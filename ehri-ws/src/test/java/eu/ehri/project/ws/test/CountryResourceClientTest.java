@@ -20,16 +20,16 @@
 package eu.ehri.project.ws.test;
 
 import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Test;
 
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 
 public class CountryResourceClientTest extends AbstractResourceClientTest {
@@ -37,10 +37,10 @@ public class CountryResourceClientTest extends AbstractResourceClientTest {
     public void testExportEad() throws Exception {
         // Create
         URI uri = entityUri(Entities.COUNTRY, "nl", "eag");
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .get(Response.class);
         assertStatus(OK, response);
-        try (InputStream stream = response.getEntityInputStream()) {
+        try (InputStream stream = response.readEntity(InputStream.class)) {
             // There should be two items: r1 and r3
             assertEquals(2, readZip(stream).size());
         }
@@ -49,11 +49,11 @@ public class CountryResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testDeleteAll() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUriBuilder(Entities.COUNTRY, "nl", "list")
                     .queryParam(AbstractResource.ALL_PARAM, "true")
                     .build())
-                .delete(ClientResponse.class);
+                .delete(Response.class);
         assertStatus(OK, response);
 
         Table expected = Table.of(Lists.newArrayList(
@@ -65,6 +65,6 @@ public class CountryResourceClientTest extends AbstractResourceClientTest {
                 Lists.newArrayList("r1"),
                 Lists.newArrayList("r3")
         ));
-        assertEquals(expected, response.getEntity(Table.class));
+        assertEquals(expected, response.readEntity(Table.class));
     }
 }

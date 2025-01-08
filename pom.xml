@@ -121,7 +121,7 @@
         <blueprints.version>2.6.0</blueprints.version>
         <jackson.version>2.10.5</jackson.version>
         <junit.version>4.13.1</junit.version>
-        <jersey.version>1.19.4</jersey.version>
+        <jersey.version>2.43</jersey.version>
     </properties>
 
     <build>

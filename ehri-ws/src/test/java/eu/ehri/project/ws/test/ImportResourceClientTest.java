@@ -26,7 +26,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import com.sun.jersey.api.client.ClientResponse;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import eu.ehri.project.ws.ImportResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
@@ -75,12 +77,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("skos", "cvoc1", "Testing SKOS", true)
                 .queryParam(FORMAT_PARAM, "Turtle")
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(payloadStream), Response.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        ImportLog log = response.getEntity(ImportLog.class);
+        assertStatus(Response.Status.OK, response);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -97,12 +98,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(payloadStream), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -119,12 +118,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(payloadStream), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -144,9 +141,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream), ImportLog.class);
 
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
@@ -164,13 +159,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class);
 
-        System.out.println(response.getEntity(String.class));
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+        System.out.println(response.readEntity(String.class));
+        assertStatus(Response.Status.BAD_REQUEST, response);
     }
 
     @Test
@@ -181,13 +174,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class);
 
-        System.out.println(response.getEntity(String.class));
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+        System.out.println(response.readEntity(String.class));
+        assertStatus(Response.Status.BAD_REQUEST, response);
     }
 
     @Test
@@ -200,9 +191,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .build();
 
         ImportLog log = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream), ImportLog.class);
         assertEquals(1, log.getErrored());
     }
 
@@ -217,9 +206,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream), ImportLog.class);
 
         assertEquals(1, log.getCreated());
 
@@ -228,15 +215,14 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         Bundle update = getEntity(Entities.DOCUMENTARY_UNIT, "nl-r1-test_doc", getAdminUserProfileId())
                 .withDataValue("foo", "bar");
         URI uri2 = entityUri(Entities.DOCUMENTARY_UNIT, update.getId());
-        jsonCallAs(getAdminUserProfileId(), uri2).put(update.toJson());
+        jsonCallAs(getAdminUserProfileId(), uri2).put(Entity.json(update.toJson()));
 
-        ClientResponse response2 = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(getClass()
-                        .getClassLoader().getResourceAsStream(SINGLE_EAD))
-                .post(ClientResponse.class);
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response2);
-        assertThat(response2.getEntity(String.class),
+        final InputStream payloadStream2 = getClass()
+                .getClassLoader().getResourceAsStream(SINGLE_EAD);
+        Response response2 = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream2), Response.class);
+        assertStatus(Response.Status.BAD_REQUEST, response2);
+        assertThat(response2.readEntity(String.class),
                 containsString("nl-r1-test_doc"));
 
         URI uri3 = getImportUrl("ead", "r1", logText, false)
@@ -244,11 +230,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(ALLOW_UPDATES_PARAM, "true")
                 .queryParam(COMMIT_PARAM, true)
                 .build();
+        final InputStream payloadStream3 = getClass()
+                .getClassLoader().getResourceAsStream(SINGLE_EAD);
         ImportLog log2 = callAs(getAdminUserProfileId(), uri3)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(getClass()
-                        .getClassLoader().getResourceAsStream(SINGLE_EAD))
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream3), ImportLog.class);
         assertEquals(1, log2.getUpdated());
     }
 
@@ -261,13 +246,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, "IDontExist") // oops
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class);
 
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
-        String output = response.getEntity(String.class);
+        assertStatus(Response.Status.BAD_REQUEST, response);
+        String output = response.readEntity(String.class);
         JsonNode rootNode = jsonMapper.readTree(output);
         assertTrue("Has correct error messages", rootNode.path("details").toString()
                 .contains("Class not found"));
@@ -282,13 +265,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, "java.lang.String") // oops
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class);
 
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
-        String output = response.getEntity(String.class);
+        assertStatus(Response.Status.BAD_REQUEST, response);
+        String output = response.readEntity(String.class);
         System.out.println(output);
         JsonNode rootNode = jsonMapper.readTree(output);
         assertTrue("Has correct error messages", rootNode.path("details").toString()
@@ -301,12 +282,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_OCTET_STREAM)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM_TYPE), Response.class);
 
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
-        String output = response.getEntity(String.class);
+        assertStatus(Response.Status.BAD_REQUEST, response);
+        String output = response.readEntity(String.class);
         JsonNode rootNode = jsonMapper.readTree(output);
         assertTrue("Has correct error messages", rootNode.path("details").toString()
                 .contains("EOF reading input data"));
@@ -322,12 +302,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -347,12 +325,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, false) // Not committing!
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -377,12 +353,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.entity(payloadStream, MediaType.APPLICATION_OCTET_STREAM_TYPE), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(6, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -406,12 +380,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.entity(payloadStream, MediaType.APPLICATION_OCTET_STREAM_TYPE), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(6, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -429,12 +401,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class);
 
-        SyncLog log = response.getEntity(SyncLog.class);
+        SyncLog log = response.readEntity(SyncLog.class);
         // this will have deleted all existing items in the repo...
         assertEquals(5, log.deleted().size());
         assertEquals(5, log.log().getCreated());
@@ -449,12 +419,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         InputStream payloadStream2 = getPayloadStream("hierarchical-ead-sync-test.xml");
-        ClientResponse response2 = callAs(getAdminUserProfileId(), uri2)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream2)
-                .post(ClientResponse.class);
+        Response response2 = callAs(getAdminUserProfileId(), uri2)
+                .post(Entity.text(payloadStream2), Response.class);
 
-        SyncLog log2 = response2.getEntity(SyncLog.class);
+        SyncLog log2 = response2.readEntity(SyncLog.class);
         System.out.println(log2);
         assertEquals(2, log2.log().getCreated());
         assertEquals(0, log2.log().getUpdated());
@@ -471,12 +439,10 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("eag", "nl", logText, false)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
-        assertStatus(ClientResponse.Status.OK, response);
-        ImportLog log = response.getEntity(ImportLog.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class);
+        assertStatus(Response.Status.OK, response);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -492,13 +458,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("eac", "auths", logText, false)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        ImportLog log = response.getEntity(ImportLog.class);
+        assertStatus(Response.Status.OK, response);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -514,10 +478,9 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 ImmutableList.of("r4", "c4", "", "associative", "", "Test 3")
         ));
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "links").build();
-        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .entity(table)
-                .post(ClientResponse.class);
-        ImportLog out = response.getEntity(ImportLog.class);
+        Response response = callAs(getAdminUserProfileId(), jsonUri)
+                .post(Entity.entity(table, MediaType.APPLICATION_JSON_TYPE), Response.class);
+        ImportLog out = response.readEntity(ImportLog.class);
         assertEquals(3, out.getCreated());
     }
 
@@ -532,10 +495,9 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam("scope", "r1")
                 .queryParam("commit", "true")
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .entity(table)
-                .post(ClientResponse.class);
-        ImportLog out = response.getEntity(ImportLog.class);
+        Response response = callAs(getAdminUserProfileId(), jsonUri)
+                .post(Entity.entity(table, MediaType.APPLICATION_JSON_TYPE), Response.class);
+        ImportLog out = response.readEntity(ImportLog.class);
         assertEquals(1, out.getCreated());
         assertEquals(1, out.getUpdated());
     }

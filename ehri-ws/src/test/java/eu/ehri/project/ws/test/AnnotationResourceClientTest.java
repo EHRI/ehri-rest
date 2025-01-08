@@ -19,18 +19,18 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.ws.AnnotationResource;
 import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-
+import javax.ws.rs.core.Response;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.CREATED;
 
 public class AnnotationResourceClientTest extends AbstractResourceClientTest {
 
@@ -39,15 +39,14 @@ public class AnnotationResourceClientTest extends AbstractResourceClientTest {
         // Create a link annotation between two objects
         URI uri = entityUriBuilder(Entities.ANNOTATION)
                 .queryParam(AnnotationResource.TARGET_PARAM, "c1").build();
-        WebResource resource = client.resource(uri);
+        WebTarget resource = client.target(uri);
         String jsonAnnotationTestString = "{\"type\": \"Annotation\", " +
                 "\"data\":{\"identifier\": \"39dj28dhs\", \"body\": \"test\"}}";
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonAnnotationTestString)
-                .post(ClientResponse.class);
+                        getAdminUserProfileId())
+                .post(Entity.json(jsonAnnotationTestString), Response.class);
         assertStatus(CREATED, response);
     }
 }
