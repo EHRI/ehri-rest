@@ -19,16 +19,17 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.GenericResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.GenericResource;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -39,10 +40,9 @@ public class VersionResourceClientTest extends AbstractResourceClientTest {
         // Create an item
         Bundle before = getEntity(Entities.REPOSITORY, "r1", getAdminUserProfileId());
         String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.REPOSITORY, "r1"))
-                .entity(jsonAgentTestString)
-                .put(ClientResponse.class);
+                .put(Entity.json(jsonAgentTestString), Response.class);
         assertStatus(OK, response);
 
         List<Bundle> versions = getItemList(ehriUri(GenericResource.ENDPOINT, "r1", "versions"),

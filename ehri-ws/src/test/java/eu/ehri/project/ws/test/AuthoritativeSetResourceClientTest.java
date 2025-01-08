@@ -19,16 +19,16 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 
 public class AuthoritativeSetResourceClientTest extends AbstractResourceClientTest {
@@ -36,10 +36,10 @@ public class AuthoritativeSetResourceClientTest extends AbstractResourceClientTe
     public void testExportEac() throws Exception {
         // Create
         URI uri = entityUri(Entities.AUTHORITATIVE_SET, "auths", "eac");
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .get(Response.class);
         assertStatus(OK, response);
-        try (InputStream stream = response.getEntityInputStream()) {
+        try (InputStream stream = response.readEntity(InputStream.class)) {
             List<ZipEntry> entries = readZip(stream);
             assertEquals(2, entries.size());
         }

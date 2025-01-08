@@ -19,22 +19,23 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.project.api.EventsApi;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.ws.GenericResource;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
 import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.api.EventsApi;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -52,10 +53,9 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         List<List<Bundle>> actionsBefore = getItemListOfLists(
                 uri, getAdminUserProfileId());
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(jsonAgentTestString)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonAgentTestString), Response.class);
 
         assertStatus(CREATED, response);
 
@@ -74,15 +74,14 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
 
         jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(jsonAgentTestString)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonAgentTestString), Response.class);
 
         // Add a good user filter...
-        MultivaluedMap<String, String> goodFilters = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> goodFilters = new MultivaluedHashMap<>();
         goodFilters.add(AbstractAccessibleResource.USER_PARAM, getAdminUserProfileId());
 
         // Add a useless filter that should remove all results
-        MultivaluedMap<String, String> badFilters = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> badFilters = new MultivaluedHashMap<>();
         badFilters.add(AbstractAccessibleResource.USER_PARAM, "nobody");
 
         URI url = entityUri(Entities.SYSTEM_EVENT);
@@ -101,9 +100,8 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
 
         // Create an item
         URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(jsonAgentTestString)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(jsonAgentTestString), Response.class);
 
         // Get the id
         String url = response.getLocation().toString();
@@ -111,7 +109,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
 
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(GenericResource.ENDPOINT, id, "events"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
@@ -119,11 +117,10 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
     public void testPersonalisedEventList() throws Exception {
 
         // Create an event by updating an item...
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.REPOSITORY, "r1"))
-                .entity(jsonAgentTestString)
                 .header(AbstractResource.LOG_MESSAGE_HEADER_NAME, "Testing update")
-                .put(ClientResponse.class);
+                .put(Entity.json(jsonAgentTestString), Response.class);
         assertStatus(OK, response);
 
         // At present, the personalised event stream for the validUser user should
@@ -145,7 +142,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         URI watchUrl = entityUriBuilder(Entities.USER_PROFILE, user, "watching")
                 .queryParam(AbstractResource.ID_PARAM, "r1").build();
 
-        jsonCallAs(user, watchUrl).post(ClientResponse.class);
+        jsonCallAs(user, watchUrl).post(Entity.json(""), Response.class);
 
         // Now our event list should contain one item, the update
         // we did initially.
@@ -153,7 +150,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         assertEquals(1, events.size());
 
         // Stop watching item r1, which should empty the list
-        jsonCallAs(user, watchUrl).delete(ClientResponse.class);
+        jsonCallAs(user, watchUrl).delete(Response.class);
 
         events = getItemListOfLists(personalisedEventUrlWatched, user);
         assertEquals(0, events.size());
@@ -169,7 +166,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         // Now follow the other user...
         URI followUrl = entityUriBuilder(Entities.USER_PROFILE, user, "following")
                 .queryParam(AbstractResource.ID_PARAM, getAdminUserProfileId()).build();
-        jsonCallAs(user, followUrl).post(ClientResponse.class);
+        jsonCallAs(user, followUrl).post(Entity.json(""), Response.class);
 
         // We should get the event again...
         events = getItemListOfLists(personalisedEventUrlFollowed, user);

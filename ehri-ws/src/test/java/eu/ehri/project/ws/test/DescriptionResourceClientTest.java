@@ -20,15 +20,16 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.ws.GenericResource;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
-import static org.junit.Assert.assertEquals;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
+
+import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.junit.Assert.assertFalse;
 
 public class DescriptionResourceClientTest extends AbstractResourceClientTest {
@@ -42,11 +43,11 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testCreateDeleteAccessPoints() throws Exception {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(GenericResource.ENDPOINT, "c2", "descriptions", "cd2", "access-points"))
-                .entity(accessPointTestStr).post(ClientResponse.class);
+                .post(Entity.json(accessPointTestStr), Response.class);
         assertStatus(CREATED, response);
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
+        JsonNode rootNode = jsonMapper.readTree(response.readEntity(String.class));
         JsonNode idNode = rootNode
                 .path(Bundle.ID_KEY);
         assertFalse(idNode.isMissingNode());
@@ -55,7 +56,7 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(GenericResource.ENDPOINT, "c2", "descriptions", "cd2",
                         "access-points", value))
-                .delete(ClientResponse.class);
+                .delete(Response.class);
         assertStatus(NO_CONTENT, response);
     }
 }

@@ -52,7 +52,6 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.persistence.Serializer;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

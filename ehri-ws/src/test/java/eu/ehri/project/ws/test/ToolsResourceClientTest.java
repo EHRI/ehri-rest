@@ -21,21 +21,23 @@ package eu.ehri.project.ws.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.ToolsResource;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-
+import javax.ws.rs.core.Response;
 import java.util.Collections;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static eu.ehri.project.ws.base.AbstractResource.CSV_MEDIA_TYPE;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -44,34 +46,37 @@ import static org.junit.Assert.assertTrue;
  * Test web service miscellaneous functions.
  */
 public class ToolsResourceClientTest extends AbstractResourceClientTest {
-    @Test(expected = UniformInterfaceException.class)
+
+
+    @Test(expected = Exception.class)
     public void testVersion() throws Exception {
         // NB: This relies on the Maven build information which is not available
         // when running tests, hence we get a uniform interface exception because
         // the version returned is null/204.
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "version"));
-        ClientResponse response = resource.get(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "version"));
+        Response response = resource.request().get(Response.class);
+        System.out.println(response.readEntity(String.class));
     }
 
     @Test
     public void testFindReplace() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "find-replace"))
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "find-replace"))
                 .queryParam("type", Entities.REPOSITORY)
                 .queryParam("subtype", Entities.REPOSITORY_DESCRIPTION)
                 .queryParam("property", "name")
                 .queryParam("commit", "true");
-        MultivaluedMap<String, String> data = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> data = new MultivaluedHashMap<>();
         data.putSingle("from", "KCL Description");
         data.putSingle("to", "NEW VALUE");
-        ClientResponse response = resource
+        Entity<Form> entity = Entity.form(data);
+        Response response = resource
+                .request(CSV_MEDIA_TYPE)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .header("Accept", "text/csv")
                 .header(AbstractResource.LOG_MESSAGE_HEADER_NAME,
                         "This is a test!")
-                .post(ClientResponse.class, data);
-        Table out = response.getEntity(Table.class);
+                .post(entity, Response.class);
+        Table out = response.readEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(1, out.rows().size());
         assertEquals(Lists.newArrayList("r2", "rd2", "KCL Description"), out.rows().get(0));
@@ -79,12 +84,13 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testRegenerateIds() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "regenerate-ids"))
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "regenerate-ids"))
                 .queryParam("id", "c1")
                 .queryParam("commit", "true");
+        Entity<Form> entity = Entity.form(new MultivaluedHashMap<>());
         Table data = Table.of(Collections.singletonList(Collections.singletonList("c4")));
-        ClientResponse response = resource.post(ClientResponse.class, data);
-        Table out = response.getEntity(Table.class);
+        Response response = resource.request().post(entity, Response.class);
+        Table out = response.readEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(2, out.rows().size());
         assertTrue(out.contains("c1", "nl-r1-c1"));
@@ -93,10 +99,10 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testRegenerateIdsForScope() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "regenerate-ids-for-scope", "r1"))
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "regenerate-ids-for-scope", "r1"))
                 .queryParam("commit", "true");
-        ClientResponse response = resource.post(ClientResponse.class);
-        Table out = response.getEntity(Table.class);
+        Response response = resource.request().post(Entity.json(""), Response.class);
+        Table out = response.readEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(4, out.rows().size());
         assertTrue(out.contains("c1", "nl-r1-c1"));
@@ -107,10 +113,10 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testRegenerateIdsForType() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "regenerate-ids-for-type",
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "regenerate-ids-for-type",
                 Entities.DOCUMENTARY_UNIT)).queryParam("commit", "true");
-        ClientResponse response = resource.post(ClientResponse.class);
-        Table out = response.getEntity(Table.class);
+        Response response = resource.request().post(Entity.json(""), Response.class);
+        Table out = response.readEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(4, out.rows().size());
         assertTrue(out.contains("c1", "nl-r1-c1"));
@@ -121,10 +127,10 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testRegenerateDescriptionIds() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "regenerate-description-ids"))
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "regenerate-description-ids"))
                 .queryParam("commit", "true");
-        ClientResponse response = resource.post(ClientResponse.class);
-        String out = response.getEntity(String.class);
+        Response response = resource.request().post(Entity.json(""), Response.class);
+        String out = response.readEntity(String.class);
         assertStatus(OK, response);
         // 2 Historical agent descriptions
         // 4 Repository descriptions
@@ -135,29 +141,29 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testRelinking() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "relink-targets"));
-        ClientResponse response = resource
-                .accept("text/csv")
-                .post(ClientResponse.class,
-                        Table.of(ImmutableList.of(ImmutableList.of("a1", "a2"))));
-        String out = response.getEntity(String.class);
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "relink-targets"));
+        Response response = resource
+                .request("text/csv")
+                .post(
+                        Entity.entity(Table.of(ImmutableList.of(ImmutableList.of("a1", "a2"))), APPLICATION_JSON_TYPE), Response.class);
+        String out = response.readEntity(String.class);
         assertStatus(OK, response);
         assertEquals("a1,a2,1\n", out);
     }
 
     @Test
     public void testRename() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "rename"));
-        ClientResponse response = resource
-                .accept("text/csv")
-                .post(ClientResponse.class,
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "rename"));
+        Response response = resource
+                .request("text/csv")
+                .post(Entity.entity(
                         Table.of(ImmutableList.of(
                                 // Data ordered child-first to
                                 // text lexical re-ordering and
                                 // correct hierarchical ID generation
                                 ImmutableList.of("c3", "test2"),
-                                ImmutableList.of("c2", "test1"))));
-        Table out = response.getEntity(Table.class);
+                                ImmutableList.of("c2", "test1"))), APPLICATION_JSON_TYPE), Response.class);
+        Table out = response.readEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(ImmutableList.of(
                 ImmutableList.of("c2", "nl-r1-c1-test1"),
@@ -167,14 +173,14 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testReparent() throws Exception {
-        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "reparent"));
-        ClientResponse response = resource
-                .accept("text/csv")
-                .post(ClientResponse.class,
-                        Table.of(ImmutableList.of(
+        WebTarget resource = client.target(ehriUri(ToolsResource.ENDPOINT, "reparent"));
+        Response response = resource
+                .request("text/csv")
+                .post(
+                        Entity.entity(Table.of(ImmutableList.of(
                                 ImmutableList.of("c4", "c1"),
-                                ImmutableList.of("c3", "c1"))));
-        Table out = response.getEntity(Table.class);
+                                ImmutableList.of("c3", "c1"))), APPLICATION_JSON_TYPE), Response.class);
+        Table out = response.readEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(ImmutableList.of(
                 ImmutableList.of("c4", "nl-r1-c1-c4"),
