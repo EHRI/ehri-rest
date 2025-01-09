@@ -72,9 +72,11 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         // Create a new agent. We're going to test that this creates
         // a corresponding action.
 
-        jsonCallAs(getAdminUserProfileId(),
+        try (Response r = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .post(Entity.json(jsonAgentTestString), Response.class);
+                .post(Entity.json(jsonAgentTestString), Response.class)) {
+            assertStatus(CREATED, r);
+        }
 
         // Add a good user filter...
         MultivaluedMap<String, String> goodFilters = new MultivaluedHashMap<>();

@@ -103,7 +103,7 @@ public class BatchResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         Response response = callAs(user, jsonUri)
-                .post(Entity.entity(table, MediaType.APPLICATION_JSON_TYPE), Response.class);
+                .post(Entity.json(table), Response.class);
         assertStatus(Response.Status.OK, response);
         assertEquals("2", response.readEntity(String.class));
         assertFalse(checkExists("a1", user));

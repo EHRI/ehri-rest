@@ -35,6 +35,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.harness.Neo4j;
 import org.neo4j.harness.Neo4jBuilder;
 import org.neo4j.harness.Neo4jBuilders;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,7 +62,7 @@ public class ServerRunner {
     private static FixtureLoader fixtureLoader;
     private static GraphCleaner<? extends Graph> graphCleaner;
 
-    private final static Logger sunLogger = Logger.getLogger("com.sun.jersey");
+    private final static Logger jettyLogger = Logger.getLogger("org.eclipse.jetty");
     private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");
     private final static Logger graphLogger = Logger.getLogger(TxNeo4jGraph.class.getName());
 
@@ -89,8 +90,11 @@ public class ServerRunner {
         if (neo4j != null) {
             throw new IOException("Server is already running: " + neo4j.httpURI());
         }
-        sunLogger.setLevel(logLevel);
+        jettyLogger.setLevel(logLevel);
         neoLogger.setLevel(logLevel);
+
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.eclipse.jetty");
+        root.setLevel(ch.qos.logback.classic.Level.WARN);
 
         // The TxNeo4jGraph gives a WARNING about restarted transactions when
         // doing indexing operations (e.g. when loading fixtures or resetting

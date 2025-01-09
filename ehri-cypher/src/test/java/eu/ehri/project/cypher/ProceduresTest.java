@@ -1,11 +1,12 @@
 package eu.ehri.project.cypher;
 
 import com.google.common.collect.Lists;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
-import org.neo4j.harness.junit.rule.Neo4jRule;
+import org.neo4j.driver.*;
+import org.neo4j.harness.Neo4j;
+import org.neo4j.harness.Neo4jBuilders;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +18,15 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class ProceduresTest {
     private static final Config settings = Config.builder().withoutEncryption().build();
 
-    @Rule
-    public Neo4jRule neo4j = new Neo4jRule().withProcedure(Procedures.class);
+    private static Neo4j neo4j;
+
+    @BeforeClass
+    public static void setUp() {
+        neo4j = Neo4jBuilders.newInProcessBuilder()
+                .withDisabledServer()
+                .withProcedure(Procedures.class)
+                .build();
+    }
 
     @Test
     public void testCountryCodeToName() {

@@ -53,8 +53,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
     @Before
     public void setUp() {
         ClientConfig config = new ClientConfig();
-        config.getClasses().add(GraphQLQueryProvider.class);
-        config.getClasses().add(JacksonFeatures.class);
+        config.register(GraphQLQueryProvider.class);
+        config.register(JacksonFeatures.class);
         client = ClientBuilder.newClient(config);
     }
 
@@ -73,7 +73,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
     public void testGraphQLSchemaIntrospection() throws Exception {
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
         Response response = callAs(getRegularUserProfileId(), queryUri)
-                .post(Entity.entity(new GraphQLQuery(IntrospectionQuery.INTROSPECTION_QUERY), MediaType.APPLICATION_JSON_TYPE), Response.class);
+                .post(Entity.json(new GraphQLQuery(IntrospectionQuery.INTROSPECTION_QUERY)), Response.class);
 
         assertStatus(OK, response);
         JsonNode data = response.readEntity(JsonNode.class);
@@ -201,7 +201,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         String testQuery = readResourceFileAsString("testquery-bad.graphql");
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
         Response response = callAs(getAdminUserProfileId(), queryUri)
-                .post(Entity.json(testQuery), Response.class);
+                .post(Entity.text(testQuery), Response.class);
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.readEntity(JsonNode.class);
@@ -214,11 +214,11 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         String testQuery = readResourceFileAsString("testquery-connection.graphql");
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
         Response response = callAs(getAdminUserProfileId(), queryUri)
-                .post(Entity.json(testQuery), Response.class);
+                .post(Entity.text(testQuery), Response.class);
 
-        assertStatus(OK, response);
         JsonNode data = response.readEntity(JsonNode.class);
         System.out.println(data);
+        assertStatus(OK, response);
 
         assertTrue(data.path("data").path("empty").path("pageInfo").path("hasPreviousPage").asBoolean());
         assertFalse(data.path("data").path("empty").path("pageInfo").path("hasNextPage").asBoolean());
