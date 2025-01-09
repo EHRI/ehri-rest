@@ -150,8 +150,8 @@ public class AbstractResourceClientTest extends RunningServerTest {
      * Get a list of items at some relativeUrl, as the given user.
      */
     protected List<List<Bundle>> getItemListOfLists(URI uri, String userId, MultivaluedMap<String, String> params) throws Exception {
-        TypeReference<List<List<Bundle>>> typeRef = new TypeReference<List<List<Bundle>>>() {
-                };
+        TypeReference<List<List<Bundle>>> typeRef = new TypeReference<>() {
+        };
         return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
 
@@ -274,7 +274,9 @@ public class AbstractResourceClientTest extends RunningServerTest {
 
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
         WebTarget target = client.target(uri);
-        params.forEach(target::queryParam);
+        for (String key : params.keySet()) {
+            target = target.queryParam(key, params.getFirst(key));
+        }
         return target
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON)
