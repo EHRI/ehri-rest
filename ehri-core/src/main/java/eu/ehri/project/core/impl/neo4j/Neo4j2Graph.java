@@ -165,7 +165,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             }
             @Override
             public void close() {
-//                getTransaction().close();
+                getTransaction().close();
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -186,7 +186,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
 
             @Override
             public void close() {
-//                getTransaction().close();
+                getTransaction().close();
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
