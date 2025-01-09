@@ -45,7 +45,7 @@ echo "EHRI lib installed..."
 
 echo
 echo "IMPORTANT: You must manually ensure the $NEO4JPATH/conf/neo4j.conf configuration contains the line:"
-echo "   dbms.unmanaged_extension_classes=eu.ehri.project.ws=/ehri"
+echo "   server.unmanaged_extension_classes=eu.ehri.project.ws=/ehri"
 echo
 
 
