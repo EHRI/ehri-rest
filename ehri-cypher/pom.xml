@@ -11,6 +11,20 @@
     <name>Cypher Procedures</name>
     <description>Helpful Neo4j Cypher procedures.</description>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.3</version>
+                <configuration>
+                    <argLine>
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.neo4j</groupId>
@@ -33,7 +47,7 @@
         <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
-            <version>1.0.5</version>
+            <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

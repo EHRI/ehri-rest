@@ -31,7 +31,7 @@ import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFWriter;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -48,8 +48,8 @@ import java.util.List;
 public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
-    public VocabularyResource(@Context GraphDatabaseService database) {
-        super(database, Vocabulary.class);
+    public VocabularyResource(@Context DatabaseManagementService service) {
+        super(service, Vocabulary.class);
     }
 
     @GET

@@ -9,7 +9,13 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 checkenv
 buildclasspath
 
-java -XX:+UseConcMarkSweepGC -XX:-UseGCOverheadLimit -Xmx2g -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_DB "$@"
+JAVA=java
+
+if [[ "$JAVA_HOME" != "" ]]; then
+    JAVA=$JAVA_HOME/bin/java
+fi
+
+$JAVA -XX:-UseGCOverheadLimit -Xmx2g -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_HOME "$@"
 
 
 

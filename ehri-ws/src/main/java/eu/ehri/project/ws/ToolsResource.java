@@ -46,7 +46,7 @@ import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -76,8 +76,8 @@ public class ToolsResource extends AbstractResource {
     private static final String SINGLE_PARAM = "single";
     private static final String ACCESS_POINT_TYPE_PARAM = "apt";
 
-    public ToolsResource(@Context GraphDatabaseService database) {
-        super(database);
+    public ToolsResource(@Context DatabaseManagementService service) {
+        super(service);
         linker = new Linker(graph);
     }
 

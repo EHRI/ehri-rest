@@ -13,6 +13,7 @@
 
   <logger name="eu.ehri.project.importers" level="${ehri.test.log.level:-info}" />
   <logger name="eu.ehri" level="${ehri.log.level:-info}" />
+  <logger name="org.eclipse.jetty" level="WARN" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

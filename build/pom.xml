@@ -50,6 +50,7 @@
                             <include>com.tinkerpop:*</include>
                             <include>com.tinkerpop.*:*</include>
                             <include>stax:stax-api</include>
+                            <include>com.carrotsearch:hppc</include>
                             <include>org.javassist:javassist</include>
                             <include>org.codehaus.jettison:jettison</include>
                             <include>org.neo4j:neo4j-graphviz</include>
@@ -66,6 +67,7 @@
                             <include>commons-cli:commons-cli</include>
                             <include>commons-codec:commons-codec</include>
                             <include>org.apache.jena:*</include>
+                            <include>org.apache.log4j:*</include>
                             <include>xerces:xercesImpl</include>
                             <include>xml-apis:xml-apis</include>
                             <include>com.typesafe:config</include>

@@ -26,7 +26,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import com.sun.jersey.api.client.ClientResponse;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import eu.ehri.project.ws.ImportResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
@@ -75,12 +77,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("skos", "cvoc1", "Testing SKOS", true)
                 .queryParam(FORMAT_PARAM, "Turtle")
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(payloadStream), Response.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        ImportLog log = response.getEntity(ImportLog.class);
+        assertStatus(Response.Status.OK, response);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
@@ -90,46 +91,43 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testImportEadViaJsonUrlMap() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(ImmutableMap.of("single-ead",
+        InputStream payloadStream = getJsonObjectPayloadStream(ImmutableMap.of("single-ead",
                 Resources.getResource(SINGLE_EAD).toURI().toString()));
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(1, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(payloadStream), Response.class)) {
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(1, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
     public void testImportEadViaLocalPaths() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
-
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (InputStream payloadStream = getResourcePathsPayloadStream(SINGLE_EAD);
+                Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class)) {
 
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(1, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(1, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
@@ -144,9 +142,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream), ImportLog.class);
 
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
@@ -164,13 +160,12 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class)) {
 
-        System.out.println(response.getEntity(String.class));
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+            System.out.println(response.readEntity(String.class));
+            assertStatus(Response.Status.BAD_REQUEST, response);
+        }
     }
 
     @Test
@@ -181,13 +176,12 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class)) {
 
-        System.out.println(response.getEntity(String.class));
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+            System.out.println(response.readEntity(String.class));
+            assertStatus(Response.Status.BAD_REQUEST, response);
+        }
     }
 
     @Test
@@ -200,9 +194,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .build();
 
         ImportLog log = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream), ImportLog.class);
         assertEquals(1, log.getErrored());
     }
 
@@ -217,9 +209,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ImportLog.class);
+                .post(Entity.xml(payloadStream), ImportLog.class);
 
         assertEquals(1, log.getCreated());
 
@@ -228,71 +218,71 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         Bundle update = getEntity(Entities.DOCUMENTARY_UNIT, "nl-r1-test_doc", getAdminUserProfileId())
                 .withDataValue("foo", "bar");
         URI uri2 = entityUri(Entities.DOCUMENTARY_UNIT, update.getId());
-        jsonCallAs(getAdminUserProfileId(), uri2).put(update.toJson());
+        try (Response r = jsonCallAs(getAdminUserProfileId(), uri2).put(Entity.json(update.toJson()))) {
+            assertStatus(Response.Status.OK, r);
+        }
 
-        ClientResponse response2 = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(getClass()
-                        .getClassLoader().getResourceAsStream(SINGLE_EAD))
-                .post(ClientResponse.class);
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response2);
-        assertThat(response2.getEntity(String.class),
-                containsString("nl-r1-test_doc"));
+        final InputStream payloadStream2 = getClass()
+                .getClassLoader().getResourceAsStream(SINGLE_EAD);
 
-        URI uri3 = getImportUrl("ead", "r1", logText, false)
-                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
-                .queryParam(ALLOW_UPDATES_PARAM, "true")
-                .queryParam(COMMIT_PARAM, true)
-                .build();
-        ImportLog log2 = callAs(getAdminUserProfileId(), uri3)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(getClass()
-                        .getClassLoader().getResourceAsStream(SINGLE_EAD))
-                .post(ImportLog.class);
-        assertEquals(1, log2.getUpdated());
+        try (Response response2 = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream2), Response.class)) {
+            assertStatus(Response.Status.BAD_REQUEST, response2);
+            assertThat(response2.readEntity(String.class),
+                    containsString("nl-r1-test_doc"));
+
+            URI uri3 = getImportUrl("ead", "r1", logText, false)
+                    .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                    .queryParam(ALLOW_UPDATES_PARAM, "true")
+                    .queryParam(COMMIT_PARAM, true)
+                    .build();
+            final InputStream payloadStream3 = getClass()
+                    .getClassLoader().getResourceAsStream(SINGLE_EAD);
+            ImportLog log2 = callAs(getAdminUserProfileId(), uri3)
+                    .post(Entity.xml(payloadStream3), ImportLog.class);
+            assertEquals(1, log2.getUpdated());
+        }
     }
 
     @Test
     public void testImportEadWithNonExistentClass() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
+        InputStream payloadStream = getResourcePathsPayloadStream(SINGLE_EAD);
 
         URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(HANDLER_PARAM, "IDontExist") // oops
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class)) {
 
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
-        String output = response.getEntity(String.class);
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertTrue("Has correct error messages", rootNode.path("details").toString()
-                .contains("Class not found"));
+            assertStatus(Response.Status.BAD_REQUEST, response);
+            String output = response.readEntity(String.class);
+            JsonNode rootNode = jsonMapper.readTree(output);
+            assertTrue("Has correct error messages", rootNode.path("details").toString()
+                    .contains("Class not found"));
+        }
     }
 
     @Test
     public void testImportEadWithBadClass() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
+        InputStream payloadStream = getResourcePathsPayloadStream(SINGLE_EAD);
 
         URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(HANDLER_PARAM, "java.lang.String") // oops
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class)) {
 
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
-        String output = response.getEntity(String.class);
-        System.out.println(output);
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertTrue("Has correct error messages", rootNode.path("details").toString()
-                .contains("not an instance of"));
+            assertStatus(Response.Status.BAD_REQUEST, response);
+            String output = response.readEntity(String.class);
+            System.out.println(output);
+            JsonNode rootNode = jsonMapper.readTree(output);
+            assertTrue("Has correct error messages", rootNode.path("details").toString()
+                    .contains("not an instance of"));
+        }
     }
 
     @Test
@@ -301,66 +291,64 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_OCTET_STREAM)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.entity("", MediaType.APPLICATION_OCTET_STREAM_TYPE), Response.class)) {
 
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
-        String output = response.getEntity(String.class);
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertTrue("Has correct error messages", rootNode.path("details").toString()
-                .contains("EOF reading input data"));
+            assertStatus(Response.Status.BAD_REQUEST, response);
+            String output = response.readEntity(String.class);
+            JsonNode rootNode = jsonMapper.readTree(output);
+            assertTrue("Has correct error messages", rootNode.path("details").toString()
+                    .contains("EOF reading input data"));
+        }
     }
 
     @Test
     public void testImportEadWithFileLogMessage() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
+        InputStream payloadStream = getResourcePathsPayloadStream(SINGLE_EAD);
         long count = getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class)) {
 
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(1, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
-        assertEquals(count + 1L,
-                getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(1, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+            assertEquals(count + 1L,
+                    getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
+        }
     }
 
     @Test
     public void testImportEadDryRun() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
+        InputStream payloadStream = getResourcePathsPayloadStream(SINGLE_EAD);
         long count = getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, false) // Not committing!
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class)) {
 
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(1, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
-        // count should be the same as before since we didn't commit
-        assertEquals(count,
-                getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(1, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+            // count should be the same as before since we didn't commit
+            assertEquals(count,
+                    getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
+        }
     }
 
     @Test
@@ -377,17 +365,16 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.entity(payloadStream, MediaType.APPLICATION_OCTET_STREAM_TYPE), Response.class)) {
 
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(6, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(6, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
@@ -406,61 +393,59 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.entity(payloadStream, MediaType.APPLICATION_OCTET_STREAM_TYPE), Response.class)) {
 
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(6, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(6, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
     public void testSyncEad() throws Exception {
         // Get the path of an EAD file
-        InputStream payloadStream = getPayloadStream(HIERARCHICAL_EAD);
+        InputStream payloadStream = getResourcePathsPayloadStream(HIERARCHICAL_EAD);
 
         String logText = "Setup";
         URI uri = getImportUrl("ead-sync", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.text(payloadStream), Response.class)) {
 
-        SyncLog log = response.getEntity(SyncLog.class);
-        // this will have deleted all existing items in the repo...
-        assertEquals(5, log.deleted().size());
-        assertEquals(5, log.log().getCreated());
-        assertEquals(0, log.log().getUpdated());
-        assertEquals(0, log.log().getUnchanged());
-        assertEquals(logText, log.log().getLogMessage().orElse(null));
+            SyncLog log = response.readEntity(SyncLog.class);
+            // this will have deleted all existing items in the repo...
+            assertEquals(5, log.deleted().size());
+            assertEquals(5, log.log().getCreated());
+            assertEquals(0, log.log().getUpdated());
+            assertEquals(0, log.log().getUnchanged());
+            assertEquals(logText, log.log().getLogMessage().orElse(null));
+        }
 
         // Now sync the updates file
-        URI uri2 = getImportUrl("ead-sync", "r1", "Test sync", false)
+        String logText2 = "Testing sync";
+        URI uri2 = getImportUrl("ead-sync", "r1", logText2, false)
                 .queryParam(ALLOW_UPDATES_PARAM, true)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        InputStream payloadStream2 = getPayloadStream("hierarchical-ead-sync-test.xml");
-        ClientResponse response2 = callAs(getAdminUserProfileId(), uri2)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(payloadStream2)
-                .post(ClientResponse.class);
+        InputStream payloadStream2 = getResourcePathsPayloadStream("hierarchical-ead-sync-test.xml");
+        try (Response response2 = callAs(getAdminUserProfileId(), uri2)
+                .post(Entity.text(payloadStream2), Response.class)) {
 
-        SyncLog log2 = response2.getEntity(SyncLog.class);
-        System.out.println(log2);
-        assertEquals(2, log2.log().getCreated());
-        assertEquals(0, log2.log().getUpdated());
-        assertEquals(3, log2.log().getUnchanged());
-        assertEquals(logText, log.log().getLogMessage().orElse(null));
-        assertThat(log.log().getEventId().orElse(null), notNullValue());
+            SyncLog log2 = response2.readEntity(SyncLog.class);
+            System.out.println(log2);
+            assertEquals(2, log2.log().getCreated());
+            assertEquals(0, log2.log().getUpdated());
+            assertEquals(3, log2.log().getUnchanged());
+            assertEquals(logText2, log2.log().getLogMessage().orElse(null));
+            assertThat(log2.log().getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
@@ -471,17 +456,16 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("eag", "nl", logText, false)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
-        assertStatus(ClientResponse.Status.OK, response);
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(1, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class)) {
+            assertStatus(Response.Status.OK, response);
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(1, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
@@ -492,18 +476,17 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         URI uri = getImportUrl("eac", "auths", logText, false)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .type(MediaType.TEXT_XML_TYPE)
-                .entity(payloadStream)
-                .post(ClientResponse.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(1, log.getCreated());
-        assertEquals(0, log.getUpdated());
-        assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+        try (Response response = callAs(getAdminUserProfileId(), uri)
+                .post(Entity.xml(payloadStream), Response.class)) {
+            assertStatus(Response.Status.OK, response);
+            ImportLog log = response.readEntity(ImportLog.class);
+            assertEquals(1, log.getCreated());
+            assertEquals(0, log.getUpdated());
+            assertEquals(0, log.getUnchanged());
+            assertEquals(logText, log.getLogMessage().orElse(null));
+            assertThat(log.getEventId().orElse(null), notNullValue());
+        }
     }
 
     @Test
@@ -514,11 +497,11 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 ImmutableList.of("r4", "c4", "", "associative", "", "Test 3")
         ));
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "links").build();
-        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .entity(table)
-                .post(ClientResponse.class);
-        ImportLog out = response.getEntity(ImportLog.class);
-        assertEquals(3, out.getCreated());
+        try (Response response = callAs(getAdminUserProfileId(), jsonUri)
+                .post(Entity.json(table), Response.class)) {
+            ImportLog out = response.readEntity(ImportLog.class);
+            assertEquals(3, out.getCreated());
+        }
     }
 
     @Test
@@ -532,12 +515,13 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam("scope", "r1")
                 .queryParam("commit", "true")
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .entity(table)
-                .post(ClientResponse.class);
-        ImportLog out = response.getEntity(ImportLog.class);
-        assertEquals(1, out.getCreated());
-        assertEquals(1, out.getUpdated());
+
+        try (Response response = callAs(getAdminUserProfileId(), jsonUri)
+                .post(Entity.json(table), Response.class)) {
+            ImportLog out = response.readEntity(ImportLog.class);
+            assertEquals(1, out.getCreated());
+            assertEquals(1, out.getUpdated());
+        }
     }
 
     private UriBuilder getImportUrl(String endPoint, String scopeId, String log, boolean tolerant) {
@@ -547,7 +531,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(TOLERANT_PARAM, String.valueOf(tolerant));
     }
 
-    private InputStream getPayloadStream(String... resources) throws URISyntaxException {
+    private InputStream getResourcePathsPayloadStream(String... resources) throws URISyntaxException {
         List<String> paths = Lists.newArrayList();
         for (String resourceName : resources) {
             URL resource = Resources.getResource(resourceName);
@@ -558,7 +542,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 payloadText.getBytes(Charsets.UTF_8));
     }
 
-    private InputStream getPayloadStream(Map<String, String> data)
+    private InputStream getJsonObjectPayloadStream(Map<String, String> data)
             throws Exception {
         byte[] buf = jsonMapper.writer().writeValueAsBytes(data);
         return new ByteArrayInputStream(buf);

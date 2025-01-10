@@ -85,6 +85,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         mmap.put(Initialize.NAME, Initialize.class);
         mmap.put(GenSchema.NAME, GenSchema.class);
+        mmap.put(SetLabels.NAME, SetLabels.class);
         mmap.put(UserAdd.NAME, UserAdd.class);
         mmap.put(UserMod.NAME, UserMod.class);
         mmap.put(EntityAdd.NAME, EntityAdd.class);

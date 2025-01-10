@@ -19,12 +19,10 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -148,19 +146,8 @@ public class GraphSON extends BaseCommand {
             reader.inputGraph(readStream, bufferSize);
             if (!cmdLine.hasOption("skip-setting-labels")) {
                 if (graph.getBaseGraph() instanceof Neo4j2Graph) {
-                    // safe, due to the above instanceof
-                    @SuppressWarnings("unchecked")
-                    FramedGraph<Neo4j2Graph> neo4j2Graph = ((FramedGraph<Neo4j2Graph>) graph);
-                    Neo4jGraphManager<?> manager = new Neo4jGraphManager<>(neo4j2Graph);
-                    int i = 0;
-                    for (Vertex v : graph.getVertices()) {
-                        manager.setLabels(v);
-                        i++;
-                        if (i % 10000 == 0) {
-                            neo4j2Graph.getBaseGraph().commit();
-                        }
-                    }
-                    System.err.println("Labelled " + i + " vertices");
+                    SetLabels labeler = new SetLabels();
+                    labeler.execWithOptions(graph, cmdLine);
                 }
             }
         } finally {

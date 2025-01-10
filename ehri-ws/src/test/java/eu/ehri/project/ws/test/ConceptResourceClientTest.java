@@ -20,8 +20,10 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.client.WebTarget;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
@@ -32,7 +34,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -54,9 +56,8 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testCreateDeleteCvocConcept() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                getCreationUri()).entity(jsonApplesTestStr)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .post(Entity.json(jsonApplesTestStr), Response.class);
 
         assertStatus(CREATED, response);
 
@@ -64,12 +65,12 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         URI location = response.getLocation();
 
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // Where is my deletion test, I want to know if it works
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .delete(ClientResponse.class);
+                .delete(Response.class);
         assertStatus(NO_CONTENT, response);
 
     }
@@ -80,7 +81,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         String jsonAppleTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
 
         // Create fruit
-        ClientResponse response = testCreateConcept(jsonFruitTestStr);
+        Response response = testCreateConcept(jsonFruitTestStr);
         // Get created entity via the response location
         URI fruitLocation = response.getLocation();
 
@@ -95,13 +96,13 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
                 .lastIndexOf('/') + 1);
 
         // make apple narrower of fruit
-        WebResource resource = client.resource(getRelationUri(fruitLocation, "narrower",
+        WebTarget resource = client.target(getRelationUri(fruitLocation, "narrower",
                 appleIdStr));
         response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).post(ClientResponse.class);
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .post(Entity.json(""), Response.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an
         // edge...)
         assertStatus(OK, response);
@@ -118,12 +119,12 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         assertTrue(containsIdentifier(response, "fruit"));
 
         // Test removal of one narrower concept
-        resource = client.resource(getRelationUri(fruitLocation, "narrower", appleIdStr));
+        resource = client.target(getRelationUri(fruitLocation, "narrower", appleIdStr));
         response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).delete(ClientResponse.class);
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .delete(Response.class);
         assertStatus(OK, response);
 
         // apple should still exist
@@ -142,7 +143,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         String jsonAppleTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
 
         // Create fruit
-        ClientResponse response = testCreateConcept(jsonTreeTestStr);
+        Response response = testCreateConcept(jsonTreeTestStr);
         // Get created entity via the response location
         URI treeLocation = response.getLocation();
 
@@ -158,12 +159,12 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
 
         // make apple related of fruit
         URI related = getRelationUri(treeLocation, "related", appleIdStr);
-        WebResource resource = client.resource(related);
+        WebTarget resource = client.target(related);
         response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).post(ClientResponse.class);
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .post(Entity.json(""), Response.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an
         // edge...)
         assertStatus(OK, response);
@@ -181,12 +182,12 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         assertTrue(containsIdentifier(response, "tree"));
 
         // Test removal of one related concept
-        resource = client.resource(related);
+        resource = client.target(related);
         response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).delete(ClientResponse.class);
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .delete(Response.class);
         assertStatus(OK, response);
 
         // apple should still exist
@@ -210,12 +211,12 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         testDelete(url);
 
         // Check it's really gone...
-        WebResource resource = client.resource(url);
-        ClientResponse response = resource
+        WebTarget resource = client.target(url);
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .get(Response.class);
         assertStatus(GONE, response);
     }
 
@@ -223,47 +224,45 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
      * helpers **
      */
 
-    private boolean containsIdentifier(final ClientResponse response,
+    private boolean containsIdentifier(final Response response,
             final String idStr) throws IOException {
-        String json = response.getEntity(String.class);
+        String json = response.readEntity(String.class);
         JsonNode rootNode = jsonMapper.readTree(json);
         JsonNode idPath = rootNode.path(0).path("data").path("identifier");
         return idPath.isTextual() && idPath.asText().equals(idStr);
 
     }
 
-    private ClientResponse testGet(URI url) {
+    private Response testGet(URI url) {
         return testGet(url.toString());
     }
 
-    private ClientResponse testGet(String url) {
-        WebResource resource = client.resource(url);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
+    private Response testGet(String url) {
+        WebTarget resource = client.target(url);
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(Response.class);
         assertStatus(OK, response);
 
         return response;
     }
 
-    private ClientResponse testDelete(URI url) {
-        WebResource resource = client.resource(url);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .delete(ClientResponse.class);
+    private Response testDelete(URI url) {
+        WebTarget resource = client.target(url);
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .delete(Response.class);
         assertStatus(NO_CONTENT, response);
 
         return response;
     }
 
-    private ClientResponse testCreateConcept(String json) {
+    private Response testCreateConcept(String json) {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(json)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .post(Entity.json(json), Response.class);
         assertStatus(CREATED, response);
         return response;
     }

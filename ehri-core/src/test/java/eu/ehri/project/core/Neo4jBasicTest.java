@@ -23,13 +23,15 @@ import com.google.common.collect.Iterables;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 
 /**
@@ -37,37 +39,33 @@ import static org.junit.Assert.assertNotNull;
  * 
  */
 public class Neo4jBasicTest {
+    protected DatabaseManagementService managementService;
     protected GraphDatabaseService graphDb;
 
     @Before
     public void prepareTestDatabase() {
-        graphDb = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder().newGraphDatabase();
+        managementService = new TestDatabaseManagementServiceBuilder().impermanent().build();
+        graphDb = managementService.database(DEFAULT_DATABASE_NAME);
     }
 
     @After
     public void destroyTestDatabase() {
-        graphDb.shutdown();
-    }
-
-    @Test(expected = org.neo4j.graphdb.NotInTransactionException.class)
-    public void notAllowCountingNodesOutsideOfATx() {
-        graphDb.getAllNodes();
+        managementService.shutdown();
     }
 
     @Test
     public void shouldAllowCountingNodes() {
         try (Transaction tx = graphDb.beginTx()) {
-            Iterable<Node> nodes = graphDb.getAllNodes();
+            Iterable<Node> nodes = tx.getAllNodes();
             assertEquals(0, Iterables.size(nodes));
-            tx.success();
+            tx.commit();
         }
     }
 
     @Test
     public void shouldCreateNode() {
         try (Transaction tx = graphDb.beginTx()) {
-            Node n = graphDb.createNode();
+            Node n = tx.createNode();
             n.setProperty("name", "Nancy");
 
             // The node should have an id of 0, being the first node
@@ -77,12 +75,12 @@ public class Neo4jBasicTest {
 
             // Retrieve a node by using the id of the created node. The id's and
             // property should match.
-            Node foundNode = graphDb.getNodeById(n.getId());
+            Node foundNode = tx.getNodeById(n.getId());
             assertEquals(foundNode.getId(), n.getId());
             assertEquals(foundNode.getProperty("name"), "Nancy");
 
-            assertEquals(1, Iterables.size(graphDb.getAllNodes()));
-            tx.success();
+            assertEquals(1, Iterables.size(tx.getAllNodes()));
+            tx.close();
         }
     }
 }

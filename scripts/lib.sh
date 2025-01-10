@@ -10,10 +10,10 @@ checkenv() {
         export NEO4J_HOME=${NEO4J_HOME%/}
     fi
 
-    # Default the graph db directory to $NEO4J_HOME/data/databases/graph.db unless
+    # Default the graph db directory to $NEO4J_HOME/data/databases/neo4j unless
     # NEO4J_DB is explicitly set
     if [ "$NEO4J_DB" = "" ]; then
-        export NEO4J_DB=$NEO4J_HOME/data/databases/graph.db
+        export NEO4J_DB=$NEO4J_HOME/data/databases/neo4j
     else
         export NEO4J_DB=${NEO4J_DB%/}
         if [ -e $NEO4J_DB ] && [ ! -d $NEO4J_DB ]; then

@@ -31,17 +31,9 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -57,8 +49,8 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     public static final String TARGET_PARAM = "target";
     public static final String BODY_PARAM = "body";
 
-    public AnnotationResource(@Context GraphDatabaseService database) {
-        super(database, Annotation.class);
+    public AnnotationResource(@Context DatabaseManagementService service) {
+        super(service, Annotation.class);
     }
 
     @GET

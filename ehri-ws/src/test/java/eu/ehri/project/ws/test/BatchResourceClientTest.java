@@ -21,7 +21,9 @@ package eu.ehri.project.ws.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.ClientResponse;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import eu.ehri.project.ws.BatchResource;
 import eu.ehri.project.ws.GenericResource;
 import eu.ehri.project.definitions.Entities;
@@ -55,12 +57,10 @@ public class BatchResourceClientTest extends AbstractResourceClientTest {
         URI jsonUri = ehriUriBuilder(BatchResource.ENDPOINT, "update")
                 .queryParam(COMMIT_PARAM, true)
                 .queryParam(LOG_PARAM, logText).build();
-        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(payloadStream)
-                .put(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), jsonUri)
+                .put(Entity.json(payloadStream), Response.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
+        ImportLog log = response.readEntity(ImportLog.class);
         assertEquals(0, log.getCreated());
         assertEquals(1, log.getUpdated());
         assertEquals(1, log.getUnchanged());
@@ -79,12 +79,10 @@ public class BatchResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(LOG_PARAM, logText)
                 .queryParam(COMMIT_PARAM, true)
                 .queryParam(SCOPE_PARAM, "nl").build();
-        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(payloadStream)
-                .put(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), jsonUri)
+                .put(Entity.json(payloadStream), Response.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
+        assertStatus(Response.Status.OK, response);
 
         Bundle after = getEntity(Entities.REPOSITORY, "r1",
                 getAdminUserProfileId());
@@ -104,11 +102,10 @@ public class BatchResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(LOG_PARAM, logText)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(user, jsonUri)
-                .entity(table)
-                .post(ClientResponse.class);
-        assertStatus(ClientResponse.Status.OK, response);
-        assertEquals("2", response.getEntity(String.class));
+        Response response = callAs(user, jsonUri)
+                .post(Entity.json(table), Response.class);
+        assertStatus(Response.Status.OK, response);
+        assertEquals("2", response.readEntity(String.class));
         assertFalse(checkExists("a1", user));
         assertFalse(checkExists("a2", user));
     }
@@ -122,16 +119,15 @@ public class BatchResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(LOG_PARAM, logText)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
-        ClientResponse response = callAs(user, jsonUri)
-                .entity(table)
-                .post(ClientResponse.class);
-        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+        Response response = callAs(user, jsonUri)
+                .post(Entity.entity(table, MediaType.APPLICATION_JSON_TYPE), Response.class);
+        assertStatus(Response.Status.BAD_REQUEST, response);
     }
 
 
     private boolean checkExists(String id, String userId) {
         URI uri = ehriUriBuilder(GenericResource.ENDPOINT, id).build();
-        return callAs(userId, uri).get(ClientResponse.class).getStatus()
-                == ClientResponse.Status.OK.getStatusCode();
+        return callAs(userId, uri).get(Response.class).getStatus()
+                == Response.Status.OK.getStatusCode();
     }
 }

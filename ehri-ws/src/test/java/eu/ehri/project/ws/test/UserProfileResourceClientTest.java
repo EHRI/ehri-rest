@@ -21,29 +21,23 @@ package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static javax.ws.rs.core.Response.Status.*;
+import static org.junit.Assert.*;
 
 public class UserProfileResourceClientTest extends AbstractResourceClientTest {
 
@@ -56,36 +50,32 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testCreateDeleteUserProfile() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.USER_PROFILE))
-                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
 
         assertStatus(CREATED, response);
         assertValidJsonData(response);
 
         // Get created entity via the response location?
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
         assertValidJsonData(response);
     }
 
     @Test
     public void testGetByKeyValue() throws Exception {
-        // -create data for testing
-        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
-        queryParams.add("key", Ontology.IDENTIFIER_KEY);
-        queryParams.add("value", FETCH_NAME);
+        WebTarget resource = client.target(entityUri(Entities.USER_PROFILE))
+                .queryParam("key", Ontology.IDENTIFIER_KEY)
+                .queryParam("value", FETCH_NAME);
 
-        WebResource resource = client.resource(entityUri(Entities.USER_PROFILE))
-                .queryParams(queryParams);
-
-        ClientResponse response = resource
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
 
         assertStatus(CREATED, response);
     }
@@ -94,9 +84,9 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
     public void testUpdateUserProfile() throws Exception {
 
         // -create data for testing
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.USER_PROFILE))
-                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
 
         assertStatus(CREATED, response);
         assertValidJsonData(response);
@@ -105,26 +95,26 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
         URI location = response.getLocation();
 
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and change it
-        String json = response.getEntity(String.class);
+        String json = response.readEntity(String.class);
         Bundle entityBundle = Bundle.fromString(json).withDataValue("name",
                 UPDATED_NAME);
 
         // -update
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .entity(entityBundle.toJson()).put(ClientResponse.class);
+                .put(Entity.json(entityBundle.toJson()), Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it changed?
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
-        String updatedJson = response.getEntity(String.class);
+        String updatedJson = response.readEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
@@ -133,14 +123,14 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
     public void testCreateUserProfileWithIntegrityErrir() throws Exception {
         // Create
         URI uri = entityUri(Entities.USER_PROFILE);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
         assertStatus(CREATED, response);
 
         // Doing exactly the same thing twice should result in a
         // ValidationError because the same IDs will be generated...
         response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
         assertStatus(BAD_REQUEST, response);
     }
 
@@ -155,19 +145,18 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
                 .queryParam("group", GROUP_ID2)
                 .build();
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(jsonUserProfileTestString)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
 
         assertStatus(CREATED, response);
 
         // Get created entity via the response location?
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // check that the groups are there
-        Set<String> groupIds = getGroupIdsFromEntityJson(response.getEntity(String.class));
+        Set<String> groupIds = getGroupIdsFromEntityJson(response.readEntity(String.class));
         assertTrue(groupIds.contains(GROUP_ID1));
         assertTrue(groupIds.contains(GROUP_ID2));
     }
@@ -195,9 +184,8 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(AbstractResource.GROUP_PARAM, GROUP_ID_NONEXISTING)
                 .build();
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(jsonUserProfileTestString)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(jsonUserProfileTestString), Response.class);
 
         assertStatus(BAD_REQUEST, response);
     }
@@ -214,30 +202,30 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
 
         URI followUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, "following")
                 .queryParam(AbstractResource.ID_PARAM, user2).build();
-        ClientResponse response = jsonCallAs(user1, followUrl1).post(ClientResponse.class);
+        Response response = jsonCallAs(user1, followUrl1).post(Entity.json(""), Response.class);
         assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(1, followers.size());
 
         URI followUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, "following")
                 .queryParam(AbstractResource.ID_PARAM, user3).build();
-        response = jsonCallAs(user1, followUrl2).post(ClientResponse.class);
+        response = jsonCallAs(user1, followUrl2).post(Entity.json(""), Response.class);
         assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(2, followers.size());
 
         // Hitting the same URL as a GET should give us a boolean...
         URI isFollowingUrl = entityUri(Entities.USER_PROFILE, user1, "is-following", user2);
-        response = jsonCallAs(user1, isFollowingUrl).get(ClientResponse.class);
+        response = jsonCallAs(user1, isFollowingUrl).get(Response.class);
         assertStatus(OK, response);
-        assertEquals("true", response.getEntity(String.class));
+        assertEquals("true", response.readEntity(String.class));
 
         URI hasFollowerUrl = entityUri(Entities.USER_PROFILE, user2, "is-follower", user1);
-        response = jsonCallAs(user2, hasFollowerUrl).get(ClientResponse.class);
+        response = jsonCallAs(user2, hasFollowerUrl).get(Response.class);
         assertStatus(OK, response);
-        assertEquals("true", response.getEntity(String.class));
+        assertEquals("true", response.readEntity(String.class));
 
-        response = jsonCallAs(user1, followUrl1).delete(ClientResponse.class);
+        response = jsonCallAs(user1, followUrl1).delete(Response.class);
         assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(1, followers.size());
@@ -253,19 +241,19 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
 
         URI blockUrl = entityUriBuilder(Entities.USER_PROFILE, user1, "blocked")
                 .queryParam(AbstractResource.ID_PARAM, user2).build();
-        ClientResponse response = jsonCallAs(user1, blockUrl)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(user1, blockUrl)
+                .post(Entity.json(""), Response.class);
         assertStatus(NO_CONTENT, response);
         blocked = getItemList(blockedUrl, user1);
         assertFalse(blocked.isEmpty());
 
         // Hitting the same URL as a GET should give us a boolean...
         URI isBlockingUrl = entityUri(Entities.USER_PROFILE, user1, "is-blocking", user2);
-        response = jsonCallAs(user1, isBlockingUrl).get(ClientResponse.class);
+        response = jsonCallAs(user1, isBlockingUrl).get(Response.class);
         assertStatus(OK, response);
-        assertEquals("true", response.getEntity(String.class));
+        assertEquals("true", response.readEntity(String.class));
 
-        response = jsonCallAs(user1, blockUrl).delete(ClientResponse.class);
+        response = jsonCallAs(user1, blockUrl).delete(Response.class);
         assertStatus(NO_CONTENT, response);
         blocked = getItemList(blockedUrl, user1);
         assertTrue(blocked.isEmpty());
@@ -282,25 +270,25 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
 
         URI watchUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, "watching")
                 .queryParam(AbstractResource.ID_PARAM, item1).build();
-        ClientResponse response = jsonCallAs(user1, watchUrl1).post(ClientResponse.class);
+        Response response = jsonCallAs(user1, watchUrl1).post(Entity.json(""), Response.class);
         assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(1, watching.size());
 
         URI watchUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, "watching")
                 .queryParam(AbstractResource.ID_PARAM, item2).build();
-        response = jsonCallAs(user1, watchUrl2).post(ClientResponse.class);
+        response = jsonCallAs(user1, watchUrl2).post(Entity.json(""), Response.class);
         assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(2, watching.size());
 
         // Hitting the same URL as a GET should give us a boolean...
         URI isWatchingUrl = entityUri(Entities.USER_PROFILE, user1, "is-watching", item1);
-        response = jsonCallAs(user1, isWatchingUrl).get(ClientResponse.class);
+        response = jsonCallAs(user1, isWatchingUrl).get(Response.class);
         assertStatus(OK, response);
-        assertEquals("true", response.getEntity(String.class));
+        assertEquals("true", response.readEntity(String.class));
 
-        response = jsonCallAs(user1, watchUrl1).delete(ClientResponse.class);
+        response = jsonCallAs(user1, watchUrl1).delete(Response.class);
         assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(1, watching.size());

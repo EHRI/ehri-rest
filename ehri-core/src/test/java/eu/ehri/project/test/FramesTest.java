@@ -28,7 +28,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class FramesTest extends ModelTestBase {
+public class FramesTest extends GraphTestBase {
 
     @Test(expected=IllegalArgumentException.class)
     public void testFramesWithListProperty() {

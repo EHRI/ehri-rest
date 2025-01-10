@@ -32,25 +32,12 @@ import eu.ehri.project.api.UserProfilesApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.VirtualUnit;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -65,8 +52,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
 
-    public UserProfileResource(@Context GraphDatabaseService database) {
-        super(database, UserProfile.class);
+    public UserProfileResource(@Context DatabaseManagementService service) {
+        super(service, UserProfile.class);
     }
 
     @GET

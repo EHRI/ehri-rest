@@ -36,7 +36,7 @@ import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -55,8 +55,8 @@ public class AuthoritativeSetResource extends
         AbstractAccessibleResource<AuthoritativeSet>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
-    public AuthoritativeSetResource(@Context GraphDatabaseService database) {
-        super(database, AuthoritativeSet.class);
+    public AuthoritativeSetResource(@Context DatabaseManagementService service) {
+        super(service, AuthoritativeSet.class);
     }
 
     @GET

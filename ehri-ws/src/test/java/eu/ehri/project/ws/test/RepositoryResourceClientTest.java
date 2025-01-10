@@ -20,18 +20,19 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.PermissionsResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.PermissionsResource;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -55,15 +56,13 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testCreateRepository() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(agentTestData)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), entityUri(Entities.COUNTRY, COUNTRY_CODE))
+                .post(Entity.json(agentTestData), Response.class);
 
         assertStatus(CREATED, response);
 
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
@@ -72,34 +71,29 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         String json = Bundle.fromString(agentTestData)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
         URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                uri).entity(json)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(json), Response.class);
         assertStatus(CREATED, response);
 
         // Now do it again!
         response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(json)
-                .post(ClientResponse.class);
+                .post(Entity.json(json), Response.class);
         assertStatus(BAD_REQUEST, response);
     }
 
     @Test
     public void testUpdateRepositoryByIdentifier() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(agentTestData)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), entityUri(Entities.COUNTRY, COUNTRY_CODE))
+                .post(Entity.json(agentTestData), Response.class);
         assertStatus(CREATED, response);
 
         // Obtain some update data.
         String updateData = Bundle.fromString(agentTestData)
                 .withDataValue("name", UPDATED_NAME).toJson();
 
-        response = jsonCallAs(getAdminUserProfileId(),
-                response.getLocation()).entity(updateData)
-                .put(ClientResponse.class);
+        response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
+                .put(Entity.json(updateData), Response.class);
         assertStatus(OK, response);
     }
 
@@ -107,15 +101,13 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testCreateRepositoryWithDeserializationError() throws Exception {
         // Create
         String badRepositoryTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(badRepositoryTestData)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), entityUri(Entities.COUNTRY, COUNTRY_CODE))
+                .post(Entity.json(badRepositoryTestData), Response.class);
 
         assertStatus(BAD_REQUEST, response);
 
         // Check the JSON gives use the correct error
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
+        JsonNode rootNode = jsonMapper.readTree(response.readEntity(String.class));
         JsonNode errValue = rootNode.path("error");
         assertFalse(errValue.isMissingNode());
         assertEquals(BAD_REQUEST.getReasonPhrase(), errValue.asText());
@@ -125,14 +117,14 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testDeleteRepository() throws Exception {
         // Create
         URI uri = entityUri(Entities.REPOSITORY, "r2");
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .delete(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(Response.class);
 
         assertStatus(NO_CONTENT, response);
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+                .get(Response.class);
 
         assertStatus(GONE, response);
     }
@@ -141,10 +133,10 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testExportEad() throws Exception {
         // Create
         URI uri = entityUri(Entities.REPOSITORY, ID, "ead3");
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+        Response response = callAs(getAdminUserProfileId(), uri)
+                .get(Response.class);
         assertStatus(OK, response);
-        try (InputStream stream = response.getEntityInputStream()) {
+        try (InputStream stream = response.readEntity(InputStream.class)) {
             // There should be three top level items: c1, c4, and m19
             assertEquals(3, readZip(stream).size());
         }
@@ -155,15 +147,14 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         // Grant permissions for a user to create items within this scope.
 
         // The user shouldn't be able to create docs with r2
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                getCreationUriFor("r2")).entity(docTestData)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME,
+                getCreationUriFor("r2"))
+                .post(Entity.json(docTestData), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // Or r3...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor("r3"))
-                .entity(docTestData)
-                .post(ClientResponse.class);
+                .post(Entity.json(docTestData), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // Now grant the user permissions to create just within
@@ -173,22 +164,19 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         URI grantUri = ehriUri(PermissionsResource.ENDPOINT, LIMITED_USER_NAME, "scope", "r2");
 
         response = jsonCallAs(getAdminUserProfileId(), grantUri)
-                .entity(permData)
-                .post(ClientResponse.class);
+                .post(Entity.json(permData), Response.class);
 
         assertStatus(OK, response);
 
         // Now creation should succeed...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor("r2"))
-                .entity(docTestData)
-                .post(ClientResponse.class);
+                .post(Entity.json(docTestData), Response.class);
         assertStatus(CREATED, response);
 
         // But r3 should still fail...
         // Or r3...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor("r3"))
-                .entity(docTestData)
-                .post(ClientResponse.class);
+                .post(Entity.json(docTestData), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // And the user himself should not be able to grant
@@ -198,8 +186,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         URI otherGrantUri = ehriUri(PermissionsResource.ENDPOINT, otherUserName, "scope", "r2");
 
         response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri)
-                .entity(grantPermData)
-                .post(ClientResponse.class);
+                .post(Entity.json(grantPermData), Response.class);
 
         assertStatus(FORBIDDEN, response);
     }

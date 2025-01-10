@@ -38,14 +38,9 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.JsonDataExporter;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -66,8 +61,8 @@ public class AdminResource extends AbstractResource {
     public static final String DEFAULT_USER_ID_PREFIX = "user";
     public static final String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
-    public AdminResource(@Context GraphDatabaseService database) {
-        super(database);
+    public AdminResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

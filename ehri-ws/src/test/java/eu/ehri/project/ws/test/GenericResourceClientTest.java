@@ -20,26 +20,21 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.project.ws.GenericResource.ENDPOINT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.junit.Assert.*;
 
 
 public class GenericResourceClientTest extends AbstractResourceClientTest {
@@ -56,8 +51,8 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
                 .segment(ENDPOINT)
                 .queryParam("id", ITEM1)
                 .queryParam("id", ITEM2).build();
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .get(Response.class);
         assertStatus(OK, response);
         testResponse(response, ITEM1);
     }
@@ -65,9 +60,8 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void getMultipleGenericEntitiesByPost() throws IOException {
         String payload = String.format("[\"%s\", \"%s\"]", ITEM1, ITEM2);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), ehriUri(ENDPOINT))
-                .entity(payload)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), ehriUri(ENDPOINT))
+                .post(Entity.json(payload), Response.class);
         assertStatus(OK, response);
         testResponse(response, ITEM1);
     }
@@ -75,9 +69,8 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void getGenericEntitiesByGid() throws IOException {
         String payload = String.format("[\"%s\"]", ITEM1);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), ehriUri(ENDPOINT))
-                .entity(payload)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), ehriUri(ENDPOINT))
+                .post(Entity.json(payload), Response.class);
         assertStatus(OK, response);
         Long gid = getGraphId(response);
 
@@ -85,9 +78,8 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
                 .segment(ENDPOINT)
                 .queryParam("gid", gid).build();
 
-        response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        response = jsonCallAs(getAdminUserProfileId(), uri).get(Response.class);
+        JsonNode rootNode = jsonMapper.readValue(response.readEntity(String.class), JsonNode.class);
         JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
         assertEquals(ITEM1, idValue.textValue());
 
@@ -97,21 +89,18 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
                 .segment(ENDPOINT).build();
 
         response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(payload)
-                .post(ClientResponse.class);
-        rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+                .post(Entity.json(payload), Response.class);
+        rootNode = jsonMapper.readValue(response.readEntity(String.class), JsonNode.class);
         idValue = rootNode.path(0).path(Bundle.ID_KEY);
         assertEquals(ITEM1, idValue.textValue());
     }
 
     @Test
     public void getSingleGenericEntity() throws IOException {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, ITEM1)).get(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(ENDPOINT, ITEM1)).get(Response.class);
         assertStatus(OK, response);
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(response.readEntity(String.class), JsonNode.class);
         JsonNode idValue = rootNode.path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
         assertEquals(ITEM1, idValue.textValue());
@@ -119,8 +108,8 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void getCannotFetchNonContentTypes() throws Exception {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, BAD_ITEM)).get(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(ENDPOINT, BAD_ITEM)).get(Response.class);
         assertStatus(NOT_FOUND, response);
     }
 
@@ -134,10 +123,9 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
                 .queryParam("id", "c4")  // OK
                 .build();
 
-        ClientResponse response = jsonCallAs(getRegularUserProfileId(), uri).get(ClientResponse.class);
+        Response response = jsonCallAs(getRegularUserProfileId(), uri).get(Response.class);
         assertStatus(OK, response);
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(response.readEntity(String.class), JsonNode.class);
         System.out.println(rootNode.toString());
         assertTrue(rootNode.isArray());
         assertEquals(4, rootNode.size());
@@ -150,61 +138,64 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testGetLinks() throws Exception {
         // Fetch annotations for an item.
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, "c1", "links"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testGetAnnotations() throws Exception {
         // Fetch annotations for an item.
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, "c1", "annotations"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testGetAccessors() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                ehriUri(ENDPOINT, "c1", "access")).get(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME,
+                ehriUri(ENDPOINT, "c1", "access")).get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testUserCannotRead() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME,
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(Response.class);
         assertStatus(NOT_FOUND, response);
     }
 
     @Test
     public void testGrantAccess() throws Exception {
         // Attempt to fetch an element.
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME,
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(Response.class);
 
         assertStatus(NOT_FOUND, response);
 
         // Set the form data
-        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<>();
         queryParams.add(AbstractResource.ACCESSOR_PARAM, LIMITED_USER_NAME);
 
-        response = client.resource(ehriUri(ENDPOINT, "c1", "access"))
-                .queryParams(queryParams)
+        WebTarget resource = client.target(ehriUri(ENDPOINT, "c1", "access"));
+        for (String param : queryParams.keySet()) {
+            resource = resource.queryParam(param, queryParams.getFirst(param));
+        }
+        response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .post(ClientResponse.class);
+                .post(Entity.json(""), Response.class);
         assertStatus(OK, response);
 
         // Try the original request again and ensure it worked...
         response = jsonCallAs(LIMITED_USER_NAME,
-                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(Response.class);
         assertStatus(OK, response);
     }
 
@@ -215,35 +206,30 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
         testGrantAccess();
 
         // Create
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME,
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(Response.class);
 
         assertStatus(OK, response);
 
-        // Set the form data
-        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
-        queryParams.add(AbstractResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME);
-
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "c1", "access"));
+        WebTarget resource = client.target(ehriUri(ENDPOINT, "c1", "access"));
         response = resource
-                .queryParams(queryParams)
+                .queryParam(AbstractResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME)
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .post(ClientResponse.class);
+                .post(Entity.json(""), Response.class);
         assertStatus(OK, response);
 
         // Try the original request again and ensure it worked...
         response = jsonCallAs(LIMITED_USER_NAME,
-                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(Response.class);
         assertStatus(NOT_FOUND, response);
     }
 
 
-    private void testResponse(ClientResponse response, String expectedId) throws IOException {
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+    private void testResponse(Response response, String expectedId) throws IOException {
+        JsonNode rootNode = jsonMapper.readValue(response.readEntity(String.class), JsonNode.class);
         JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
         assertEquals(expectedId, idValue.textValue());
@@ -252,9 +238,8 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
         assertTrue(rootNode.path(2).isMissingNode());
     }
 
-    private Long getGraphId(ClientResponse response) throws IOException {
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+    private Long getGraphId(Response response) throws IOException {
+        JsonNode rootNode = jsonMapper.readValue(response.readEntity(String.class), JsonNode.class);
         JsonNode idValue = rootNode.path(0).path(Bundle.META_KEY).path("gid");
         return idValue.asLong();
     }

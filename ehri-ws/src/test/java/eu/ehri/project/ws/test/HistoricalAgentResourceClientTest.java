@@ -19,16 +19,18 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+
+import static javax.ws.rs.core.Response.Status.*;
 
 public class HistoricalAgentResourceClientTest extends AbstractResourceClientTest {
 
@@ -45,17 +47,16 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testCreateAuthority() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.HISTORICAL_AGENT))
-                .entity(authorityTestData)
-                .post(ClientResponse.class);
+                .post(Entity.json(authorityTestData), Response.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
 
-        response = jsonCallAs(getAdminUserProfileId(), location).get(ClientResponse.class);
+        response = jsonCallAs(getAdminUserProfileId(), location).get(Response.class);
         assertStatus(OK, response);
     }
 
@@ -64,18 +65,18 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
         String json = Bundle.fromString(authorityTestData)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT)).entity(json)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.HISTORICAL_AGENT))
+                .post(Entity.json(json), Response.class);
         assertStatus(BAD_REQUEST, response);
     }
 
     @Test
     public void testUpdateAuthorityByIdentifier() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT)).entity(authorityTestData)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.HISTORICAL_AGENT))
+                .post(Entity.json(authorityTestData), Response.class);
         assertStatus(CREATED, response);
 
         // Obtain some update data.
@@ -83,8 +84,7 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
-                .entity(updateData)
-                .put(ClientResponse.class);
+                .put(Entity.json(updateData), Response.class);
         assertStatus(OK, response);
     }
 
@@ -92,9 +92,9 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     public void testCreateAuthorityWithDeserializationError() throws Exception {
         // Create
         String badAuthorityTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT)).entity(badAuthorityTestData)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.HISTORICAL_AGENT))
+                .post(Entity.json(badAuthorityTestData), Response.class);
 
         assertStatus(BAD_REQUEST, response);
     }
@@ -103,12 +103,12 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     public void testDeleteAuthority() throws Exception {
         // Create
         URI uri = entityUri(Entities.HISTORICAL_AGENT, TEST_ID);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .delete(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(Response.class);
         assertStatus(NO_CONTENT, response);
 
         // Check it's really gone...
-        response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
+        response = jsonCallAs(getAdminUserProfileId(), uri).get(Response.class);
         assertStatus(GONE, response);
     }
 }

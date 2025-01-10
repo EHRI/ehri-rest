@@ -30,7 +30,7 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.utils.Table;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +54,8 @@ public class BatchResource extends AbstractResource {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchResource.class);
 
-    public BatchResource(@Context GraphDatabaseService database) {
-        super(database);
+    public BatchResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

@@ -20,23 +20,22 @@
 package eu.ehri.project.ws.test;
 
 import com.google.common.collect.Sets;
-import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.GroupResource;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.GroupResource;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -50,15 +49,14 @@ public class GroupResourceClientTest extends AbstractResourceClientTest {
     public void testCreateGroup() throws Exception {
         // Create
         String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.GROUP)).entity(jsonGroupTestString)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), entityUri(Entities.GROUP))
+                .post(Entity.json(jsonGroupTestString), Response.class);
 
         assertStatus(CREATED, response);
         // Get created doc via the response location?
         URI location = response.getLocation();
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
@@ -70,12 +68,10 @@ public class GroupResourceClientTest extends AbstractResourceClientTest {
                 .segment(AbstractResource.RESOURCE_ENDPOINT_PREFIX)
                 .segment(Entities.GROUP)
                 .queryParam(GroupResource.MEMBER_PARAM, "linda").build();
-        ClientResponse response = client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        Response response = client.target(uri)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
-                .entity(jsonGroupTestString)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonGroupTestString), Response.class);
 
         assertStatus(CREATED, response);
 
@@ -93,18 +89,18 @@ public class GroupResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testAddUser() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.GROUP, TEST_GROUP_NAME, NON_ADMIN_USER))
-                .post(ClientResponse.class);
+                .post(Entity.json(""), Response.class);
         assertStatus(NO_CONTENT, response);
     }
 
     @Test
     public void testRemoveUser() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER))
-                .delete(ClientResponse.class);
+                .delete(Response.class);
         assertStatus(NO_CONTENT, response);
     }
 

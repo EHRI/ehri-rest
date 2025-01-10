@@ -16,7 +16,7 @@ module EhriUtils
     end
 
     # set the NEO4J_DB path if not already set
-    ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db" 
+    ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/databases/neo4j" 
   end
 end
 

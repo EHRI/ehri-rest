@@ -22,6 +22,7 @@ package eu.ehri.project.core.impl;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.TxGraph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
@@ -41,20 +42,15 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
 
     public static final Logger logger = LoggerFactory.getLogger(TxNeo4jGraph.class);
 
+    public TxNeo4jGraph(DatabaseManagementService service, GraphDatabaseService graph) {
+        super(service, graph);
+    }
+
     public TxNeo4jGraph(String directory) {
         super(directory);
     }
 
-    public TxNeo4jGraph(GraphDatabaseService rawGraph) {
-        super(rawGraph);
-    }
-
-    private ThreadLocal<Neo4jTx> etx = new ThreadLocal<Neo4jTx>() {
-        @Override
-        public Neo4jTx initialValue() {
-            return null;
-        }
-    };
+    private final ThreadLocal<Neo4jTx> etx = ThreadLocal.withInitial(() -> null);
 
     public Tx beginTx() {
         logger.trace("Begin tx: {}", Thread.currentThread().getName());
@@ -89,7 +85,7 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
 
     @Override
     public void shutdown() {
-        getRawGraph().shutdown();
+        getManagementService().shutdown();
     }
 
     /**
@@ -100,18 +96,6 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
     @Override
     public void autoStartTransaction(boolean forWrite) {
         // Not allowing auto-start TX
-    }
-
-    /**
-     * Since we override autoStartTx to do nothing, we must also
-     * override this function (which loads key indices and sneakily
-     * commits them) when the graph is constructed. We do not use
-     * key indexable functionality so nothing is lost (unless the
-     * base class is changed, but, can't do much about that.)
-     */
-    @Override
-    public void init() {
-        // Don't load key indices
     }
 
     /**
@@ -130,7 +114,7 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
          *
          * @return a Neo4j transaction
          */
-        Transaction underlying() {
+        public Transaction underlying() {
             return tx.get();
         }
 
@@ -140,7 +124,7 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
             if (transaction == null) {
                 throw new UnderlyingTxRemovedError("Underlying transaction removed!");
             }
-            transaction.success();
+            transaction.commit();
         }
 
         public void close() {
@@ -160,7 +144,7 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
             if (transaction == null) {
                 throw new UnderlyingTxRemovedError("Underlying transaction removed!");
             }
-            transaction.failure();
+            transaction.rollback();
         }
     }
 }

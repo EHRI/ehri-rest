@@ -20,26 +20,24 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
 
@@ -64,22 +62,22 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testCreateDeleteVirtualUnit() throws Exception {
         // Create
         String currentUserId = getAdminUserProfileId();
-        ClientResponse response = jsonCallAs(currentUserId, getCreationUri())
-                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
+        Response response = jsonCallAs(currentUserId, getCreationUri())
+                .post(Entity.json(jsonVirtualUnitStr), Response.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
         response = jsonCallAs(currentUserId, location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // Ensure the user now owns that item:
         response = jsonCallAs(currentUserId,
                 entityUri(Entities.USER_PROFILE, currentUserId,
                         "virtual-units"))
-                .get(ClientResponse.class);
+                .get(Response.class);
 
         assertStatus(OK, response);
         // Check the response contains a new version
@@ -90,33 +88,33 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testCreateDeleteChildVirtualUnit() throws Exception {
         // Create
         String currentUserId = getAdminUserProfileId();
-        ClientResponse response = jsonCallAs(currentUserId,
+        Response response = jsonCallAs(currentUserId,
                 entityUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID))
-                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
+                .post(Entity.json(jsonVirtualUnitStr), Response.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
         response = jsonCallAs(currentUserId, location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testIntegrityError() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .post(Entity.json(jsonVirtualUnitStr), Response.class);
 
         assertStatus(CREATED, response);
 
         // Okay... now if we try and do the same things again we should
         // get an integrity error because the identifiers are the same.
         response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
+                .post(Entity.json(jsonVirtualUnitStr), Response.class);
         // Check the JSON gives use the correct error
-        String errString = response.getEntity(String.class);
+        String errString = response.readEntity(String.class);
 
         assertStatus(BAD_REQUEST, response);
 
@@ -129,13 +127,13 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testGetVirtualUnitByIdentifier() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
-                .get(ClientResponse.class);
+                .get(Response.class);
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
+        JsonNode rootNode = jsonMapper.readTree(response.readEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -146,14 +144,13 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testUpdateVirtualUnitByIdentifier() throws Exception {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
-                .entity(jsonVirtualUnitStr)
-                .put(ClientResponse.class);
+                .put(Entity.json(jsonVirtualUnitStr), Response.class);
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
+        JsonNode rootNode = jsonMapper.readTree(response.readEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -164,7 +161,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testListVirtualUnit() throws Exception {
         List<Bundle> data = getEntityList(
                 Entities.VIRTUAL_UNIT, getAdminUserProfileId());
-        assertTrue(!data.isEmpty());
+        assertFalse(data.isEmpty());
         data.sort(bundleComparator);
         // Extract the first collection. According to the fixtures this
         // should be named 'vc1'.
@@ -182,53 +179,50 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testUpdateVirtualUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
-        WebResource resource = client.resource(getCreationUri());
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        WebTarget resource = client.target(getCreationUri());
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
+                .post(Entity.json(jsonVirtualUnitStr), Response.class);
 
         assertStatus(CREATED, response);
         assertValidJsonData(response);
-        // response.getEntity(String.class)
+        // response.readEntity(String.class)
 
         // Get created doc via the response location?
         URI location = response.getLocation();
 
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and change it
-        String json = response.getEntity(String.class);
+        String json = response.readEntity(String.class);
         String toUpdateJson = Bundle.fromString(json)
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(toUpdateJson)
-                .put(ClientResponse.class);
+                .request(MediaType.APPLICATION_JSON)
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .put(Entity.json(toUpdateJson), Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it changed?
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
-        String updatedJson = response.getEntity(String.class);
+        String updatedJson = response.readEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
@@ -237,13 +231,12 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testPatchVirtualUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
-        WebResource resource = client.resource(getCreationUri());
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        WebTarget resource = client.target(getCreationUri());
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
+                .post(Entity.json(jsonVirtualUnitStr), Response.class);
 
         assertStatus(CREATED, response);
 
@@ -253,28 +246,26 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
         String toUpdateJson = partialJsonVirtualUnitTestStr;
 
         // - patch the data (using the Patch header)
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .header(AbstractResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
-                .entity(toUpdateJson)
-                .put(ClientResponse.class);
+                .put(Entity.json(toUpdateJson), Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it patched?
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
-        String updatedJson = response.getEntity(String.class);
+        String updatedJson = response.readEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(CREATED_ID, updatedEntityBundle.getDataValue(Ontology.IDENTIFIER_KEY));
         assertEquals(PARTIAL_DESC, updatedEntityBundle.getDataValue("description"));
@@ -282,10 +273,10 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testPageVirtualUnitsForUser() throws Exception {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.USER_PROFILE, "linda",
                         "virtual-units"))
-                .get(ClientResponse.class);
+                .get(Response.class);
 
         assertStatus(OK, response);
         assertEquals(1, getPaginationTotal(response));

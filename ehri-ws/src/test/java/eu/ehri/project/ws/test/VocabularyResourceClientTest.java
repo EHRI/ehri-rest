@@ -20,7 +20,6 @@
 package eu.ehri.project.ws.test;
 
 import com.google.common.collect.ImmutableList;
-import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.ws.VocabularyResource;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
@@ -28,11 +27,14 @@ import eu.ehri.project.utils.Table;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.Response.Status;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static javax.ws.rs.core.Response.Status.*;
 import static eu.ehri.project.ws.base.AbstractResource.ALL_PARAM;
 import static org.junit.Assert.assertEquals;
 
@@ -56,7 +58,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     public void testCreateDeleteCvocVocabulary() throws Exception {
 
         // Create
-        ClientResponse response = testCreate(entityUri(Entities.CVOC_VOCABULARY), jsonTestVocabularyString);
+        Response response = testCreate(entityUri(Entities.CVOC_VOCABULARY), jsonTestVocabularyString);
 
         // Get created entity via the response location?
         URI location = response.getLocation();
@@ -73,7 +75,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testCreateCvocConcept() throws Exception {
         // Create
-        ClientResponse response = testCreate(entityUri(Entities.CVOC_VOCABULARY),
+        Response response = testCreate(entityUri(Entities.CVOC_VOCABULARY),
                 jsonTestVocabularyString);
 
         // Get created entity via the response location?
@@ -101,45 +103,46 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     public void testExportVocabulary() throws Exception {
         UriBuilder uri = ehriUriBuilder(AbstractResource.RESOURCE_ENDPOINT_PREFIX,
                 Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "export");
-        ClientResponse response = client.resource(uri.build())
-                .get(ClientResponse.class);
+        Response response = client.target(uri.build())
+                .request().get(Response.class);
         assertStatus(OK, response);
-        assertEquals(MediaType.valueOf(VocabularyResource.TURTLE_MIMETYPE + "; charset=utf-8"), response.getType());
+        assertEquals(MediaType.valueOf(VocabularyResource.TURTLE_MIMETYPE + "; charset=utf-8"), response.getMediaType());
 
-        response = client.resource(uri.build())
+        response = client.target(uri.build()).request()
                 .header("Accept", VocabularyResource.RDF_XML_MIMETYPE)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
-        assertEquals(MediaType.valueOf(VocabularyResource.RDF_XML_MIMETYPE + "; charset=utf-8"), response.getType());
+        assertEquals(MediaType.valueOf(VocabularyResource.RDF_XML_MIMETYPE + "; charset=utf-8"), response.getMediaType());
 
-        response = client.resource(uri.build())
+        response = client.target(uri.build()).request()
                 .header("Accept", VocabularyResource.N3_MIMETYPE)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
-        assertEquals(MediaType.valueOf(VocabularyResource.N3_MIMETYPE + "; charset=utf-8"), response.getType());
+        assertEquals(MediaType.valueOf(VocabularyResource.N3_MIMETYPE + "; charset=utf-8"), response.getMediaType());
 
-        response = client.resource(uri.build())
+        response = client.target(uri.build())
                 .queryParam("format", "N3")
-                .get(ClientResponse.class);
+                .request()
+                .get(Response.class);
         assertStatus(OK, response);
-        assertEquals(MediaType.valueOf(VocabularyResource.N3_MIMETYPE + "; charset=utf-8"), response.getType());
+        assertEquals(MediaType.valueOf(VocabularyResource.N3_MIMETYPE + "; charset=utf-8"), response.getMediaType());
     }
 
     @Test
     public void testDeleteChildren() throws Exception {
         URI uri = entityUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "list")
                 .queryParam(ALL_PARAM, "true").build();
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .delete(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(Response.class);
         assertStatus(OK, response);
         assertEquals(
                 Table.column(ImmutableList.of("cvocc1", "cvocc2")),
-                response.getEntity(Table.class));
+                response.readEntity(Table.class));
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.CVOC_CONCEPT, "cvocc1"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(GONE, response);
     }
 
@@ -147,9 +150,9 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     public void testDelete() throws Exception {
         // Check we can't delete with children
         URI uri = entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .delete(ClientResponse.class);
-        assertStatus(CONFLICT, response);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(Response.class);
+        assertStatus(Status.CONFLICT, response);
 
         // Need to delete children first...
         testDelete(entityUri(Entities.CVOC_CONCEPT, "cvocc1"));
@@ -160,7 +163,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(GONE, response);
     }
 
@@ -169,24 +172,27 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
      */
 
     // Note: maybe generalize them and reuse for other tests
-    private ClientResponse testGet(URI uri) {
-        return jsonCallAs(getAdminUserProfileId(), uri)
-                .get(ClientResponse.class);
+    private Response testGet(URI uri) {
+        try (Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .get(Response.class)) {
+            return response;
+        }
     }
 
-    private ClientResponse testCreate(URI uri, String json) {
+    private Response testCreate(URI uri, String json) {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .entity(json).post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .post(Entity.json(json), Response.class);
         assertStatus(CREATED, response);
         return response;
     }
 
-    private ClientResponse testDelete(URI uri) {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
-                .delete(ClientResponse.class);
-        assertStatus(NO_CONTENT, response);
+    private Response testDelete(URI uri) {
+        try (Response response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(Response.class)) {
+            assertStatus(NO_CONTENT, response);
 
-        return response;
+            return response;
+        }
     }
 }
