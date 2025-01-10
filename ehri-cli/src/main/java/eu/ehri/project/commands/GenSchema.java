@@ -51,8 +51,14 @@ public class GenSchema extends BaseCommand {
         if (baseGraph instanceof Neo4j2Graph) {
             GraphDatabaseService service = ((Neo4j2Graph) baseGraph).getRawGraph();
             try (Transaction tx = service.beginTx()) {
+                System.err.println("INFO: Dropping all indices and constraints...");
                 Neo4jGraphManager.dropIndicesAndConstraints(tx);
+                tx.commit();
+            }
+            try (Transaction tx = service.beginTx()) {
+                System.err.println("INFO: Creating all indices and constraints...");
                 Neo4jGraphManager.createIndicesAndConstraints(tx);
+                tx.commit();
             }
         } else {
             System.err.println("ERROR: Cannot generate schema on a non-Neo4j2 graph");

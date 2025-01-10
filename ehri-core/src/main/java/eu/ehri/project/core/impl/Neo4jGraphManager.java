@@ -147,9 +147,11 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
      */
     public static void createIndicesAndConstraints(Transaction tx) {
         Schema schema = tx.schema();
+        logger.trace("Creating index on property: {} -> {}", BASE_LABEL, EntityType.ID_KEY);
         schema.constraintFor(Label.label(BASE_LABEL))
                 .assertPropertyIsUnique(EntityType.ID_KEY)
                 .create();
+        logger.trace("Creating index on property: {} -> {}", BASE_LABEL, EntityType.TYPE_KEY);
         schema.indexFor(Label.label(BASE_LABEL))
                 .on(EntityType.TYPE_KEY)
                 .create();
@@ -169,8 +171,7 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
 
             Collection<String> uniquePropertyKeys = ClassUtils.getUniquePropertyKeys(cls.getJavaClass());
             for (String unique : uniquePropertyKeys) {
-                logger.trace("Creating constraint on unique property: {} -> {}",
-                        cls.getName(), unique);
+                logger.trace("Creating constraint on unique property: {} -> {}", cls.getName(), unique);
                 schema.constraintFor(Label.label(cls.getName()))
                         .assertPropertyIsUnique(unique)
                         .create();

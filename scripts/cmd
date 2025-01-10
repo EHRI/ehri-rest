@@ -15,7 +15,7 @@ if [[ "$JAVA_HOME" != "" ]]; then
     JAVA=$JAVA_HOME/bin/java
 fi
 
-$JAVA -XX:-UseGCOverheadLimit -Xmx2g -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_DB "$@"
+$JAVA -XX:-UseGCOverheadLimit -Xmx2g -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_HOME "$@"
 
 
 
