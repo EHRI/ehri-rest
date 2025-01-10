@@ -20,14 +20,15 @@
 package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
+import eu.ehri.project.models.annotations.EntityType;
 import org.apache.commons.cli.CommandLine;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.neo4j.graphdb.*;
+
+import static eu.ehri.project.core.impl.Neo4jGraphManager.BASE_LABEL;
 
 /**
  * Command for generating the (Neo4j) graph schema.
@@ -46,26 +47,54 @@ public class SetLabels extends BaseCommand {
         return "Set node labels to match types per the __type property.";
     }
 
+    @Override
+    protected void setCustomOptions(Options options) {
+        options.addOption(Option.builder("b")
+                .hasArg().type(Integer.class)
+                .longOpt("buffer-size")
+                .desc("Transaction buffer size").build());
+    }
+
+    public static void labelNodes(GraphDatabaseService service, int batchSize, Label baseLabel) {
+        long processedCount = 0;
+        boolean hasMore = true;
+
+        while (hasMore) {
+            try (Transaction tx = service.beginTx()) {
+                // Query that uses SKIP/LIMIT for pagination
+                String query = "MATCH (n) RETURN n SKIP " + processedCount + " " + "LIMIT " + batchSize;
+                ResourceIterator<Node> nodes = tx.execute(query).columnAs("n");
+
+                int batchCount = 0;
+                while (nodes.hasNext()) {
+                    Node node = nodes.next();
+                    node.addLabel(baseLabel);
+                    node.addLabel(Label.label((String) node.getProperty(EntityType.TYPE_KEY)));
+                    batchCount++;
+                }
+
+                // If we processed fewer nodes than the batch size, we're done
+                hasMore = (batchCount == batchSize);
+                processedCount += batchCount;
+
+                tx.commit();
+                System.out.println("Processed " + processedCount + " nodes");
+            }
+        }
+    }
 
     @Override
     public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
+        int bufferSize = cmdLine.hasOption("buffer-size")
+                ? Integer.parseInt(cmdLine.getOptionValue("buffer-size"))
+                : 1000;
         Graph baseGraph = graph.getBaseGraph();
         if (baseGraph instanceof Neo4j2Graph) {
-            // safe, due to the above instanceof
-            @SuppressWarnings("unchecked")
-            FramedGraph<Neo4j2Graph> neo4j2Graph = (FramedGraph<Neo4j2Graph>) graph;
-            Neo4jGraphManager<?> manager = new Neo4jGraphManager<>(neo4j2Graph);
-            int i = 0;
-            for (Vertex v : graph.getVertices()) {
-                manager.setLabels(v);
-                i++;
-                if (i % 10000 == 0) {
-                    neo4j2Graph.getBaseGraph().commit();
-                }
-            }
-            System.err.println("Labelled " + i + " vertices");
+            GraphDatabaseService service = ((Neo4j2Graph) baseGraph).getRawGraph();
+            Label baseLabel = Label.label(BASE_LABEL);
+            labelNodes(service, bufferSize, baseLabel);
         } else {
-            System.err.println("ERROR: Cannot generate schema on a non-Neo4j2 graph");
+            System.err.println("ERROR: Cannot set labels on non Neo4j2-graph");
         }
         return 0;
     }

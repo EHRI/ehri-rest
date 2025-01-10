@@ -25,6 +25,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.base.*;
 import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
