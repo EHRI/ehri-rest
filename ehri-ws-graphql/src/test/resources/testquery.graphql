@@ -10,6 +10,7 @@ query test {
         id
         type
         identifier
+        otherIdentifiers
         itemCount
         firstEnglishDescription: description(languageCode: "eng", identifier: "c1-desc") {
             identifier
@@ -33,6 +34,7 @@ query test {
             english: description(languageCode: "eng") {
                 name
                 addresses {
+                    name
                     municipality
                     email
                 }

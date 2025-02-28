@@ -2,6 +2,7 @@ package eu.ehri.project.definitions;
 
 public enum ContactInfo implements DefinitionList {
 
+    name,
     contactPerson,
     street,
     municipality,
