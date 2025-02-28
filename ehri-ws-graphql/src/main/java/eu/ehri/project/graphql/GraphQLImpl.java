@@ -1210,6 +1210,7 @@ public class GraphQLImpl {
             .description(__("documentaryUnit.description"))
             .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("documentaryUnit.field.identifier.description")))
+            .field(listFieldDefinition(Ontology.OTHER_IDENTIFIERS, __("documentaryUnit.field.otherIdentifiers.description"), GraphQLString))
             .field(descriptionsFieldDefinition(documentaryUnitDescriptionType))
             .field(singleDescriptionFieldDefinition(documentaryUnitDescriptionType))
             .field(itemFieldDefinition("repository", __("documentaryUnit.field.repository.description"), repositoryType))

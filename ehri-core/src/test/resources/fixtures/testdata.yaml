@@ -243,6 +243,8 @@
   type: DocumentaryUnit
   data:
     identifier: c1
+    otherIdentifiers:
+      - c1-alt
   relationships:
     describes:
       - id: cd1

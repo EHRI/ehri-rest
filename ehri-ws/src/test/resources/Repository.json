@@ -40,7 +40,8 @@
 								"countryCode":null,
 								"region":null,
 								"telephone":null,
-								"contactPerson":"Mike Bryant"
+								"contactPerson":"Mike Bryant",
+								"name": "primary"
 							}
 						}
 					]

@@ -105,6 +105,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .path("allChildren").path("items").size());
         assertFalse(data.path("data").path("c1").path("itemCount").isMissingNode());
         assertEquals(1, data.path("data").path("c1").path("itemCount").intValue());
+        assertEquals("c1-alt", data.path("data").path("c1").path("otherIdentifiers").path(0).textValue());
         assertEquals(0, data.path("data").path("c4").path("itemCount").intValue());
         assertEquals("c2", data.path("data").path("c1")
                 .path("children").path("items").path(0)
@@ -119,6 +120,9 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .path(0).path("context").path("body").path(0).path("id").textValue());
         assertEquals("Person Access 2", data.path("data").path("c3").path("related")
                 .path(0).path("context").path("body").path(0).path("name").textValue());
+        assertEquals("An Address", data.path("data").path("c1").path("repository")
+                .path("english").path("addresses").path(0)
+                .path("name").textValue());
         assertEquals("Amsterdam", data.path("data").path("c1").path("repository")
                 .path("english").path("addresses").path(0)
                 .path("municipality").textValue());
