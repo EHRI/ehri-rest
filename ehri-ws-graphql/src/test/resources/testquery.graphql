@@ -34,7 +34,7 @@ query test {
             english: description(languageCode: "eng") {
                 name
                 addresses {
-                    name
+                    addressName
                     municipality
                     email
                 }
