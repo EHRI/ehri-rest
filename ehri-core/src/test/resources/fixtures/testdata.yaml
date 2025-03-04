@@ -150,7 +150,7 @@
             - id: ar1
               type: Address
               data:
-                name: An Address
+                addressName: An Address
                 street: 1 Some St.
                 municipality: Amsterdam
                 email:
@@ -183,7 +183,7 @@
             - id: ar2
               type: Address
               data:
-                name: An Address
+                addressName: An Address
                 street: Strand
                 municipality: London
                 webpage: http://www.kcl.ac.uk
