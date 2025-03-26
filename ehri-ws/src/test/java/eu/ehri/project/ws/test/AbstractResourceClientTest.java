@@ -26,23 +26,22 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.ws.providers.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDeserializer;
-import eu.ehri.project.ws.providers.*;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.client.ClientConfig;
+import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,18 +65,18 @@ public class AbstractResourceClientTest extends RunningServerTest {
     protected Client client;
 
     AbstractResourceClientTest(Class<?> ... additionalProviders) {
-        ClientConfig config = new DefaultClientConfig();
+        ClientConfig config = new ClientConfig();
         Lists.<Class<?>>newArrayList(
                 GlobalPermissionSetProvider.class,
                 TableProvider.class,
                 BundleProvider.class,
                 ImportLogProvider.class,
                 SyncLogProvider.class
-        ).forEach(p -> config.getClasses().add(p));
+        ).forEach(config::register);
         Lists.newArrayList(additionalProviders)
-                .forEach(p -> config.getClasses().add(p));
+                .forEach(config::register);
 
-        client = Client.create(config);
+        client = ClientBuilder.newClient(config);
     }
 
     protected List<ZipEntry> readZip(InputStream stream) throws IOException {
@@ -127,7 +126,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
      */
 
     protected List<Bundle> getItemList(URI uri, String userId) throws Exception {
-        return getItemList(uri, userId, new MultivaluedMapImpl());
+        return getItemList(uri, userId, new MultivaluedHashMap<>());
     }
 
     protected List<Bundle> decodeList(String data) throws Exception {
@@ -139,22 +138,20 @@ public class AbstractResourceClientTest extends RunningServerTest {
     /**
      * Get a list of items at some url, as the given user.
      */
-    protected List<Bundle> getItemList(URI uri, String userId,
-            MultivaluedMap<String, String> params) throws Exception {
+    protected List<Bundle> getItemList(URI uri, String userId, MultivaluedMap<String, String> params) throws Exception {
         return decodeList(getJson(uri, userId, params));
     }
 
     protected List<List<Bundle>> getItemListOfLists(URI uri, String userId) throws Exception {
-        return getItemListOfLists(uri, userId, new MultivaluedMapImpl());
+        return getItemListOfLists(uri, userId, new MultivaluedHashMap<>());
     }
 
     /**
      * Get a list of items at some relativeUrl, as the given user.
      */
-    protected List<List<Bundle>> getItemListOfLists(URI uri, String userId,
-            MultivaluedMap<String, String> params) throws Exception {
-        TypeReference<List<List<Bundle>>> typeRef = new TypeReference<List<List<Bundle>>>() {
-                };
+    protected List<List<Bundle>> getItemListOfLists(URI uri, String userId, MultivaluedMap<String, String> params) throws Exception {
+        TypeReference<List<List<Bundle>>> typeRef = new TypeReference<>() {
+        };
         return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
 
@@ -163,7 +160,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
      */
     protected List<Bundle> getEntityList(String entityType, String userId)
             throws Exception {
-        return getEntityList(entityUri(entityType), userId, new MultivaluedMapImpl());
+        return getEntityList(entityUri(entityType), userId, new MultivaluedHashMap<>());
     }
 
     /**
@@ -175,7 +172,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
      */
     protected Bundle getEntity(String type, String id, String userId) throws Exception {
         return jsonMapper.readValue(getJson(
-                entityUri(type, id), userId, new MultivaluedMapImpl()), Bundle.class);
+                entityUri(type, id), userId, new MultivaluedHashMap<>()), Bundle.class);
     }
 
     /**
@@ -187,9 +184,9 @@ public class AbstractResourceClientTest extends RunningServerTest {
         return getItemList(uri, userId, params);
     }
 
-    protected int getPaginationTotal(ClientResponse response) {
-        MultivaluedMap<String, String> headers = response.getHeaders();
-        String range = headers.getFirst(AbstractResource.RANGE_HEADER_NAME);
+    protected int getPaginationTotal(Response response) {
+        MultivaluedMap<String, Object> headers = response.getHeaders();
+        String range = (String)headers.getFirst(AbstractResource.RANGE_HEADER_NAME);
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
             return matcher.find() ? Integer.parseInt(matcher.group(3)) : -1;
@@ -198,9 +195,9 @@ public class AbstractResourceClientTest extends RunningServerTest {
     }
 
     protected long getEntityCount(String entityType, String userId) {
-        WebResource resource = client.resource(entityUri(entityType));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        WebTarget target = client.target(entityUri(entityType));
+        Response response = target.request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME, userId)
                 .head();
         return getPaginationTotal(response);
@@ -234,34 +231,33 @@ public class AbstractResourceClientTest extends RunningServerTest {
         return ehriUriBuilder(segments).build();
     }
 
-    protected WebResource.Builder jsonCallAs(String user, URI uri) {
+    protected Invocation.Builder jsonCallAs(String user, URI uri) {
         return callAs(user, uri)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON);
+                .accept(MediaType.APPLICATION_JSON);
     }
 
-    protected WebResource.Builder jsonCallAs(String user, String... segments) {
+    protected Invocation.Builder jsonCallAs(String user, String... segments) {
         return callAs(user, segments)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON);
+                .accept(MediaType.APPLICATION_JSON);
     }
 
-    protected WebResource.Builder callAs(String user, URI uri) {
-        return client.resource(uri)
+    protected Invocation.Builder callAs(String user, URI uri) {
+        return client.target(uri)
+                .request()
                 .header(AbstractResource.AUTH_HEADER_NAME, user);
     }
 
-    protected WebResource.Builder callAs(String user, String... segments) {
+    protected Invocation.Builder callAs(String user, String... segments) {
         return callAs(user, ehriUriBuilder(segments).build());
     }
 
-    protected void assertStatus(ClientResponse.Status status, ClientResponse response) {
+    protected void assertStatus(Status status, Response response) {
         org.junit.Assert.assertEquals(status.getStatusCode(), response.getStatus());
     }
 
-    protected void assertValidJsonData(ClientResponse response) {
+    protected void assertValidJsonData(Response response) {
         try {
-            Bundle.fromString(response.getEntity(String.class));
+            Bundle.fromString(response.readEntity(String.class));
         } catch (DeserializationError deserializationError) {
             throw new RuntimeException(deserializationError);
         }
@@ -277,16 +273,14 @@ public class AbstractResourceClientTest extends RunningServerTest {
     protected final Comparator<Bundle> bundleComparator = Comparator.comparing(Bundle::getId);
 
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
-        WebResource resource = client.resource(uri).queryParams(params);
-        try {
-            return resource
-                    .accept(MediaType.APPLICATION_JSON)
-                    .type(MediaType.APPLICATION_JSON)
-                    .header(AbstractResource.AUTH_HEADER_NAME, userId)
-                    .get(String.class);
-        } catch (UniformInterfaceException e) {
-            System.out.println(e.getResponse().getEntity(String.class));
-            throw e;
+        WebTarget target = client.target(uri);
+        for (String key : params.keySet()) {
+            target = target.queryParam(key, params.getFirst(key));
         }
+        return target
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractResource.AUTH_HEADER_NAME, userId)
+                .get(String.class);
     }
 }

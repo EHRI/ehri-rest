@@ -19,12 +19,14 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.LinkResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.ws.LinkResource;
 import org.junit.Test;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
+
+import static javax.ws.rs.core.Response.Status.CREATED;
 
 public class LinkResourceClientTest extends AbstractResourceClientTest {
     @Test
@@ -32,12 +34,11 @@ public class LinkResourceClientTest extends AbstractResourceClientTest {
         // Create a link annotation between two objects
         String jsonLinkTestString = "{\"type\": \"Link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
                 "\"body\": \"test\", \"type\": \"associate\"}}";
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUriBuilder(Entities.LINK)
                         .queryParam(LinkResource.TARGET_PARAM, "c1")
                         .queryParam(LinkResource.SOURCE_PARAM, "c4").build())
-                .entity(jsonLinkTestString)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonLinkTestString), Response.class);
         assertStatus(CREATED, response);
     }
 }

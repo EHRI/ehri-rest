@@ -34,7 +34,7 @@ import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
 import eu.ehri.project.ws.errors.ConflictError;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -51,8 +51,8 @@ public class DocumentaryUnitResource
         extends AbstractAccessibleResource<DocumentaryUnit>
         implements GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
 
-    public DocumentaryUnitResource(@Context GraphDatabaseService database) {
-        super(database, DocumentaryUnit.class);
+    public DocumentaryUnitResource(@Context DatabaseManagementService service) {
+        super(service, DocumentaryUnit.class);
     }
 
     @GET
@@ -202,15 +202,16 @@ public class DocumentaryUnitResource
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            DocumentaryUnit unit = api().get(id, cls);
+            checkExists(id, cls);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
                     final Api api = api();
+                    DocumentaryUnit unit2 = manager.getEntityUnchecked(id, DocumentaryUnit.class);
                     final EadExporter exporter = fmt.equals("ead")
                             ? new Ead2002Exporter(api)
                             : new Ead3Exporter(api);
-                    exporter.export(unit, outputStream, lang);
+                    exporter.export(unit2, outputStream, lang);
                     tx2.success();
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
