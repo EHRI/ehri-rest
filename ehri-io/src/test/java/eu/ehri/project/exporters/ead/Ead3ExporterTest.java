@@ -42,7 +42,7 @@ import static eu.ehri.project.test.XmlTestHelpers.*;
 @Ignore
 public class Ead3ExporterTest extends XmlExporterTest {
 
-    private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
+    private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
 
     @Test
     public void testExport1() throws Exception {

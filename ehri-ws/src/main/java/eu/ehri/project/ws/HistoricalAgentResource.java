@@ -122,7 +122,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
-                    HistoricalAgent agent = manager.getEntityUnchecked(id, HistoricalAgent.class);
+                    HistoricalAgent agent = manager.getEntityUnchecked(id, cls);
                     new Eac2010Exporter(api()).export(agent, outputStream, lang);
                     tx2.success();
                 }
