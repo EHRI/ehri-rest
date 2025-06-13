@@ -102,7 +102,7 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
             attribute(sw, "http://www.w3.org/2001/XMLSchema-instance",
                     "schemaLocation", DEFAULT_NAMESPACE);
 
-            Repository repository = unit.getRepository();
+            Optional<Repository> repoOpt = Optional.ofNullable(unit.getRepository());
             Optional<Description> descOpt = LanguageHelpers.getBestDescription(unit, Optional.empty(), langCode);
             String title = descOpt.map(Description::getName).orElse(unit.getIdentifier());
 
@@ -115,7 +115,11 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
                 tag(sw, "recordid", unit.getId());
                 tag(sw, "filedesc", () -> {
                     tag(sw, "titlestmt", () -> tag(sw, "titleproper", title));
-                    descOpt.ifPresent(desc -> addFileDesc(sw, langCode, repository, desc));
+                    descOpt.ifPresent(desc -> {
+                        repoOpt.ifPresent( repo -> {
+                                addFileDesc(sw, langCode, repo, desc);
+                        });
+                    });
                 });
 
                 tag(sw, "maintenancestatus", attrs("value", "derived"));
@@ -142,7 +146,7 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
 
             descOpt.ifPresent(desc -> {
                 tag(sw, "archdesc", getLevelAttrs(descOpt, "collection"), () -> {
-                    addDataSection(sw, repository, unit, desc, langCode);
+                    addDataSection(sw, unit, desc, langCode, repoOpt);
                     addPropertyValues(sw, unit, desc, langCode);
                     Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
                     if (orderedChildren.iterator().hasNext()) {
@@ -210,67 +214,75 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
         });
     }
 
-    private void addDataSection(XMLStreamWriter sw, Repository repository, DocumentaryUnit subUnit,
-                                Description desc, String langCode) {
+    private void addDataSection(XMLStreamWriter sw, DocumentaryUnit subUnit, Description desc, String langCode, Optional<Repository> repoOpt) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
-
-            // Render structured dates. Additional unstructured dates are possible in <unitdate>
-            for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
-                String start = datePeriod.getStartDate();
-                String end = datePeriod.getEndDate();
-                if (start != null && end != null) {
-                    DateTime startDateTime = DateTime.parse(start);
-                    DateTime endDateTime = DateTime.parse(end);
-                    tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
-                        tag(sw, "daterange", () -> {
-                            tag(sw, "fromdate", Integer.toString(startDateTime.year().get()),
-                                    attrs("standarddate", unitDateNormalFormat.print(startDateTime)));
-                           tag(sw, "todate", Integer.toString(endDateTime.year().get()),
-                                   attrs("standarddate", unitDateNormalFormat.print(endDateTime)));
-                        });
-                    });
-                } else if (start != null || end != null) {
-                    String date = start != null ? start : end;
-                    DateTime dt = DateTime.parse(date);
-                    String stdDate = unitDateNormalFormat.print(dt);
-                    String text = String.format("%s", dt.year().get());
-                    tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
-                        tag(sw, "datesingle", text, attrs("standarddate", stdDate));
-                    });
-                }
-            }
-
-            Set<String> propertyKeys = desc.getPropertyKeys();
-            for (Map.Entry<IsadG, String> pair : textDidMappings.entrySet()) {
-                if (propertyKeys.contains(pair.getKey().name())) {
-                    for (Object v : coerceList(desc.getProperty(pair.getKey()))) {
-                        tag(sw, pair.getValue(), v.toString(), textFieldAttrs(pair.getKey()));
-                    }
-                }
-            }
-
-            if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
-                tag(sw, "langmaterial", () -> {
-                    for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
-                        String langName = LanguageHelpers.codeToName(v.toString());
-                        if (v.toString().length() != 3) {
-                            tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
-                        } else {
-                            tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
-                                    .toString()));
-                        }
-                    }
-                });
-            }
-
-            Optional.ofNullable(repository).ifPresent(repo -> {
-                LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode).ifPresent(repoDesc ->
-                    tag(sw, path("repository", "corpname", "part"), repoDesc.getName())
-                );
+            addDatePeriods(sw, desc);
+            addDidProperties(sw, desc);
+            repoOpt.ifPresent(repo -> {
+                addRepositoryInfo(sw, langCode, repo);
             });
         });
+    }
+
+    private void addRepositoryInfo(XMLStreamWriter sw, String langCode, Repository repo) {
+        LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode)
+                .ifPresent(repoDesc ->
+                    tag(sw, path("repository", "corpname", "part"), repoDesc.getName()));
+    }
+
+    private void addDidProperties(XMLStreamWriter sw, Description desc) {
+        Set<String> propertyKeys = desc.getPropertyKeys();
+        for (Map.Entry<IsadG, String> pair : textDidMappings.entrySet()) {
+            if (propertyKeys.contains(pair.getKey().name())) {
+                for (Object v : coerceList(desc.getProperty(pair.getKey()))) {
+                    tag(sw, pair.getValue(), v.toString(), textFieldAttrs(pair.getKey()));
+                }
+            }
+        }
+
+        if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
+            tag(sw, "langmaterial", () -> {
+                for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
+                    String langName = LanguageHelpers.codeToName(v.toString());
+                    if (v.toString().length() != 3) {
+                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
+                    } else {
+                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
+                                .toString()));
+                    }
+                }
+            });
+        }
+    }
+
+    private void addDatePeriods(XMLStreamWriter sw, Description desc) {
+        // Render structured dates. Additional unstructured dates are possible in <unitdate>
+        for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
+            String start = datePeriod.getStartDate();
+            String end = datePeriod.getEndDate();
+            if (start != null && end != null) {
+                DateTime startDateTime = DateTime.parse(start);
+                DateTime endDateTime = DateTime.parse(end);
+                tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
+                    tag(sw, "daterange", () -> {
+                        tag(sw, "fromdate", Integer.toString(startDateTime.year().get()),
+                                attrs("standarddate", unitDateNormalFormat.print(startDateTime)));
+                       tag(sw, "todate", Integer.toString(endDateTime.year().get()),
+                               attrs("standarddate", unitDateNormalFormat.print(endDateTime)));
+                    });
+                });
+            } else if (start != null || end != null) {
+                String date = start != null ? start : end;
+                DateTime dt = DateTime.parse(date);
+                String stdDate = unitDateNormalFormat.print(dt);
+                String text = String.format("%s", dt.year().get());
+                tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
+                    tag(sw, "datesingle", text, attrs("standarddate", stdDate));
+                });
+            }
+        }
     }
 
     private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit,
@@ -280,7 +292,7 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
         String levelTag = String.format("c%02d", num);
         tag(sw, levelTag, getLevelAttrs(descOpt, null), () -> {
             descOpt.ifPresent(desc -> {
-                addDataSection(sw, null, subUnit, desc, langCode);
+                addDataSection(sw, subUnit, desc, langCode, Optional.empty());
                 addPropertyValues(sw, subUnit, desc, langCode);
                 addControlAccess(sw, desc);
             });

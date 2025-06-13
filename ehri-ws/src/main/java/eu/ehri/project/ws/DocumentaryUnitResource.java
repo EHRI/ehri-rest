@@ -202,11 +202,12 @@ public class DocumentaryUnitResource
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            DocumentaryUnit unit = api().get(id, cls);
+            checkExists(id, cls);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
                     final Api api = api();
+                    DocumentaryUnit unit = manager.getEntityUnchecked(id, cls);
                     final EadExporter exporter = fmt.equals("ead")
                             ? new Ead2002Exporter(api)
                             : new Ead3Exporter(api);

@@ -34,8 +34,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);
     private static final Config config = ConfigFactory.load();
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
-
-    private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
+    private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
 
     private static final String DEFAULT_NAMESPACE = "urn:isbn:1-931666-22-9";
     private static final Map<String, String> NAMESPACES = namespaces(
@@ -102,9 +101,8 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             attribute(sw, "http://www.w3.org/2001/XMLSchema-instance",
                     "schemaLocation", DEFAULT_NAMESPACE + " http://www.loc.gov/ead/ead.xsd");
 
-            Repository repository = unit.getRepository();
-            Optional<Description> descOpt = LanguageHelpers.getBestDescription(
-                    unit, Optional.empty(), langCode);
+            Optional<Repository> repoOpt = Optional.ofNullable(unit.getRepository());
+            Optional<Description> descOpt = LanguageHelpers.getBestDescription(unit, Optional.empty(), langCode);
 
             tag(sw, "eadheader", attrs("relatedencoding", "DC",
                     "scriptencoding", "iso15924",
@@ -114,7 +112,9 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
                 tag(sw, "eadid", unit.getId());
                 descOpt.ifPresent(desc -> {
-                    addFileDesc(sw, langCode, repository, desc);
+                    repoOpt.ifPresent(repo -> {
+                        addFileDesc(sw, langCode, repo, desc);
+                    });
                     addProfileDesc(sw, desc);
                 });
                 addRevisionDesc(sw, unit);
@@ -122,7 +122,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
             descOpt.ifPresent(desc -> {
                 tag(sw, "archdesc", getLevelAttrs(descOpt, "collection"), () -> {
-                    addDataSection(sw, repository, unit, desc, langCode);
+                    addDataSection(sw, unit, desc, langCode, repoOpt);
                     addPropertyValues(sw, unit, desc, langCode);
                     Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
                     if (orderedChildren.iterator().hasNext()) {
@@ -160,8 +160,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         tag(sw, "filedesc", () -> {
             tag(sw, "titlestmt", () -> tag(sw, "titleproper", desc.getName()));
             tag(sw, "publicationstmt", () -> {
-                LanguageHelpers.getBestDescription(
-                        repository, Optional.empty(), langCode).ifPresent(repoDesc -> {
+                LanguageHelpers.getBestDescription(repository, Optional.empty(), langCode).ifPresent(repoDesc -> {
                     tag(sw, "publisher", repoDesc.getName());
                     for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
                         tag(sw, "address", () -> {
@@ -206,75 +205,84 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         }
     }
 
-    private void addDataSection(XMLStreamWriter sw, Repository repository, DocumentaryUnit subUnit,
-            Description desc, String langCode) {
+    private void addDataSection(XMLStreamWriter sw, DocumentaryUnit subUnit, Description desc, String langCode, Optional<Repository> repoOpt) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
-
-            for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
-                if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
-                    String start = datePeriod.getStartDate();
-                    String end = datePeriod.getEndDate();
-                    if (start != null && end != null) {
-                        DateTime startDateTime = new DateTime(start);
-                        DateTime endDateTime = new DateTime(end);
-                        String normal = String.format("%s/%s",
-                                unitDateNormalFormat.print(startDateTime),
-                                unitDateNormalFormat.print(endDateTime));
-                        String text = String.format("%s/%s",
-                                startDateTime.year().get(), endDateTime.year().get());
-                        tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
-                    } else if (start != null) {
-                        DateTime startDateTime = new DateTime(start);
-                        String normal = String.format("%s",
-                                unitDateNormalFormat.print(startDateTime));
-                        String text = String.format("%s", startDateTime.year().get());
-                        tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
-                    }
-                }
-            }
-
-            Set<String> propertyKeys = desc.getPropertyKeys();
-            for (Map.Entry<IsadG, String> pair : textDidMappings.entrySet()) {
-                if (propertyKeys.contains(pair.getKey().name())) {
-                    for (Object v : coerceList(desc.getProperty(pair.getKey()))) {
-                        tag(sw, pair.getValue(), v.toString(), textFieldAttrs(pair.getKey()));
-                    }
-                }
-            }
-
-            if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
-                tag(sw, "langmaterial", () -> {
-                    for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
-                        String langName = LanguageHelpers.codeToName(v.toString());
-                        if (v.toString().length() != 3) {
-                            tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
-                        } else {
-                            tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
-                                    .toString()));
-                        }
-                    }
-                });
-            }
-
-            Optional.ofNullable(repository).ifPresent(repo -> {
-                LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode).ifPresent(repoDesc ->
-                        tag(sw, "repository", () ->
-                                tag(sw, "corpname", repoDesc.getName()))
-                );
+            addDatePeriods(sw, desc);
+            addDidProperties(sw, desc);
+            repoOpt.ifPresent(repo -> {
+                addRepositoryInfo(sw, repo, langCode);
             });
         });
     }
 
-    private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit,
-            Optional<Description> priorDescOpt, String langCode) {
+    private void addRepositoryInfo(XMLStreamWriter sw, Repository repo, String langCode) {
+        LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode)
+            .ifPresent(repoDesc -> {
+                tag(sw, "repository", () -> {
+                    tag(sw, "corpname", repoDesc.getName());
+                });
+            });
+    }
+
+    private void addDidProperties(XMLStreamWriter sw, Description desc) {
+        Set<String> propertyKeys = desc.getPropertyKeys();
+        for (Map.Entry<IsadG, String> pair : textDidMappings.entrySet()) {
+            if (propertyKeys.contains(pair.getKey().name())) {
+                for (Object v : coerceList(desc.getProperty(pair.getKey()))) {
+                    tag(sw, pair.getValue(), v.toString(), textFieldAttrs(pair.getKey()));
+                }
+            }
+        }
+
+        if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
+            tag(sw, "langmaterial", () -> {
+                for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
+                    String langName = LanguageHelpers.codeToName(v.toString());
+                    if (v.toString().length() != 3) {
+                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
+                    } else {
+                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
+                                .toString()));
+                    }
+                }
+            });
+        }
+    }
+
+    private void addDatePeriods(XMLStreamWriter sw, Description desc) {
+        for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
+            if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
+                String start = datePeriod.getStartDate();
+                String end = datePeriod.getEndDate();
+                if (start != null && end != null) {
+                    DateTime startDateTime = new DateTime(start);
+                    DateTime endDateTime = new DateTime(end);
+                    String normal = String.format("%s/%s",
+                            unitDateNormalFormat.print(startDateTime),
+                            unitDateNormalFormat.print(endDateTime));
+                    String text = String.format("%s/%s",
+                            startDateTime.year().get(), endDateTime.year().get());
+                    tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
+                } else if (start != null) {
+                    DateTime startDateTime = new DateTime(start);
+                    String normal = String.format("%s",
+                            unitDateNormalFormat.print(startDateTime));
+                    String text = String.format("%s", startDateTime.year().get());
+                    tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
+                }
+            }
+        }
+    }
+
+    private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit, Optional<Description> priorDescOpt, String langCode) {
         logger.trace("Adding EAD sublevel: c{}", num);
         Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);
         tag(sw, levelTag, getLevelAttrs(descOpt, null), () -> {
             descOpt.ifPresent(desc -> {
-                addDataSection(sw, null, subUnit, desc, langCode);
+                addDataSection(sw, subUnit, desc, langCode, Optional.empty());
                 addPropertyValues(sw, subUnit, desc, langCode);
                 addControlAccess(sw, desc);
             });
@@ -335,7 +343,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             if (available.contains(pair.getKey().name())) {
                 for (Object v : coerceList(item.getProperty(pair.getKey()))) {
                     tag(sw, pair.getValue(), textFieldAttrs(pair.getKey()), () ->
-                        tag(sw, "p", () -> cData(sw, v.toString()))
+                            tag(sw, "p", () -> cData(sw, v.toString()))
                     );
                 }
             }
