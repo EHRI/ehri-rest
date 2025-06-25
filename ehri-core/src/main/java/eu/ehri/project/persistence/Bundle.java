@@ -199,7 +199,7 @@ public final class Bundle implements NestableData<Bundle> {
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations) {
-        return of(id, type, data, relations, Maps.<String, Object>newHashMap());
+        return of(id, type, data, relations, Maps.newHashMap());
     }
 
     /**
@@ -237,8 +237,8 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(EntityClass type) {
-        return of(null, type, Maps.<String, Object>newHashMap(), ArrayListMultimap
-                .<String, Bundle>create(), Maps.<String, Object>newHashMap());
+        return of(null, type, Maps.newHashMap(), ArrayListMultimap
+                .create(), Maps.newHashMap());
     }
 
     /**
@@ -249,8 +249,8 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(EntityClass type, Map<String, Object> data) {
-        return of(null, type, data, ArrayListMultimap.<String, Bundle>create(),
-                Maps.<String, Object>newHashMap());
+        return of(null, type, data, ArrayListMultimap.create(),
+                Maps.newHashMap());
     }
 
     /**

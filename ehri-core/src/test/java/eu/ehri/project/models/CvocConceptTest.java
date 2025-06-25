@@ -116,7 +116,7 @@ public class CvocConceptTest extends ModelTestBase {
         // TODO test removal of a relation
     }
 
-    private String TEST_LABEL_LANG = "en-US";
+    private final String TEST_LABEL_LANG = "en-US";
 
     // @formatter:off
     @SuppressWarnings("serial")
@@ -176,7 +176,7 @@ public class CvocConceptTest extends ModelTestBase {
         //assertEquals("alt2", altLabels[1]);
         // NOTE we can't call getAltLabels() on the interface, because it is optional
         List<String> altLabels = descr.getProperty("altLabel");
-        assertFalse(altLabels == null);
+        assertNotNull(altLabels);
         assertEquals(2, altLabels.size());
         assertEquals("alt2", altLabels.get(1));
     }

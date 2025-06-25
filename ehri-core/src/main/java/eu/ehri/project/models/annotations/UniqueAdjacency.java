@@ -21,14 +21,14 @@ public @interface UniqueAdjacency {
      *
      * @return the edge label
      */
-    public String label();
+    String label();
 
     /**
      * The edge direction of the adjacency.
      *
      * @return the direction of the edges composing the adjacency
      */
-    public Direction direction() default Direction.OUT;
+    Direction direction() default Direction.OUT;
 
     /**
      * If true, specifies that the source can only have one
@@ -36,5 +36,5 @@ public @interface UniqueAdjacency {
      *
      * @return the direction of the edges composing the adjacency
      */
-    public boolean single() default false;
+    boolean single() default false;
 }

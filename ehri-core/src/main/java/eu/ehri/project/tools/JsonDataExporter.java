@@ -92,7 +92,7 @@ public class JsonDataExporter {
             if (oid != null && otype != null) {
                 List<String> ref = Lists.newArrayList(oid, otype);
                 if (!outRels.containsKey(label)) {
-                    outRels.put(label, Lists.<List<String>>newArrayList());
+                    outRels.put(label, Lists.newArrayList());
                 }
 
                 outRels.get(label).add(ref);

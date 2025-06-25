@@ -51,7 +51,7 @@ public class BundleProvider implements MessageBodyReader<Bundle>, MessageBodyWri
     @Override
     public Bundle readFrom(Class<Bundle> bundleClass, Type type, Annotation[] annotations,
                            MediaType mediaType, MultivaluedMap<String,
-            String> headers, InputStream stream) throws IOException, WebApplicationException {
+            String> headers, InputStream stream) throws WebApplicationException {
         try {
             return Bundle.fromStream(stream);
         } catch (DeserializationError deserializationError) {
@@ -70,7 +70,14 @@ public class BundleProvider implements MessageBodyReader<Bundle>, MessageBodyWri
     }
 
     @Override
-    public void writeTo(Bundle bundle, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
+    public void writeTo(
+            Bundle bundle,
+            Class<?> aClass,
+            Type type,
+            Annotation[] annotations,
+            MediaType mediaType,
+            MultivaluedMap<String, Object> multivaluedMap,
+            OutputStream outputStream) throws WebApplicationException {
         try {
             Bundle.toStream(bundle, outputStream);
         } catch (SerializationError serializationError) {

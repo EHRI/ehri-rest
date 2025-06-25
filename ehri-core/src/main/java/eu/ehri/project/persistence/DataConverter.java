@@ -210,7 +210,7 @@ class DataConverter {
                 throw new DeserializationError("Stream should be an array of objects, was: " + jsonToken);
             }
             final Iterator<Bundle> iterator = parser.nextValue() == JsonToken.END_ARRAY
-                    ? Collections.<Bundle>emptyIterator()
+                    ? Collections.emptyIterator()
                     : parser.readValuesAs(Bundle.class);
             return new CloseableIterable<Bundle>() {
                 @Override

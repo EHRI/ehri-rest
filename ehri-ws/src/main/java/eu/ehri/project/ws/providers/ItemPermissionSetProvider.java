@@ -55,7 +55,7 @@ public class ItemPermissionSetProvider implements MessageBodyReader<ItemPermissi
     @Override
     public ItemPermissionSet readFrom(Class<ItemPermissionSet> bundleClass, Type type, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, String> headers, InputStream stream)
-                throws IOException, WebApplicationException {
+                throws WebApplicationException {
         try {
             return parseMatrix(stream);
         } catch (DeserializationError deserializationError) {

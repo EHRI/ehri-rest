@@ -202,9 +202,9 @@ public class BundleTest {
                                 .withDataValue(Ontology.MAINTENANCE_EVENT_TYPE,
                                         MaintenanceEventType.created.toString()));
 
-        Bundle withIds = start.generateIds(Sets.<String>newHashSet());
+        Bundle withIds = start.generateIds(Sets.newHashSet());
         Bundle toMerge = DataUtils.setItem(withIds, "describes[0]/hasDate[-1]", nested)
-                .generateIds(Sets.<String>newHashSet());
+                .generateIds(Sets.newHashSet());
         Bundle patch = DataUtils.set(withIds, "describes[0]/name", "Foobar 2");
         Bundle merged = toMerge.mergeDataWith(patch);
         assertNotSame(merged, bundle);

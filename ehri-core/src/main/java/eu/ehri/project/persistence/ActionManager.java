@@ -323,7 +323,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type, Optional<String> logMessage) {
-        return new EventContext(user, type, getTimestamp(), logMessage, Sets.<Pair<Entity, Bundle>>newHashSet());
+        return new EventContext(user, type, getTimestamp(), logMessage, Sets.newHashSet());
     }
 
     /**
@@ -334,8 +334,8 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type) {
-        return new EventContext(user, type, getTimestamp(), Optional.<String>empty(),
-                Sets.<Pair<Entity, Bundle>>newHashSet());
+        return new EventContext(user, type, getTimestamp(), Optional.empty(),
+                Sets.newHashSet());
     }
 
     /**
@@ -347,7 +347,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Accessible subject, Actioner user, EventTypes type) {
-        return newEventContext(subject, user, type, Optional.<String>empty());
+        return newEventContext(subject, user, type, Optional.empty());
     }
 
     /**
@@ -436,12 +436,9 @@ public final class ActionManager {
 
         Actioner actioner1 = event1.getActioner();
         Actioner actioner2 = event2.getActioner();
-        if (actioner1 != null && actioner2 != null && !actioner1.equals(actioner2)) {
-            return false;
-        }
+        return actioner1 == null || actioner2 == null || actioner1.equals(actioner2);
 
         // Okay, fall through...
-        return true;
     }
 
     /**

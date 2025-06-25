@@ -172,8 +172,7 @@ public class Check extends BaseCommand {
             List<String> path = Lists.newArrayList(Iterables.concat(scope.idPath(), Lists.newArrayList(ident)));
             String finalId = IdGeneratorUtils.joinPath(path);
             if (!finalId.equals(doc.getId())) {
-                System.err.println(String.format("Generated ID does not match scopes: '%s' -> %s + %s",
-                        doc.getId(), path, ident));
+                System.err.printf("Generated ID does not match scopes: '%s' -> %s + %s%n", doc.getId(), path, ident);
             }
         }
     }
@@ -185,8 +184,7 @@ public class Check extends BaseCommand {
                 Entity scope = grant.getScope();
                 Entity perm = grant.getPermission();
                 if (scope != null && perm != null && perm.getId().equals(PermissionType.OWNER.getName())) {
-                    System.err.println(
-                            String.format("Owner permission grant with scope: %s", grant.asVertex().getId()));
+                    System.err.printf("Owner permission grant with scope: %s%n", grant.asVertex().getId());
                 }
             }
         }

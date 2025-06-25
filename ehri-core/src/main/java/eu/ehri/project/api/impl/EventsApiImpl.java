@@ -219,13 +219,13 @@ public class EventsApiImpl implements EventsApi {
         this(graph, accessor,
                 -1,
                 -1,
-                Lists.<String>newArrayList(),
-                Lists.<String>newArrayList(),
-                Lists.<EntityClass>newArrayList(),
-                Lists.<EventTypes>newArrayList(),
+                Lists.newArrayList(),
+                Lists.newArrayList(),
+                Lists.newArrayList(),
+                Lists.newArrayList(),
                 null,
                 null,
-                Lists.<ShowType>newArrayList(),
+                Lists.newArrayList(),
                 Aggregation.strict);
     }
 

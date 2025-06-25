@@ -193,7 +193,7 @@ public class DbUpgrader1to2 {
                     Preconditions.checkState(listNode.isArray(), "Relations contains a list");
                     ArrayNode relList = jsonMapper.valueToTree(listNode);
                     for (int i = 0; i < relList.size(); i++) {
-                        ObjectNode out = upgradeNode(jsonMapper.<ObjectNode>valueToTree(relList.path(i)));
+                        ObjectNode out = upgradeNode(jsonMapper.valueToTree(relList.path(i)));
                         relList.set(i, out);
                     }
                     relObject.set(next.getKey(), relList);

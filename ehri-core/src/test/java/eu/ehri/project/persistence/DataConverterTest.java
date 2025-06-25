@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class DataConverterTest extends AbstractFixtureTest {
         Object t3 = Lists.newArrayList();
         Object[] t4 = {"not", "empty"};
         Object[] t5 = {};
-        Object t6 = (Iterable) () -> Lists.newArrayList().iterator();
+        Object t6 = (Iterable) () -> Collections.emptyIterator();
         assertFalse(isEmptySequence(t1));
         assertFalse(isEmptySequence(t2));
         assertTrue(isEmptySequence(t3));

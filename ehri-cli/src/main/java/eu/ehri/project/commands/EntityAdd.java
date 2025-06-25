@@ -91,8 +91,9 @@ public class EntityAdd extends BaseCommand {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty()) {
             throw new RuntimeException(getUsage());
+        }
 
         String logMessage = "Imported from command-line";
         if (cmdLine.hasOption("log")) {

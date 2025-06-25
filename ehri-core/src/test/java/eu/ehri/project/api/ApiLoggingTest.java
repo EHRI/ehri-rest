@@ -59,7 +59,7 @@ public class ApiLoggingTest extends AbstractFixtureTest {
 
         // Check the nested item was created correctly
         DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
-        assertTrue(datePeriod != null);
+        assertNotNull(datePeriod);
         assertEquals(TestData.TEST_START_DATE, datePeriod.getStartDate());
 
         // And that the reverse relationship works.

@@ -67,8 +67,9 @@ public class EntityDelete extends BaseCommand {
             CommandLine cmdLine) throws Exception {
 
         // the first argument is the item ID, and that must be specified
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty()) {
             throw new RuntimeException(getUsage());
+        }
         String id = cmdLine.getArgs()[0];
 
         String logMessage = "Deleting item " + id + " via the command-line";

@@ -31,7 +31,7 @@ public class UserProfilesApiTest extends AbstractFixtureTest {
     public void testNoOpLogging() throws Exception {
         // If no items are given, we shouldn't log anything...
         SystemEvent latestEvent = am.getLatestGlobalEvent();
-        views(basicUser).addWatching(basicUser.getId(), Lists.<String>newArrayList());
+        views(basicUser).addWatching(basicUser.getId(), Lists.newArrayList());
         assertEquals(latestEvent, am.getLatestGlobalEvent());
     }
 

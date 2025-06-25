@@ -86,7 +86,7 @@ public class UserMod extends BaseCommand {
         String logMessage = cmdLine.getOptionValue("c",
                 "Adding user to groups");
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty())
             throw new RuntimeException(getUsage());
 
         // Fetch the admin accessor, who's going to do the work.

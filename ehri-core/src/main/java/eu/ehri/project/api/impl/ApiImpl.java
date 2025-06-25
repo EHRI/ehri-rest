@@ -149,13 +149,13 @@ public class ApiImpl implements Api {
     @Override
     public <E extends Accessible> Mutation<E> update(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError {
-        return update(bundle, cls, Optional.<String>empty());
+        return update(bundle, cls, Optional.empty());
     }
 
     @Override
     public <E extends Accessible> E create(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, DeserializationError {
-        return create(bundle, cls, Optional.<String>empty());
+        return create(bundle, cls, Optional.empty());
     }
 
     @Override

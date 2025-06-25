@@ -39,37 +39,37 @@ public class UniqueAdjacencyAnnotationHandlerTest extends GraphTestBase {
         graph.shutdown();
     }
 
-    public static interface TestFrame extends VertexFrame {
+    public interface TestFrame extends VertexFrame {
 
         @UniqueAdjacency(label = NORMAL)
-        public int countNormal();
+        int countNormal();
 
         @Adjacency(label = NORMAL)
-        public void addNormal(TestFrame other);
+        void addNormal(TestFrame other);
 
         @UniqueAdjacency(label = UNIQUE)
-        public TestFrame getUnique();
+        TestFrame getUnique();
 
         @UniqueAdjacency(label = UNIQUE)
-        public boolean isUnqiue();
+        boolean isUnqiue();
 
         @UniqueAdjacency(label = UNIQUE)
-        public void addUnique(TestFrame other);
+        void addUnique(TestFrame other);
 
         @UniqueAdjacency(label = UNIQUE)
-        public void setUnique(TestFrame other);
+        void setUnique(TestFrame other);
 
         @UniqueAdjacency(label = SINGLE, single = true)
-        public TestFrame getSingle();
+        TestFrame getSingle();
 
         @UniqueAdjacency(label = SINGLE, single = true)
-        public boolean isSingle();
+        boolean isSingle();
 
         @UniqueAdjacency(label = SINGLE, single = true)
-        public void addSingle(TestFrame other);
+        void addSingle(TestFrame other);
 
         @UniqueAdjacency(label = SINGLE, single = true)
-        public void setSingle(TestFrame other);
+        void setSingle(TestFrame other);
     }
 
     @Test

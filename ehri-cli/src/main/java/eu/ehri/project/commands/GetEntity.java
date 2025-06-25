@@ -48,8 +48,9 @@ public class GetEntity extends BaseCommand {
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         Serializer serializer = new Serializer(graph);
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty()) {
             throw new RuntimeException(getUsage());
+        }
 
         Vertex vertex = manager.getVertex(cmdLine.getArgs()[0]);
         System.out.println(serializer.vertexToJson(vertex));

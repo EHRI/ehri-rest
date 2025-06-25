@@ -73,8 +73,9 @@ public class DeleteEntities extends BaseCommand {
             CommandLine cmdLine) throws Exception {
 
         // the first argument is the entity type, and that must be specified
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty()) {
             throw new RuntimeException(getUsage());
+        }
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         Class<?> cls = type.getJavaClass();
 

@@ -157,7 +157,7 @@ public class AdminResource extends AbstractResource {
     }
 
     private Map<String, Object> parseUserData(String json) throws IOException {
-        if (json == null || json.trim().equals("")) {
+        if (json == null || json.trim().isEmpty()) {
             return Maps.newHashMap();
         } else {
             TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {

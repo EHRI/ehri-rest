@@ -17,6 +17,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,7 +31,7 @@ public class XmlTestHelpers {
         factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
         factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        return documentBuilder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+        return documentBuilder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
     }
 
     public static void validatesSchema(String xml, String schemaResourceName) throws IOException, SAXException {
@@ -40,7 +41,7 @@ public class XmlTestHelpers {
 
         Schema schema = factory.newSchema(Resources.getResource(schemaResourceName));
         Validator validator = schema.newValidator();
-        validator.validate(new StreamSource(new ByteArrayInputStream(xml.getBytes("UTF-8"))));
+        validator.validate(new StreamSource(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))));
     }
 
     public static void assertXPath(Document doc, String value, String path) throws Exception {
