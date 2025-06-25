@@ -36,7 +36,7 @@ public class TestData {
 
     public static Map<String, Object> getTestDocBundle() {
         // Data structure representing a not-yet-created collection.
-        return ImmutableMap.<String, Object>of(
+        return ImmutableMap.of(
                 Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT,
                 Bundle.DATA_KEY, ImmutableMap.of(
                         Ontology.NAME_KEY, TEST_COLLECTION_NAME,
@@ -70,7 +70,7 @@ public class TestData {
 
     public static Map<String, Object> getTestAgentBundle() {
         // Data structure representing a not-yet-created collection.
-        return ImmutableMap.<String, Object>of(
+        return ImmutableMap.of(
                 Bundle.TYPE_KEY, Entities.REPOSITORY,
                 Bundle.DATA_KEY, ImmutableMap.of(
                         Ontology.NAME_KEY, "Test Repo 1",
@@ -101,7 +101,7 @@ public class TestData {
 
     public static Map<String, Object> getTestUserBundle() {
         // Data structure representing a not-yet-created user.
-        return ImmutableMap.<String, Object>of(
+        return ImmutableMap.of(
                 Bundle.TYPE_KEY, Entities.USER_PROFILE,
                 Bundle.DATA_KEY, ImmutableMap.of(
                         Ontology.NAME_KEY, TEST_USER_NAME,

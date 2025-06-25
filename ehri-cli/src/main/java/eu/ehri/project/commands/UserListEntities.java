@@ -62,7 +62,7 @@ public class UserListEntities extends BaseCommand {
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty())
             throw new RuntimeException(getUsage());
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -75,7 +75,6 @@ public class UserListEntities extends BaseCommand {
         UserProfile user = manager.getEntity(
                 cmdLine.getOptionValue("user"), UserProfile.class);
 
-        @SuppressWarnings("unchecked")
         QueryApi query = api(graph, user).query();
         for (Entity acc : query.page(Entity.class)) {
             System.out.println(acc.getId());

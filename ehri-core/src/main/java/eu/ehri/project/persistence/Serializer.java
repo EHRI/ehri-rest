@@ -414,7 +414,7 @@ public final class Serializer {
     private boolean shouldTraverse(String relationName, Method method, int level, boolean lite) {
         // In order to avoid @Fetching the whole graph we track the
         // depth parameter and increase it for every traversal.
-        // However the @Fetch annotation can also specify a maximum
+        // However, the @Fetch annotation can also specify a maximum
         // level of traversal beyond which we don't serialize.
         Fetch fetchProps = method.getAnnotation(Fetch.class);
         Dependent dep = method.getAnnotation(Dependent.class);
@@ -532,7 +532,7 @@ public final class Serializer {
 
         if (depth < maxTraversals) {
             Class<?> cls = EntityClass
-                    .withName(item.<String>getProperty(EntityType.TYPE_KEY)).getJavaClass();
+                    .withName(item.getProperty(EntityType.TYPE_KEY)).getJavaClass();
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 

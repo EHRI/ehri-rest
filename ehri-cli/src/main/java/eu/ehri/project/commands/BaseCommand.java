@@ -66,7 +66,7 @@ public abstract class BaseCommand implements Command {
 
     @Override
     public String getDetailedHelp() {
-        String sep = System.getProperty("line.separator");
+        String sep = System.lineSeparator();
         HelpFormatter formatter = new HelpFormatter();
         setCustomOptions(options);
         StringWriter out = new StringWriter();

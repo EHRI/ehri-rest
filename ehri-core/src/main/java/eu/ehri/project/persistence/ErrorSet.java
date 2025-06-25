@@ -74,8 +74,8 @@ public final class ErrorSet implements NestableData<ErrorSet> {
      * Constructor.
      */
     public ErrorSet() {
-        this(ArrayListMultimap.<String, String>create(),
-                ArrayListMultimap.<String, ErrorSet>create());
+        this(ArrayListMultimap.create(),
+                ArrayListMultimap.create());
     }
 
     /**
@@ -97,7 +97,7 @@ public final class ErrorSet implements NestableData<ErrorSet> {
      * @param errors A map of top-level errors
      */
     public ErrorSet(Multimap<String, String> errors) {
-        this(errors, ArrayListMultimap.<String, ErrorSet>create());
+        this(errors, ArrayListMultimap.create());
     }
 
     /**

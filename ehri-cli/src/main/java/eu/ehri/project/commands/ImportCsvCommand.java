@@ -96,8 +96,9 @@ public abstract class ImportCsvCommand extends BaseCommand {
             logMessage = cmdLine.getOptionValue("log");
         }
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty()) {
             throw new RuntimeException(getUsage());
+        }
 
         List<String> filePaths = Lists.newLinkedList();
         filePaths.addAll(cmdLine.getArgList());

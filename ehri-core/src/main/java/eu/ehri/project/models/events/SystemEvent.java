@@ -169,9 +169,9 @@ public interface SystemEvent extends Accessible {
                     .loop("n", JavaHandlerUtils.noopLoopFunc,
                             vertexLoopBundle -> isValidEndpoint(vertexLoopBundle.getObject(),
                             Ontology.ENTITY_HAS_LIFECYCLE_EVENT));
-            return (Accessible) (subjects.iterator().hasNext()
+            return subjects.iterator().hasNext()
                     ? frame(subjects.iterator().next())
-                    : null);
+                    : null;
         }
 
         @Override
@@ -181,9 +181,9 @@ public interface SystemEvent extends Accessible {
                     .loop("n", JavaHandlerUtils.noopLoopFunc,
                             vertexLoopBundle -> isValidEndpoint(vertexLoopBundle.getObject(),
                             Ontology.ACTIONER_HAS_LIFECYCLE_ACTION));
-            return (Actioner) (actioners.iterator().hasNext()
+            return actioners.iterator().hasNext()
                     ? frame(actioners.iterator().next())
-                    : null);
+                    : null;
         }
 
         private boolean isValidEndpoint(Vertex vertex, String linkRel) {

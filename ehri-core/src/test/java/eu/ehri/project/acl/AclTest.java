@@ -116,7 +116,7 @@ public class AclTest extends ModelTestBase {
         Accessible prof = manager
                 .getEntity("reto", Accessible.class);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
-        assertFalse(acl.belongsToAdmin(reto));
+        assertFalse(AclManager.belongsToAdmin(reto));
         assertTrue(acl.canAccess(prof, reto));
     }
 
@@ -182,7 +182,7 @@ public class AclTest extends ModelTestBase {
         Accessor reto = manager.getEntity("reto", Accessor.class);
         Accessible kcl = manager.getEntity("kcl", Accessible.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.belongsToAdmin(reto));
+        assertFalse(AclManager.belongsToAdmin(reto));
         assertTrue(acl.canAccess(kcl, reto));
     }
 
@@ -196,7 +196,7 @@ public class AclTest extends ModelTestBase {
         Accessor reto = manager.getEntity("reto", Accessor.class);
         Accessible kcl = manager.getEntity("kcl", Accessible.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.belongsToAdmin(reto));
+        assertFalse(AclManager.belongsToAdmin(reto));
         assertTrue(acl.canAccess(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
@@ -214,7 +214,7 @@ public class AclTest extends ModelTestBase {
         Accessor reto = manager.getEntity("reto", Accessor.class);
         Accessible kcl = manager.getEntity("kcl", Accessible.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.belongsToAdmin(reto));
+        assertFalse(AclManager.belongsToAdmin(reto));
         assertTrue(acl.canAccess(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
@@ -235,7 +235,7 @@ public class AclTest extends ModelTestBase {
             ItemNotFound {
         Accessor linda = manager.getEntity("linda", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.belongsToAdmin(linda));
+        assertFalse(AclManager.belongsToAdmin(linda));
 
         GlobalPermissionSet cmap = acl.getGlobalPermissions(linda);
         // linda has been granted CREATE access for DocumentaryUnits.
@@ -260,7 +260,7 @@ public class AclTest extends ModelTestBase {
 
         Accessor accessor = manager.getEntity("reto", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.belongsToAdmin(accessor));
+        assertFalse(AclManager.belongsToAdmin(accessor));
 
         // Check initial perms are empty...
         GlobalPermissionSet cmap = acl.getGlobalPermissions(accessor);
@@ -295,7 +295,7 @@ public class AclTest extends ModelTestBase {
 
         Accessor accessor = manager.getEntity("admin", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertTrue(acl.belongsToAdmin(accessor));
+        assertTrue(AclManager.belongsToAdmin(accessor));
 
         // Check initial perms are empty...
         GlobalPermissionSet cmap = acl.getGlobalPermissions(accessor);

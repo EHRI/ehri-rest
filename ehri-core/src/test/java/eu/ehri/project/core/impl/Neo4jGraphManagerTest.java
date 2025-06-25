@@ -53,7 +53,7 @@ public class Neo4jGraphManagerTest {
         String testId = "foo";
         createTestVertex(testId, EntityClass.DOCUMENTARY_UNIT);
         Neo4j2Vertex updated = (Neo4j2Vertex)manager.updateVertex(testId, EntityClass.REPOSITORY,
-                Maps.<String,Object>newHashMap());
+                Maps.newHashMap());
         List<String> updatedLabels = Lists.newArrayList(updated.getLabels());
         assertEquals(2, updatedLabels.size());
         assertThat(updatedLabels, hasItem(Neo4jGraphManager.BASE_LABEL));
@@ -62,6 +62,6 @@ public class Neo4jGraphManagerTest {
 
     private Neo4j2Vertex createTestVertex(String id, EntityClass type) throws Exception {
         return (Neo4j2Vertex)manager.createVertex(id, type,
-                Maps.<String, Object>newHashMap());
+                Maps.newHashMap());
     }
 }

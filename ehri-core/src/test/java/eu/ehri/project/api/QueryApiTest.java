@@ -34,9 +34,7 @@ import org.junit.Test;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class QueryApiTest extends AbstractFixtureTest {
 
@@ -223,7 +221,7 @@ public class QueryApiTest extends AbstractFixtureTest {
         assertEquals("c3", list.get(0).getIdentifier());
         assertEquals("c4", list.get(1).getIdentifier());
         assertEquals("m19", list.get(2).getIdentifier());
-        assertEquals(5, toList(fQuery.filter(Lists.<String>newArrayList())
+        assertEquals(5, toList(fQuery.filter(Lists.newArrayList())
                 .page(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)).size());
 
     }
@@ -236,20 +234,20 @@ public class QueryApiTest extends AbstractFixtureTest {
         QueryApi.Page<DocumentaryUnit> page = query.orderBy(
                 Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC).page(
                 EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class);
-        assertFalse(page.getTotal() == 0);
+        assertNotEquals(0, page.getTotal());
         assertEquals("c1", toList(page.getIterable()).get(0).getIdentifier());
 
         QueryApi orderQuery = query
                 .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.DESC);
         page = orderQuery
                 .page(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class);
-        assertFalse(page.getTotal() == 0);
+        assertNotEquals(0, page.getTotal());
 
         // NB: This will break if other collections are added to the
         // fixtures. Adjust as necessary.
         assertEquals("m19", toList(page.getIterable()).get(0).getIdentifier());
         assertEquals("c1", toList(orderQuery
-                .filter(Lists.<String>newArrayList())
+                .filter(Lists.newArrayList())
                 .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC)
                 .page(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)
                 .getIterable()).get(0).getIdentifier());

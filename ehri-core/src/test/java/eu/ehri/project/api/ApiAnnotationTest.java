@@ -55,7 +55,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd4", ann,
-                        Lists.<Accessor>newArrayList(), Optional.empty());
+                        Lists.newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 
@@ -66,7 +66,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c1", "cd1", ann,
-                        Lists.<Accessor>newArrayList(), Optional.empty());
+                        Lists.newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 
@@ -77,7 +77,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd1", ann,
-                        Lists.<Accessor>newArrayList(), Optional.empty());
+                        Lists.newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 
@@ -88,7 +88,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd4", ann,
-                        Lists.<Accessor>newArrayList(), Optional.empty());
+                        Lists.newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 }

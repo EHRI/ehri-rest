@@ -86,7 +86,7 @@ public class UserAdd extends BaseCommand {
         String logMessage = cmdLine.getOptionValue("c",
                 "Created via command-line");
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty())
             throw new RuntimeException(getUsage());
 
         // Fetch the admin accessor, who's going to do the work.

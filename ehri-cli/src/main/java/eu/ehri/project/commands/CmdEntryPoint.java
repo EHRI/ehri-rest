@@ -105,7 +105,7 @@ public class CmdEntryPoint extends BaseCommand {
     @Override
     public String getHelp() {
         try {
-            String sep = System.getProperty("line.separator");
+            String sep = System.lineSeparator();
             StringBuilder buffer = new StringBuilder(String.format(
                     "Command line interface for the EHRI graph database.%n%n " +
                             "The following commands are available:%n%n"));

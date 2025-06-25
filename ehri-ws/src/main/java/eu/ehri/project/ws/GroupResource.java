@@ -20,7 +20,6 @@
 package eu.ehri.project.ws;
 
 import com.google.common.collect.Sets;
-import eu.ehri.project.ws.base.*;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;

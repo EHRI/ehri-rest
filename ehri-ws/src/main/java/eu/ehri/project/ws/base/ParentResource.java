@@ -84,7 +84,7 @@ public interface ParentResource {
      * @throws HierarchyError       if an attempt is made to delete child items that have
      *                              children themselves without using the {{all}} parameter.
      * @throws PermissionDenied     if the user cannot perform the action
-     * @throws DeserializationError if the input data is not well formed
+     * @throws DeserializationError if the input data is not well-formed
      * @throws ValidationError      if data constraints are not met
      */
     Table deleteChildren(String id, boolean all, boolean version, int batchSize)

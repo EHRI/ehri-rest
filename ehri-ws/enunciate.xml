@@ -5,7 +5,7 @@
            xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.5.0.xsd">
 
     <title>EHRI Web Service API</title>
-    <copyright>The EHRI Project</copyright>
+    <copyright>EHRI-ERIC</copyright>
 
     <application root="http://localhost:7474/ehri"/>
 

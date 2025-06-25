@@ -49,7 +49,7 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
         super(rawGraph);
     }
 
-    private ThreadLocal<Neo4jTx> etx = new ThreadLocal<Neo4jTx>() {
+    private final ThreadLocal<Neo4jTx> etx = new ThreadLocal<Neo4jTx>() {
         @Override
         public Neo4jTx initialValue() {
             return null;

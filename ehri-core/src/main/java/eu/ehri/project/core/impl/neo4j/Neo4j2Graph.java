@@ -355,7 +355,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     public CloseableIterable<Map<String, Object>> query(String query, Map<String, Object> params) {
         ResourceIterable<Map<String, Object>> wrap = () -> {
             autoStartTransaction(false);
-            return rawGraph.execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+            return rawGraph.execute(query, params == null ? Collections.emptyMap() : params);
         };
         return new WrappingCloseableIterable<>(wrap);
     }

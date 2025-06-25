@@ -125,7 +125,7 @@ public interface Accessible extends PermissionGrantTarget {
             GremlinPipeline<Vertex, Vertex> out = gremlin()
                     .out(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .out(Ontology.ENTITY_HAS_EVENT);
-            return (SystemEvent) (out.hasNext() ? frame(out.next()) : null);
+            return out.hasNext() ? frame(out.next()) : null;
         }
 
         public Iterable<PermissionScope> getPermissionScopes() {

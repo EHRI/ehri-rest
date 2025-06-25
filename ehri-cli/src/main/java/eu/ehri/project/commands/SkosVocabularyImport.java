@@ -89,7 +89,7 @@ public class SkosVocabularyImport extends BaseCommand {
         }
 
         // at least one file specufied
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().isEmpty())
             throw new RuntimeException(getUsage());
 
         if (!cmdLine.hasOption("scope")) {

@@ -251,13 +251,12 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param id         the item's ID
      * @param preProcess a handler to run before deleting the item
-     * @throws ValidationError  if the action would violate constraints
      * @throws ItemNotFound     if the item does not exist
      * @throws PermissionDenied if the user does not have permission to perform the action
      * @throws HierarchyError   if the action would orphan child items
      */
     protected void deleteItem(String id, Handler<E> preProcess)
-            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
+            throws PermissionDenied, ItemNotFound, HierarchyError {
         try {
             E item = fetchAndCheckType(id);
             preProcess.process(item);

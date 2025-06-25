@@ -54,10 +54,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public abstract class GraphTestBase {
@@ -174,8 +171,8 @@ public abstract class GraphTestBase {
             VertexProxy proxy = (VertexProxy) o;
 
             return gid.equals(proxy.gid)
-                    && !(id != null ? !id.equals(proxy.id) : proxy.id != null)
-                    && !(type != null ? !type.equals(proxy.type) : proxy.type != null);
+                    && !(!Objects.equals(id, proxy.id))
+                    && !(!Objects.equals(type, proxy.type));
         }
 
         @Override

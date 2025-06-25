@@ -52,6 +52,6 @@ public class FramesTest extends ModelTestBase {
         // These should be equal because they frame the same vertex, despite
         // being different interfaces.
         assertEquals(f1, f2);
-        assertTrue(f1.equals(f2));
+        assertEquals(f1, f2);
     }
 }

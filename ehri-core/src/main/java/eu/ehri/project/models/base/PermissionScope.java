@@ -107,7 +107,7 @@ public interface PermissionScope extends Identifiable {
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc)
                     .transform(vertex -> vertex.<String>getProperty(Ontology.IDENTIFIER_KEY))
                     .toList());
-            pIds.add(it().<String>getProperty(Ontology.IDENTIFIER_KEY));
+            pIds.add(it().getProperty(Ontology.IDENTIFIER_KEY));
             return pIds;
         }
     }

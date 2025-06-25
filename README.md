@@ -27,3 +27,16 @@ For documentation (a work-in-progress, but better than nothing) see the docs:
 For getting up and running quickly, Docker is the recommended approach. A local server can be started on port 7474 and an administrative user account "mike" with the following command:
 
     sudo docker run --publish 7474:7474 --env ADMIN_USER=mike -it ehri/ehri-rest
+
+Generating web service documentation
+------------------------------------
+
+This project uses the [Enunciate Maven plugin](https://enunciate.webcohesion.com) to generate REST API documentation from Jersey-based
+web service classes. This can be built by running:
+
+    mvn site:site
+    mvn site:stage
+
+(the `site:stage` command is necessary to combine the various modules into a single site.)
+
+You can then access these docs from `./target/staging/ehri-ws/wsdocs/index.html`.

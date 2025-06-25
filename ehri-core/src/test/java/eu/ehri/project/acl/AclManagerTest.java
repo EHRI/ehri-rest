@@ -136,7 +136,7 @@ public class AclManagerTest extends GraphTestBase {
         AclManager acl = new AclManager(graph);
         assertTrue(acl.canAccess(c1, user1));
         assertFalse(acl.canAccess(c1, user2));
-        acl.setAccessors(c1, Lists.<Accessor>newArrayList(user1, user2));
+        acl.setAccessors(c1, Lists.newArrayList(user1, user2));
         assertTrue(acl.canAccess(c1, user1));
         assertTrue(acl.canAccess(c1, user2));
     }

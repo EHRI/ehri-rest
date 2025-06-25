@@ -94,7 +94,7 @@ public interface Version extends Accessible {
                     .loop("n", JavaHandlerUtils.noopLoopFunc,
                             vertexLoopBundle -> !vertexLoopBundle.getObject().getVertices(Direction.IN,
                             Ontology.ENTITY_HAS_PRIOR_VERSION).iterator().hasNext());
-            return (Accessible)(out.hasNext() ? frame(out.next()) : null);
+            return out.hasNext() ? frame(out.next()) : null;
         }
     }
 }

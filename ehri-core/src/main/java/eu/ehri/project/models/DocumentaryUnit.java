@@ -178,7 +178,7 @@ public interface DocumentaryUnit extends AbstractUnit {
             GremlinPipeline<Vertex, Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);
 
-            return (Repository) (out.hasNext() ? frame(out.next()) : null);
+            return out.hasNext() ? frame(out.next()) : null;
         }
 
         public Iterable<DocumentaryUnit> getAncestors() {
