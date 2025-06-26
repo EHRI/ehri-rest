@@ -24,8 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
@@ -33,20 +31,17 @@ import eu.ehri.project.persistence.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static com.sun.jersey.api.client.ClientResponse.Status.FORBIDDEN;
+import static eu.ehri.project.ws.PermissionsResource.ENDPOINT;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import static eu.ehri.project.ws.PermissionsResource.ENDPOINT;
 
 /**
  * Test Permissions resource.
@@ -64,16 +59,14 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testSettingGlobalPermissionMatrix()
-            throws
-            UniformInterfaceException, IOException {
+    public void testSettingGlobalPermissionMatrix() throws IOException {
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
-                .get(ClientResponse.class);
+                .get(Response.class);
 
         assertStatus(OK, response);
-        String data = response.getEntity(String.class);
+        String data = response.readEntity(String.class);
 
         List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(data);
         // Check we don't ALREADY have DocumentaryUnit -> create/delete perms
@@ -85,17 +78,16 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         // Set the permission
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
-                .entity(jsonMapper.writeValueAsBytes(getTestMatrix()))
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonMapper.writeValueAsString(getTestMatrix())), Response.class);
 
         assertStatus(OK, response);
 
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
-                .get(ClientResponse.class);
+                .get(Response.class);
 
         assertStatus(OK, response);
-        data = response.getEntity(String.class);
+        data = response.readEntity(String.class);
         List<Map<String, Map<String, List<String>>>> newMatrix = getInheritedMatrix(data);
 
         // Check we don't ALREADY have DocumentaryUnit -> create/delete perms
@@ -112,10 +104,10 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
 
         // Test a user setting his own permissions - this should
         // obviously fail...
-        byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
+        String payload = jsonMapper.writeValueAsString(getTestMatrix());
+        Response response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
-                .post(ClientResponse.class, bytes);
+                .post(Entity.json(payload), Response.class);
         assertStatus(FORBIDDEN, response);
         // TODO: Figure out why no content ever seems to be returned here?
     }
@@ -132,10 +124,10 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
                         PermissionType.CREATE.getName()).build());
 
         // Set the permission
-        byte[] bytes = jsonMapper.writeValueAsBytes(testMatrix);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        String json = jsonMapper.writeValueAsString(testMatrix);
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
-                .post(ClientResponse.class, bytes);
+                .post(Entity.json(json), Response.class);
         assertStatus(BAD_REQUEST, response);
     }
 
@@ -143,30 +135,28 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
     public void testSettingGlobalPermissions() throws Exception {
 
         URI uri = getCreationUriFor(TEST_HOLDER_IDENTIFIER);
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME, uri)
-                .entity(jsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME, uri)
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // Set the permission
-        byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
+        String json = jsonMapper.writeValueAsString(getTestMatrix());
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
-                .post(ClientResponse.class, bytes);
+                .post(Entity.json(json), Response.class);
 
         assertStatus(OK, response);
 
         // Retry the create action
         response = jsonCallAs(LIMITED_USER_NAME, uri)
-                .entity(jsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         // Should get CREATED this time...
         assertStatus(CREATED, response);
 
         // Finally, delete the item
         response = jsonCallAs(LIMITED_USER_NAME,
-                response.getLocation()).delete(ClientResponse.class);
+                response.getLocation()).delete(Response.class);
 
         // Should get NO_CONTENT this time...
         assertStatus(NO_CONTENT, response);
@@ -180,15 +170,14 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         String r3 = "r3";
 
         // The user shouldn't be able to create docs with r2
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                getCreationUriFor(r2)).entity(jsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME,
+                getCreationUriFor(r2))
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // Or r3...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor(r3))
-                .entity(jsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // Now grant the user permissions to create just within
@@ -198,22 +187,19 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         URI grantUri = ehriUri(ENDPOINT, LIMITED_USER_NAME, "scope", r2);
 
         response = jsonCallAs(getAdminUserProfileId(), grantUri)
-                .entity(permData)
-                .post(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
+                .post(Entity.json(permData), Response.class);
+        System.out.println(response.readEntity(String.class));
         assertStatus(OK, response);
 
         // Now creation should succeed...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor(r2))
-                .entity(jsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
         assertStatus(CREATED, response);
 
         // But r3 should still fail...
         // Or r3...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor(r3))
-                .entity(jsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // And the user himself should not be able to grant
@@ -222,8 +208,8 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         String grantPermData = "{\"DocumentaryUnit\": [\"grant\"]}";
         URI otherGrantUri = ehriUri(ENDPOINT, otherUserName, "scope", r2);
 
-        response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri).entity(grantPermData)
-                .post(ClientResponse.class);
+        response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri)
+                .post(Entity.json(grantPermData), Response.class);
 
         assertStatus(FORBIDDEN, response);
 
@@ -236,18 +222,17 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         String targetResourceId = "c4";
         URI targetResourceUri = entityUri(Entities.DOCUMENTARY_UNIT, targetResourceId);
 
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
-                .get(ClientResponse.class);
+        Response response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
+                .get(Response.class);
         assertStatus(OK, response);
 
         // First try and update the item
         String testUpdateString = Bundle
-                .fromString(response.getEntity(String.class))
+                .fromString(response.readEntity(String.class))
                 .withDataValue("testKey", "testValue").toJson();
 
         response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
-                .entity(testUpdateString)
-                .put(ClientResponse.class);
+                .put(Entity.json(testUpdateString), Response.class);
         assertStatus(FORBIDDEN, response);
 
         // Now grant the user permissions to update and delete just on this item
@@ -257,20 +242,19 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT,
                         LIMITED_USER_NAME, "item", targetResourceId))
-                .entity(permData)
-                .post(ClientResponse.class);
+                .post(Entity.json(permData), Response.class);
 
         assertStatus(OK, response);
 
         // Retry the create action
-        response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri).entity(testUpdateString)
-                .put(ClientResponse.class);
+        response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
+                .put(Entity.json(testUpdateString), Response.class);
         // Should get UPDATED this time...
         assertStatus(OK, response);
 
         // Finally, delete the item
         response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
-                .delete(ClientResponse.class);
+                .delete(Response.class);
 
         // Should get NO_CONTENT this time...
         assertStatus(NO_CONTENT, response);

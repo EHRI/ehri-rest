@@ -9,6 +9,7 @@
   </appender>
 
   <logger name="eu.ehri" level="${ehri.log.level:-info}" />
+  <logger name="org.eclipse.jetty" level="WARN" />
 <!--  <logger name="graphql" level="TRACE"/>-->
 
   <root level="INFO">

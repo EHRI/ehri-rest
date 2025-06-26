@@ -34,7 +34,7 @@ import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
 import eu.ehri.project.ws.errors.ConflictError;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -51,8 +51,8 @@ public class DocumentaryUnitResource
         extends AbstractAccessibleResource<DocumentaryUnit>
         implements GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
 
-    public DocumentaryUnitResource(@Context GraphDatabaseService database) {
-        super(database, DocumentaryUnit.class);
+    public DocumentaryUnitResource(@Context DatabaseManagementService service) {
+        super(service, DocumentaryUnit.class);
     }
 
     @GET

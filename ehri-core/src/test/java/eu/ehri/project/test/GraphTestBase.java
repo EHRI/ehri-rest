@@ -28,9 +28,7 @@ import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphConfiguration;
 import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.AbstractModule;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
@@ -42,27 +40,31 @@ import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
-import eu.ehri.project.models.utils.UniqueAdjacencyAnnotationHandler;
 import org.junit.After;
 import org.junit.Before;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
+
 
 public abstract class GraphTestBase {
 
+    private static final TestDatabaseManagementServiceBuilder dbBuilder = new TestDatabaseManagementServiceBuilder().impermanent();
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
     protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
+    protected DatabaseManagementService dms;
+    protected GraphDatabaseService service;
 
     protected static List<VertexProxy> getGraphState(FramedGraph<?> graph) {
         List<VertexProxy> list = Lists.newArrayList();
@@ -107,26 +109,27 @@ public abstract class GraphTestBase {
 
     @Before
     public void setUp() throws Exception {
+        resetGraph();
         graph = getFramedGraph();
         manager = GraphManagerFactory.getInstance(graph);
+        try (Transaction tx = service.beginTx()) {
+            Neo4jGraphManager.createIndicesAndConstraints(tx);
+            tx.commit();
+        }
+    }
+
+    protected void resetGraph() throws Exception {
+        dms = dbBuilder.build();
+        service = dms.database(DEFAULT_DATABASE_NAME);
     }
 
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
-        File tempFile = File.createTempFile("neo4j-tmp", ".db");
-        tempFile.deleteOnExit();
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(tempFile)
-                .newGraphDatabase();
-        try (Transaction tx = rawGraph.beginTx()) {
-            Neo4jGraphManager.createIndicesAndConstraints(rawGraph);
-            tx.success();
-        }
-        return graphFactory.create(new Neo4j2Graph(rawGraph));
+        return graphFactory.create(new Neo4j2Graph(dms, service));
     }
 
     @After
     public void tearDown() throws Exception {
-        graph.shutdown();
+        dms.shutdown();
     }
 
     /**
@@ -233,21 +236,14 @@ public abstract class GraphTestBase {
     }
 
     protected int getNodeCount(FramedGraph<?> graph) {
-        long l = Iterables.size(graph.getVertices());
-        if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
-            throw new RuntimeException("Too many vertex items in graph to fit into an integer!");
-        return (int) l;
+        return Iterables.size(graph.getVertices());
     }
 
     protected int getEdgeCount(FramedGraph<?> graph) {
-        long l = Iterables.size(graph.getEdges());
-        if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
-            throw new RuntimeException("Too many edge items in graph to fit into an integer!");
-        return (int) l;
+        return Iterables.size(graph.getEdges());
     }
 
-    protected String readResourceFileAsString(String resourceName)
-            throws java.io.IOException {
+    protected String readResourceFileAsString(String resourceName) throws java.io.IOException {
         URL url = Resources.getResource(resourceName);
         return Resources.toString(url, Charsets.UTF_8);
     }

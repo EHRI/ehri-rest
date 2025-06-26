@@ -41,7 +41,7 @@ import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.w3c.dom.Document;
 
 import javax.ws.rs.*;
@@ -62,8 +62,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "entities";
 
-    public GenericResource(@Context GraphDatabaseService database) {
-        super(database, Accessible.class);
+    public GenericResource(@Context DatabaseManagementService service) {
+        super(service, Accessible.class);
     }
 
     /**

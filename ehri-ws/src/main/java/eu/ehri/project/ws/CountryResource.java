@@ -28,7 +28,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -45,8 +45,8 @@ public class CountryResource
         extends AbstractAccessibleResource<Country>
         implements CreateResource, GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
 
-    public CountryResource(@Context GraphDatabaseService database) {
-        super(database, Country.class);
+    public CountryResource(@Context DatabaseManagementService service) {
+        super(service, Country.class);
     }
 
     @GET

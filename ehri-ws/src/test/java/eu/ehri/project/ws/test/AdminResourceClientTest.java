@@ -19,22 +19,23 @@
 
 package eu.ehri.project.ws.test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import eu.ehri.project.ws.AdminResource;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.AdminResource;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.project.ws.base.AbstractResource.AUTH_HEADER_NAME;
-import static eu.ehri.project.ws.AdminResource.ENDPOINT;
 import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
+import static eu.ehri.project.ws.AdminResource.ENDPOINT;
+import static eu.ehri.project.ws.base.AbstractResource.AUTH_HEADER_NAME;
+import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.*;
 
 /**
@@ -45,20 +46,20 @@ public class AdminResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testAdminGetUserProfile() throws Exception {
         // get the admin user profile
-        WebResource resource = client.resource(
+        WebTarget resource = client.target(
                 entityUri(Entities.USER_PROFILE, getAdminUserProfileId()));
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testExportGraphSONAsAnon() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-graphson"));
-        ClientResponse response = resource.get(ClientResponse.class);
-        String data = response.getEntity(String.class);
+        WebTarget resource = client.target(ehriUri(ENDPOINT, "export-graphson"));
+        Response response = resource.request().get(Response.class);
+        String data = response.readEntity(String.class);
         assertStatus(OK, response);
         assertTrue("Anon export must contain publicly-visible item ann1", data.contains("ann1"));
         assertFalse("Anon export must not contain restricted item ann3", data.contains("ann3"));
@@ -67,10 +68,10 @@ public class AdminResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testExportGraphSONAsAdmin() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-graphson"));
-        ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
-                .get(ClientResponse.class);
-        String data = response.getEntity(String.class);
+        WebTarget resource = client.target(ehriUri(ENDPOINT, "export-graphson"));
+        Response response = resource.request().header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
+                .get(Response.class);
+        String data = response.readEntity(String.class);
         assertStatus(OK, response);
         assertTrue("Admin export must contain publicly-visible item ann1", data.contains("ann1"));
         assertTrue("Admin export must contain restricted item ann3", data.contains("ann3"));
@@ -78,33 +79,37 @@ public class AdminResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testExportJSON() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-json"));
-        ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
-                .get(ClientResponse.class);
+        WebTarget resource = client.target(ehriUri(ENDPOINT, "export-json"));
+        Response response = resource
+                .request()
+                .header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "create-default-user-profile"));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+        WebTarget resource = client.target(ehriUri(ENDPOINT, "create-default-user-profile"));
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(""), Response.class);
 
         assertStatus(CREATED, response);
-        Bundle bundle = response.getEntity(Bundle.class);
+        Bundle bundle = response.readEntity(Bundle.class);
         String ident = (String) bundle.getData().get(Ontology.IDENTIFIER_KEY);
-        assertTrue(ident != null);
+        assertNotNull(ident);
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
 
         // Create another user and ensure their idents are different and
         // incremental
-        WebResource resource2 = client.resource(ehriUri(ENDPOINT, "create-default-user-profile"));
-        response = resource2.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+        WebTarget resource2 = client.target(ehriUri(ENDPOINT, "create-default-user-profile"));
+        response = resource2
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(""), Response.class);
 
         assertStatus(CREATED, response);
-        Bundle bundle2 = response.getEntity(Bundle.class);
+        Bundle bundle2 = response.readEntity(Bundle.class);
         String ident2 = (String) bundle2.getData().get(
                 Ontology.IDENTIFIER_KEY);
         assertEquals(parseUserId(ident) + 1, parseUserId(ident2));

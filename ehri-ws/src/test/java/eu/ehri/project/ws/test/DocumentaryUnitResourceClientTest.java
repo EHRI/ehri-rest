@@ -22,24 +22,25 @@ package eu.ehri.project.ws.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -72,43 +73,43 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testCreateDeleteDocumentaryUnit() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testNotFoundWithValidUrl() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "r1"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(NOT_FOUND, response);
     }
 
     @Test
     public void testCacheControl() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
-        String c1cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
+        String c1cc = response.getHeaderString(HttpHeaders.CACHE_CONTROL);
         assertThat(c1cc, containsString("no-cache"));
         assertThat(c1cc, containsString("no-store"));
         // C4 is unrestricted and thus has a max-age set
         response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c4"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
-        String c4cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
+        String c4cc = response.getHeaderString(HttpHeaders.CACHE_CONTROL);
         assertThat(c4cc, not(containsString("no-cache")));
         assertThat(c4cc, not(containsString("no-store")));
         assertThat(c4cc, containsString("max-age=" + AbstractResource.ITEM_CACHE_TIME));
@@ -117,30 +118,30 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testDeleteDocumentaryWithChildren() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID))
-                .delete(ClientResponse.class);
+                .delete(Response.class);
         assertStatus(CONFLICT, response);
     }
 
     @Test
     public void testDeleteChildren() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUriBuilder(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, "list")
                         .queryParam(AbstractResource.ALL_PARAM, "true")
                         .queryParam("batch", "2")
                         .build())
-                .delete(ClientResponse.class);
+                .delete(Response.class);
         assertStatus(OK, response);
 
         Table expected = Table.of(Lists.newArrayList(
                 Lists.newArrayList("c2"),
                 Lists.newArrayList("c3")
         ));
-        assertEquals(expected, response.getEntity(Table.class));
+        assertEquals(expected, response.readEntity(Table.class));
         for (List<String> id : expected.rows()) {
-            ClientResponse r1 = jsonCallAs(getAdminUserProfileId(),
+            Response r1 = jsonCallAs(getAdminUserProfileId(),
                     entityUri(Entities.DOCUMENTARY_UNIT, id.get(0)))
                     .head();
             assertStatus(GONE, r1);
@@ -150,33 +151,33 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testCreateDeleteChildDocumentaryUnit() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID))
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
         response = jsonCallAs(getAdminUserProfileId(), location)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
     }
 
     @Test
     public void testIntegrityError() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         assertStatus(CREATED, response);
 
         // Okay... now if we try and do the same things again we should
         // get an integrity error because the identifiers are the same.
         response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
         // Check the JSON gives use the correct error
-        String errString = response.getEntity(String.class);
+        String errString = response.readEntity(String.class);
         assertStatus(BAD_REQUEST, response);
 
         JsonNode rootNode = jsonMapper.readTree(errString);
@@ -189,11 +190,10 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testValidationError() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(invalidJsonDocumentaryUnitTestStr)
-                .post(ClientResponse.class);
+        Response response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .post(Entity.json(invalidJsonDocumentaryUnitTestStr), Response.class);
 
-        String errorJson = response.getEntity(String.class);
+        String errorJson = response.readEntity(String.class);
         assertStatus(BAD_REQUEST, response);
 
         // Check the JSON gives use the correct error
@@ -218,14 +218,13 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     public void testUpdateDocumentaryUnitByIdentifier() throws Exception {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
-                .entity(jsonDocumentaryUnitTestStr)
-                .put(ClientResponse.class);
+                .put(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
+        JsonNode rootNode = jsonMapper.readTree(response.readEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -234,7 +233,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
 
     @Test
     public void testListDocumentaryUnit() throws Exception {
-        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
         params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
@@ -247,13 +246,16 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
 
     @Test
     public void testListDocumentaryUnitWithStreaming() throws Exception {
-        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
         //params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         params.add(AbstractResource.LIMIT_PARAM, String.valueOf(-1L));
 
-        WebResource resource = client.resource(entityUri(Entities.DOCUMENTARY_UNIT)).queryParams(params);
-        String s = resource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        WebTarget resource = client.target(entityUri(Entities.DOCUMENTARY_UNIT));
+        for (String key : params.keySet()) {
+            resource = resource.queryParam(key, params.getFirst(key));
+        }
+        String s = resource
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
                 .header(AbstractResource.STREAM_HEADER_NAME, "true")
                 .get(String.class);
@@ -268,25 +270,25 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
 
     @Test
     public void testListDocumentaryUnitWithNotFound() throws Exception {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "BAD_ID", "list"))
-                .get(ClientResponse.class);
-        String s = response.getEntity(String.class);
+                .get(Response.class);
+        String s = response.readEntity(String.class);
         assertStatus(NOT_FOUND, response);
     }
 
     @Test
     public void testListDocumentaryUnitWithBadUser() throws Exception {
-        ClientResponse response = jsonCallAs("invalidId",
+        Response response = jsonCallAs("invalidId",
                 entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER, "list"))
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(BAD_REQUEST, response);
     }
 
     @Test
     public void testListDocumentaryUnitWithOffset() throws Exception {
         // Fetch the second doc unit item (c2)
-        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
         params.add(AbstractResource.OFFSET_PARAM, "1");
         params.add(AbstractResource.LIMIT_PARAM, "1");
         params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
@@ -310,13 +312,13 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     public void testUpdateDocumentaryUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
-        WebResource resource = client.resource(getCreationUri());
-        ClientResponse response = resource
+        WebTarget resource = client.target(getCreationUri());
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         assertStatus(CREATED, response);
         assertValidJsonData(response);
@@ -325,38 +327,40 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         // Get created doc via the response location?
         URI location = response.getLocation();
 
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId())
+                .get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and change it
-        String json = response.getEntity(String.class);
+        String json = response.readEntity(String.class);
         String toUpdateJson = Bundle.fromString(json)
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(toUpdateJson)
-                .put(ClientResponse.class);
+                        getAdminUserProfileId())
+                .put(Entity.json(toUpdateJson), Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it changed?
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId())
+                .get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
-        String updatedJson = response.getEntity(String.class);
+        String updatedJson = response.readEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
@@ -365,13 +369,13 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     public void testPatchDocumentaryUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
-        WebResource resource = client.resource(getCreationUri());
-        ClientResponse response = resource
+        WebTarget resource = client.target(getCreationUri());
+        Response response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .post(Entity.json(jsonDocumentaryUnitTestStr), Response.class);
 
         assertStatus(CREATED, response);
 
@@ -381,28 +385,27 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         String toUpdateJson = partialJsonDocumentaryUnitTestStr;
 
         // - patch the data (using the Patch header)
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
+                .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .header(AbstractResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
-                .entity(toUpdateJson)
-                .put(ClientResponse.class);
+                .put(Entity.json(toUpdateJson), Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it patched?
-        resource = client.resource(location);
+        resource = client.target(location);
         response = resource
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
-        String updatedJson = response.getEntity(String.class);
+        String updatedJson = response.readEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(CREATED_ID, updatedEntityBundle.getDataValue(Ontology.IDENTIFIER_KEY));
         assertEquals(PARTIAL_NAME, updatedEntityBundle.getDataValue(Ontology.NAME_KEY));
@@ -411,58 +414,55 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testRenameDocumentaryUnitWithCollision() throws Exception {
         // When there's a confict the result should be an HTTP 409 error
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename"))
-                .entity("m19", MediaType.TEXT_PLAIN_TYPE)
-                .post(ClientResponse.class);
+                .post(Entity.text("m19"), Response.class);
         assertStatus(CONFLICT, response);
 
         // When the check parameter is given the result should be a list
         // of conflicting item IDs
-        ClientResponse response2 = jsonCallAs(getAdminUserProfileId(),
+        Response response2 = jsonCallAs(getAdminUserProfileId(),
                 entityUriBuilder(Entities.DOCUMENTARY_UNIT, "c1", "rename")
                         .queryParam("check", true).build())
-                .entity("m19", MediaType.TEXT_PLAIN_TYPE)
-                .post(ClientResponse.class);
+                .post(Entity.text("m19"), Response.class);
         assertStatus(OK, response2);
         Table expected = Table.of(Lists.<List<String>>newArrayList(
                 Lists.newArrayList("c1", "nl-r1-m19")
         ));
-        assertEquals(expected, response2.getEntity(Table.class));
+        assertEquals(expected, response2.readEntity(Table.class));
     }
 
     @Test
     public void testRenameDocumentaryUnit() throws Exception {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        Response response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename"))
-                .entity("z1", MediaType.TEXT_PLAIN_TYPE)
-                .post(ClientResponse.class);
+                .post(Entity.text("z1"), Response.class);
         assertStatus(OK, response);
         Table expected = Table.of(Lists.newArrayList(
                 Lists.newArrayList("c1", "nl-r1-z1"),
                 Lists.newArrayList("c2", "nl-r1-z1-c2"),
                 Lists.newArrayList("c3", "nl-r1-z1-c2-c3")
         ));
-        assertEquals(expected, response.getEntity(Table.class));
+        assertEquals(expected, response.readEntity(Table.class));
     }
 
     @Test
     public void testExportEad() throws Exception {
-        ClientResponse response = callAs(getAdminUserProfileId(),
+        Response response = callAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1", "ead"))
                 .accept(MediaType.TEXT_XML_TYPE)
-                .get(ClientResponse.class);
+                .get(Response.class);
+        String ead = response.readEntity(String.class);
         assertStatus(OK, response);
-        String ead = response.getEntity(String.class);
         assertThat(ead, containsString("<ead xmlns=\"urn:isbn:1-931666-22-9\""));
 
         // Now check EAD3
         response = callAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1", "ead3"))
                 .accept(MediaType.TEXT_XML_TYPE)
-                .get(ClientResponse.class);
+                .get(Response.class);
         assertStatus(OK, response);
-        String ead3 = response.getEntity(String.class);
+        String ead3 = response.readEntity(String.class);
         assertThat(ead3, containsString("<ead xmlns=\"http://ead3.archivists.org/schema/\""));
     }
 

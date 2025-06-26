@@ -24,6 +24,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import org.apache.commons.cli.CommandLine;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 /**
  * Command for generating the (Neo4j) graph schema.
@@ -47,8 +49,17 @@ public class GenSchema extends BaseCommand {
     public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         Graph baseGraph = graph.getBaseGraph();
         if (baseGraph instanceof Neo4j2Graph) {
-            Neo4jGraphManager.createIndicesAndConstraints(
-                    ((Neo4j2Graph) baseGraph).getRawGraph());
+            GraphDatabaseService service = ((Neo4j2Graph) baseGraph).getRawGraph();
+            try (Transaction tx = service.beginTx()) {
+                System.err.println("INFO: Dropping all indices and constraints...");
+                Neo4jGraphManager.dropIndicesAndConstraints(tx);
+                tx.commit();
+            }
+            try (Transaction tx = service.beginTx()) {
+                System.err.println("INFO: Creating all indices and constraints...");
+                Neo4jGraphManager.createIndicesAndConstraints(tx);
+                tx.commit();
+            }
         } else {
             System.err.println("ERROR: Cannot generate schema on a non-Neo4j2 graph");
         }

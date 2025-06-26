@@ -20,13 +20,13 @@
 package eu.ehri.project.ws.test;
 
 
-import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.OaiPmhResource;
 import eu.ehri.project.oaipmh.Verb;
+import eu.ehri.project.ws.OaiPmhResource;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 
 import static eu.ehri.project.test.XmlTestHelpers.assertXPath;
@@ -70,11 +70,11 @@ public class OaiPmhResourceClientTest extends AbstractResourceClientTest {
 
     private Document get(String params, int limit) throws Exception {
         URI queryUri = getUri(params);
-        ClientResponse response = callAs(getRegularUserProfileId(), queryUri)
+        Response response = callAs(getRegularUserProfileId(), queryUri)
                 .accept(MediaType.TEXT_XML_TYPE)
                 .header(OaiPmhResource.LIMIT_HEADER_NAME, limit)
-                .get(ClientResponse.class);
-        String entity = response.getEntity(String.class);
+                .get(Response.class);
+        String entity = response.readEntity(String.class);
         // System.out.println("OUT = " + entity);
         return parseDocument(entity);
     }
