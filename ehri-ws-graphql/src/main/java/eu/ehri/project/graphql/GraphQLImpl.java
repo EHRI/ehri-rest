@@ -287,6 +287,12 @@ public class GraphQLImpl {
         builder.dataFetcher(coordinates(linkType.getName(), "targets"),
                 oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets()));
 
+        builder.dataFetcher(coordinates(linkType.getName(), "source"),
+                manyToOneRelationshipFetcher(a -> a.as(Link.class).getLinkSource()));
+
+        builder.dataFetcher(coordinates(linkType.getName(), "linkType"),
+                keyDataFetcher(Ontology.LINK_HAS_TYPE));
+
         builder.dataFetcher(coordinates(linkType.getName(), "body"),
                 oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkBodies()));
 
@@ -1346,7 +1352,9 @@ public class GraphQLImpl {
             .field(nullAttr(Ontology.LINK_HAS_DESCRIPTION, __("link.field.description.description")))
             .field(nullAttr(Ontology.LINK_HAS_FIELD, __("link.field.field.description")))
             .field(listFieldDefinition("targets", __("link.field.targets.description"), linkableInterface))
+            .field(itemFieldDefinition("source", __("link.field.source.description"), linkableInterface))
             .field(listFieldDefinition("body", __("link.field.body.description"), accessPointType))
+            .field(nullAttr("linkType", __("link.field.linkType.description")))
             .field(annotationsFieldDefinition)
             .field(datePeriodFieldDefinition)
             .field(itemEventsFieldDefinition())

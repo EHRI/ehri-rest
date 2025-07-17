@@ -94,9 +94,9 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         // Without the X-Stream header we should get strict execution.
         assertNull(response.getHeaders().getFirst("Transfer-Encoding"));
 
-        assertStatus(OK, response);
         JsonNode data = response.getEntity(JsonNode.class);
-//         System.out.println(data.toPrettyString());
+         System.out.println(data.toPrettyString());
+        assertStatus(OK, response);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
         assertEquals(1, data.path("data").path("c1")
@@ -160,6 +160,11 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertEquals("Test", data.path("data").path("gb").path("extensive").textValue());
         assertFalse(data.path("data").path("wrongType").isMissingNode());
         assertTrue(data.path("data").path("wrongType").isNull());
+        assertTrue(data.path("data").path("link3").path("source").isNull());
+        assertEquals(2, data.path("data").path("link3").path("targets").size());
+        assertEquals("associative", data.path("data").path("link3").path("linkType").textValue());
+        assertEquals("c4", data.path("data").path("link4").path("source").path("id").textValue());
+        assertEquals("copy", data.path("data").path("link4").path("linkType").textValue());
     }
 
     @Test
