@@ -234,4 +234,26 @@ query test {
     wrongType: HistoricalAgent(id: "c1") {
         id
     }
+
+    link3: Link(id: "link3") {
+        id
+        source {
+            id
+        }
+        targets {
+            id
+        }
+        linkType
+    }
+
+    link4: Link(id: "link4") {
+        id
+        source {
+            id
+        }
+        targets {
+            id
+        }
+        linkType
+    }
 }
