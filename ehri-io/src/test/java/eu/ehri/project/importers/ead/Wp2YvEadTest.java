@@ -25,10 +25,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -121,7 +118,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
             assertTrue(!toList(c3.getLinks()).isEmpty());
             for (Link a : c3.getLinks()) {
                 logger.debug(a.getLinkType() + " " + a.getDescription());
-                assertEquals("associative", a.getLinkType());
+                assertEquals(LinkType.associative, a.getLinkType());
                 assertEquals(1, Iterables.size(a.getLinkBodies()));
             }
 

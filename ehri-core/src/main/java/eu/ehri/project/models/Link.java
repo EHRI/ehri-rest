@@ -19,20 +19,11 @@
 
 package eu.ehri.project.models;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.*;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.models.base.Promotable;
-import eu.ehri.project.models.base.Temporal;
+import eu.ehri.project.models.base.*;
 
 /**
  * Links two items together with a given body, with may either be
@@ -95,7 +86,7 @@ public interface Link extends Promotable, Temporal, Annotatable {
 
     @Mandatory
     @Property(Ontology.LINK_HAS_TYPE)
-    String getLinkType();
+    LinkType getLinkType();
 
     @Indexed
     @Property(Ontology.LINK_HAS_FIELD)

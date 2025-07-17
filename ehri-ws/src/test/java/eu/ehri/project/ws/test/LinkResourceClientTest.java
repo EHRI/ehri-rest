@@ -31,7 +31,7 @@ public class LinkResourceClientTest extends AbstractResourceClientTest {
     public void testCreateLink() throws Exception {
         // Create a link annotation between two objects
         String jsonLinkTestString = "{\"type\": \"Link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
-                "\"body\": \"test\", \"type\": \"associate\"}}";
+                "\"body\": \"test\", \"type\": \"associative\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUriBuilder(Entities.LINK)
                         .queryParam(LinkResource.TARGET_PARAM, "c1")
