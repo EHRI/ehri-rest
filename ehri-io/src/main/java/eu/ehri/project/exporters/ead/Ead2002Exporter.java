@@ -406,7 +406,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     private List<String> getCopyInfo(DocumentaryUnit unit, String langCode) {
         return StreamSupport.stream(unit.getLinks().spliterator(), false)
                 .filter(link ->
-                        Objects.equals(link.getLinkType(), "copy")
+                        Objects.equals(link.getLinkType(), LinkType.copy)
                                 && Objects.equals(link.getLinkSource(), unit))
                 .map(Link::getDescription)
                 .filter(d -> Objects.nonNull(d) && !d.trim().isEmpty())

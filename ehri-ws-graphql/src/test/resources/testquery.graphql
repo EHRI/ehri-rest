@@ -215,7 +215,7 @@ query test {
         related {
             id
         }
-        connected {
+        connected(linkType: copy) {
             context {
                 body {
                     name

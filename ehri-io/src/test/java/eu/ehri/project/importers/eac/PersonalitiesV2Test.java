@@ -191,7 +191,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
                                 }
                             }
                             assertTrue(conceptFound);
-                            logger.debug(link.getLinkType());
+                            logger.debug(link.getLinkType().toString());
                             for (String key : link.getPropertyKeys()) {
                                 logger.debug(key + ":" + link.getProperty(key));
                             }

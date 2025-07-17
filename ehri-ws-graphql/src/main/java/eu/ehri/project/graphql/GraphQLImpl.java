@@ -616,9 +616,12 @@ public class GraphQLImpl {
                     .map(Named::getName).orElse(null);
 
     private static final DataFetcher<List<Map<String, Object>>> connectedItemsDataFetcher = env -> {
+        String linkType = env.getArgument("linkType");
         Entity source = env.getSource();
         Iterable<Link> links = source.as(Linkable.class).getLinks();
-        return StreamSupport.stream(links.spliterator(), false).map(link -> {
+        return StreamSupport.stream(links.spliterator(), false)
+                .filter(link -> linkType == null || linkType.equals(link.getLinkType().toString()))
+                .map(link -> {
             Linkable target = Iterables.tryFind(link.getLinkTargets(),
                     t -> t != null && !t.equals(source)).orNull();
             return target == null ? null : mapOf("context", link, "item", target);
@@ -857,6 +860,12 @@ public class GraphQLImpl {
 
     private GraphQLFieldDefinition connectedTypeFieldDefinition() {
         return newFieldDefinition()
+                .argument(newArgument()
+                        .name("linkType")
+                        .description(__("link.field.linkType.description"))
+                        .type(linkTypeEnum)
+                        .build()
+                )
                 .name("connected")
                 .description(__("graphql.field.connected.description"))
                 .type(GraphQLList.list(connectedType))
@@ -1081,6 +1090,17 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.EVENT_TIMESTAMP, bundle.getString("systemEvent.field.timestamp.description")))
             .field(nullAttr(Ontology.EVENT_LOG_MESSAGE, bundle.getString("systemEvent.field.logMessage.description")))
             .field(nonNullAttr(Ontology.EVENT_TYPE, bundle.getString("systemEvent.field.eventType.description")))
+            .build();
+
+    private final GraphQLEnumType linkTypeEnum = newEnum()
+            .name(LinkType.class.getSimpleName())
+            .description(__("graphql.enum.linkType.description"))
+            .value(LinkType.associative.name())
+            .value(LinkType.hierarchical.name())
+            .value(LinkType.temporal.name())
+            .value(LinkType.identity.name())
+            .value(LinkType.family.name())
+            .value(LinkType.copy.name())
             .build();
 
     private final GraphQLEnumType accessPointTypeEnum = newEnum()
@@ -1354,7 +1374,11 @@ public class GraphQLImpl {
             .field(listFieldDefinition("targets", __("link.field.targets.description"), linkableInterface))
             .field(itemFieldDefinition("source", __("link.field.source.description"), linkableInterface))
             .field(listFieldDefinition("body", __("link.field.body.description"), accessPointType))
-            .field(nullAttr("linkType", __("link.field.linkType.description")))
+            .field(newFieldDefinition()
+                    .name("linkType")
+                    .description(__("graphql.enum.linkType.description"))
+                    .type(GraphQLNonNull.nonNull(linkTypeEnum))
+                    .build())
             .field(annotationsFieldDefinition)
             .field(datePeriodFieldDefinition)
             .field(itemEventsFieldDefinition())

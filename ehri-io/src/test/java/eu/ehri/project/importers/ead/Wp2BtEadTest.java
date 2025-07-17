@@ -136,7 +136,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             //assert keywords are matched to cvocs
             assertTrue(!toList(c1_b.getLinks()).isEmpty());
             for (Link a : c1_b.getLinks()) {
-                logger.debug(a.getLinkType());
+                logger.debug(a.getLinkType().toString());
             }
 
             List<Accessible> subjects = toList(ev.getSubjects());
