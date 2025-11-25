@@ -34,10 +34,15 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -187,6 +192,32 @@ public class ApiAclTest extends AbstractFixtureTest {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("dans", Group.class);
         api(basicUser).acl().removeAccessorFromGroup(group, user);
+    }
+
+    @Test
+    public void testSetMembers() throws Exception {
+        Group group = manager.getEntity("dans", Group.class);
+        Set<String> memberIds = StreamSupport.stream(group.getMembers().spliterator(), false)
+                .map(Entity::getId).collect(Collectors.toSet());
+        assertEquals(memberIds, Sets.newHashSet("linda"));
+
+        Set<Accessor> newMembers = Sets.newHashSet(
+                manager.getEntity("tim", Accessor.class),
+                manager.getEntity("reto", Accessor.class)
+        );
+        api(adminUser).acl().setMembers(group, newMembers);
+        Set<String> newMemberIds = StreamSupport.stream(group.getMembers().spliterator(), false)
+                .map(Entity::getId).collect(Collectors.toSet());
+        assertEquals(newMemberIds, Sets.newHashSet("tim", "reto"));
+    }
+
+    @Test(expected = PermissionDenied.class)
+    public void testSetMembersFailsWithAdmin() throws Exception {
+        Group group = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+        Set<Accessor> newMembers = Sets.newHashSet(
+                manager.getEntity("tim", Accessor.class)
+        );
+        api(adminUser).acl().setMembers(group, newMembers);
     }
 
     @Test

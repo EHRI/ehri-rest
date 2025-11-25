@@ -258,7 +258,7 @@ public interface Api {
 
     /**
      * Get an item's links.
-     *
+     * <p>
      * Links are skipped if their targets are not accessible to the
      * current user.
      *
@@ -403,7 +403,14 @@ public interface Api {
                                                                GlobalPermissionSet permissionSet) throws PermissionDenied;
 
 
-        void setAccessors(Accessible entity, Set<Accessor> accessors) throws PermissionDenied;
+        /**
+         * Set the users/groups who are able to access this resource.
+         *
+         * @param item      the item
+         * @param accessors the set of accessors able to access this resource
+         * @throws PermissionDenied if the grant action is not available to the user
+         */
+        void setAccessors(Accessible item, Set<Accessor> accessors) throws PermissionDenied;
 
         /**
          * Set permissions for the given user on the given item.
@@ -445,6 +452,15 @@ public interface Api {
          * @throws PermissionDenied if the grant action is not available to the user
          */
         void removeAccessorFromGroup(Group group, Accessor userOrGroup) throws PermissionDenied;
+
+        /**
+         * Set members of a given group, removing existing members not in this set.
+         *
+         * @param group the group
+         * @param usersOrGroups the users or groups to add
+         * @throws PermissionDenied if the grant action is not available to the user
+         */
+        void setMembers(Group group, Set<Accessor> usersOrGroups) throws PermissionDenied;
     }
 
     class NotPromotableError extends Exception {

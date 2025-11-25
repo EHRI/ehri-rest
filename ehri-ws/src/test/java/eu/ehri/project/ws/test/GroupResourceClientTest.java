@@ -47,7 +47,7 @@ public class GroupResourceClientTest extends AbstractResourceClientTest {
     static final String NON_ADMIN_USER = "reto";
 
     @Test
-    public void testCreateGroup() throws Exception {
+    public void testCreateGroup() {
         // Create
         String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
@@ -106,6 +106,26 @@ public class GroupResourceClientTest extends AbstractResourceClientTest {
                 entityUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER))
                 .delete(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
+    }
+
+    @Test
+    public void testSetGroupMembers() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                UriBuilder.fromUri(entityUri(Entities.GROUP, "soma", "list"))
+                        .queryParam(GroupResource.MEMBER_PARAM, "mike")
+                        .queryParam(GroupResource.MEMBER_PARAM, "reto").build())
+                .post(ClientResponse.class);
+        assertStatus(NO_CONTENT, response);
+
+        List<Bundle> list = getItemList(entityUri(Entities.GROUP, "soma", "list"),
+                getAdminUserProfileId());
+
+        Set<String> ids = getIdsFromEntityList(list);
+        // for 'kcl' it should be 'mike', 'reto' and nothing else
+        assertTrue(ids.contains("mike"));
+        assertTrue(ids.contains("reto"));
+        assertEquals(2, ids.size());
     }
 
     @Test
