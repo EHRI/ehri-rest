@@ -1,5 +1,5 @@
 # Docker file for EHRI backend web service
-FROM neo4j:3.5.28
+FROM docker.io/neo4j:3.5.28
 
 # Set git commit build revision as a label which
 # we can inspect to figure out the image version.
