@@ -21,11 +21,16 @@ package eu.ehri.project.models;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertEquals;
 
@@ -69,5 +74,13 @@ public class GroupTest extends AbstractFixtureTest {
         // All users should be mike, veerle, tim (inherited)
         List<?> userProfileList = toList(admin.getAllUserProfileMembers());
         assertEquals(3, userProfileList.size());
+    }
+
+    @Test
+    public void testSetMembers() throws Exception {
+        Group admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+        Set<String> members = StreamSupport.stream(admin.getAllUserProfileMembers().spliterator(), false)
+                .map(Entity::getId).collect(Collectors.toSet());
+        assertEquals(members, Sets.newHashSet("mike", "veerle", "tim"));
     }
 }

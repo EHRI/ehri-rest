@@ -315,6 +315,29 @@ public class ApiImpl implements Api {
                         accessor.as(Actioner.class), EventTypes.removeGroup)
                         .addSubjects(userOrGroup.as(Accessible.class)));
             }
+
+            @Override
+            public void setMembers(Group group, Set<Accessor> usersOrGroups) throws PermissionDenied {
+                if (Group.ADMIN_GROUP_IDENTIFIER.equals(group.getId())) {
+                    throw new PermissionDenied("This function cannot be used for the admin group");
+                }
+                for (Accessor newAccessor : usersOrGroups) {
+                    ensureCanModifyGroupMembership(group, newAccessor, accessor);
+                }
+                Set<Accessor> existing = Sets.newHashSet();
+                for (Accessor current : group.getMembers()) {
+                    if (!usersOrGroups.contains(current)) {
+                        removeAccessorFromGroup(group, current);
+                    } else {
+                        existing.add(current);
+                    }
+                }
+                for (Accessor newAccessor : usersOrGroups) {
+                    if (!existing.contains(newAccessor)) {
+                        addAccessorToGroup(group, newAccessor);
+                    }
+                }
+            }
         };
     }
 

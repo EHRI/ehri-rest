@@ -39,7 +39,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Provides a web service interface for the Group model.
@@ -145,6 +147,32 @@ public class GroupResource
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
             api().acl().removeAccessorFromGroup(group, accessor);
+            tx.success();
+        }
+    }
+
+    /**
+     * Add a set of accessors (users or groups) to another group.
+     * You can't use this on the admin group, and you can't remove
+     * yourself from a group this way.
+     *
+     * @param id      the group ID
+     * @param members a list of group member IDs
+     * @throws ItemNotFound     if an item does not exist
+     * @throws PermissionDenied if the user cannot perform the action
+     */
+    @POST
+    @Path("{id:[^/]+}/list")
+    public void setMembers(@PathParam("id") String id,
+                           @QueryParam(MEMBER_PARAM) List<String> members)
+            throws PermissionDenied, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
+            Set<Accessor> newMembers = members.stream()
+                    .map(userId -> manager.getEntityUnchecked(userId, Accessor.class))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            api().acl().setMembers(group, newMembers);
             tx.success();
         }
     }

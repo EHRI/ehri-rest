@@ -101,7 +101,7 @@ public class UserAdd extends BaseCommand {
         }
 
         Bundle bundle = Bundle.of(EntityClass.USER_PROFILE,
-                Maps.<String, Object>newHashMap())
+                Maps.newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, userId)
                 .withDataValue(Ontology.NAME_KEY, userName);
         String nodeId = EntityClass.USER_PROFILE.getIdGen()

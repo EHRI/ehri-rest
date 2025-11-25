@@ -314,7 +314,7 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Set a value in the bundle's meta data.
+     * Set a value in the bundle's metadata.
      *
      * @param key   The metadata key
      * @param value The metadata value
@@ -382,7 +382,7 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Set the entire meta data map for this bundle.
+     * Set the entire metadata map for this bundle.
      *
      * @param meta The full metadata map to set
      * @return The new bundle
