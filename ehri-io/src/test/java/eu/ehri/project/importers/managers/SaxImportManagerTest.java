@@ -19,25 +19,58 @@
 
 package eu.ehri.project.importers.managers;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.IOHelpers;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.junit.Test;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 public class SaxImportManagerTest extends AbstractImporterTest {
+
+    @Test
+    public void testImportInferHierarchy() throws Exception {
+        final ImmutableMap<String, String> map = ImmutableMap.of(
+                "1c.xml", Resources.getResource("infer1c.xml").toURI().toString(),
+                "1c/1s.xml", Resources.getResource("infer1s.xml").toURI().toString(),
+                "1c/1s/1f.xml", Resources.getResource("infer1f.xml").toURI().toString(),
+                "2c.xml", Resources.getResource("infer2c.xml").toURI().toString()
+        );
+        JsonMapper mapper = new JsonMapper();
+        byte[] buf = mapper.writer().writeValueAsBytes(map);
+        InputStream stream = new ByteArrayInputStream(buf);
+
+        SaxImportManager importer = saxImportManager(EadImporter.class, EadHandler.class,
+                ImportOptions.basic().withImportHierarchy(true));
+        ImportLog log = importer.importJson(stream, "Testing Hierarchy Import");
+        assertEquals(4, log.getCreated());
+
+        String[] ids = {"nl-r1-1c", "nl-r1-1c-1s", "nl-r1-1c-1s-1f", "nl-r1-2c"};
+        for (String id : ids) {
+            assertThat(manager.getEntityUnchecked(id, DocumentaryUnit.class), notNullValue());
+        }
+    }
 
     @Test
     public void testImportZipArchive() throws Exception {

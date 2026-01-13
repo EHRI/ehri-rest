@@ -93,11 +93,13 @@ public class ImportResource extends AbstractResource {
     public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String USE_SOURCE_ID_PARAM = "use-source-id";
+    public static final String FONDS_PARAM = "fonds";
     public static final String HANDLER_PARAM = "handler";
     public static final String TAG_PARAM = "tag";
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
+    public static final String INFER_HIERARCHY_PARAM = "infer-hierarchy";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -245,11 +247,12 @@ public class ImportResource extends AbstractResource {
     @Path("ead")
     public ImportLog importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @DefaultValue("false") @QueryParam(USE_SOURCE_ID_PARAM) Boolean useSourceId,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
+            @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
+            @QueryParam(INFER_HIERARCHY_PARAM) @DefaultValue("false") Boolean inferHierarchy,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -268,6 +271,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     useSourceId,
                     defaultLang,
+                    inferHierarchy,
                     propertyFile
             );
             ImportManager importManager = SaxImportManager.create(
@@ -339,12 +343,13 @@ public class ImportResource extends AbstractResource {
     @Path("ead-sync")
     public SyncLog syncEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @QueryParam("fonds") String fonds,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @DefaultValue("false") @QueryParam(USE_SOURCE_ID_PARAM) Boolean useSourceId,
+            @QueryParam(FONDS_PARAM) String fonds,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
+            @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
+            @QueryParam(INFER_HIERARCHY_PARAM) @DefaultValue("false") Boolean inferHierarchy,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -369,7 +374,7 @@ public class ImportResource extends AbstractResource {
 
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, propertyFile);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, inferHierarchy, propertyFile);
             SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
@@ -417,6 +422,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     defaultLang,
+                    false,
                     nameOrDefault(propertyFile, "eag.properties")
             );
             ImportManager importManager = SaxImportManager.create(
@@ -466,6 +472,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     defaultLang,
+                    false,
                     nameOrDefault(propertyFile, "eac.properties")
             );
             ImportManager importManager = SaxImportManager.create(
@@ -513,6 +520,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     lang,
+                    false,
                     null
             );
             ImportManager importManager = CsvImportManager.create(

@@ -80,7 +80,7 @@ public interface ImportManager {
     /**
      * Import multiple files via a list of file paths.
      *
-     * @param json       a JSON-format stream in the form of a object
+     * @param json       a JSON-format stream in the form of an object
      *                   consisting of name/URL key/values
      * @param logMessage an optional log message to describe the import
      * @return an ImportLog for the given stream

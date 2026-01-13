@@ -16,10 +16,11 @@ public class ImportOptions {
     public final boolean updates;
     public final String defaultLang;
     public final boolean useSourceId;
+    public final boolean inferHierarchy;
     public final XmlImportProperties properties;
 
     public static ImportOptions properties(String properties) {
-        return create(false, false, false, null, properties);
+        return create(false, false, false, null, false, properties);
     }
 
     /**
@@ -28,26 +29,28 @@ public class ImportOptions {
      * @return an options object
      */
     public static ImportOptions basic() {
-        return create(false, false, false, null, (String) null);
+        return create(false, false, false, null, false, null);
     }
 
-    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, String properties) {
+    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, boolean inferHierarchy, String properties) {
         this(
                 tolerant,
                 updates,
                 useSourceId,
                 Optional.ofNullable(defaultLang).orElse(config.getString("io.import.defaultLang")),
+                inferHierarchy,
                 properties == null
                         ? new XmlImportProperties(config.getString("io.import.defaultProperties"))
                         : new XmlImportProperties(properties)
         );
     }
 
-    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, XmlImportProperties properties) {
+    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, boolean inferHierarchy, XmlImportProperties properties) {
         this.tolerant = tolerant;
         this.updates = updates;
         this.useSourceId = useSourceId;
         this.defaultLang = defaultLang;
+        this.inferHierarchy = inferHierarchy;
         this.properties = properties;
     }
 
@@ -63,30 +66,34 @@ public class ImportOptions {
      * @param properties   a property mapping configuration
      * @return an options object
      */
-    public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, String properties) {
-        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, properties);
+    public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, boolean inferHierarchy, String properties) {
+        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, inferHierarchy, properties);
     }
 
     public ImportOptions withProperties(String properties) {
         XmlImportProperties props = properties == null
                 ? new XmlImportProperties(config.getString("io.import.defaultProperties"))
                 : new XmlImportProperties(properties);
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, props);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, props);
     }
 
     public ImportOptions withUpdates(boolean updates) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, properties);
     }
 
     public ImportOptions withDefaultLang(String lang) {
-        return new ImportOptions(tolerant, updates, useSourceId, lang, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, lang, inferHierarchy, properties);
     }
 
     public ImportOptions withTolerant(boolean tolerant) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, properties);
     }
 
     public ImportOptions withUseSourceId(boolean merging) {
-        return new ImportOptions(tolerant, updates, merging, defaultLang, properties);
+        return new ImportOptions(tolerant, updates, merging, defaultLang, inferHierarchy, properties);
+    }
+
+    public ImportOptions withImportHierarchy(boolean inferHierarchy) {
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, properties);
     }
 }

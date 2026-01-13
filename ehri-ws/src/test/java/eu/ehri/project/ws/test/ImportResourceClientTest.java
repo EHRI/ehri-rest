@@ -111,6 +111,30 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
+    public void testImportEadViaJsonUrlMapWithInferHierarchy() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(ImmutableMap.of(
+                "test-doc.xml", Resources.getResource("ead.xml").toURI().toString(),
+                "test-doc/hierarchy.xml", Resources.getResource("hierarchical-ead.xml").toURI().toString()
+        ));
+
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(INFER_HIERARCHY_PARAM, true)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(6, log.getCreated());
+        assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
+    }
+
+    @Test
     public void testImportEadViaLocalPaths() throws Exception {
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);

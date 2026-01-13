@@ -25,8 +25,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
@@ -52,7 +55,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Base ImportManager.
@@ -72,6 +79,8 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     protected String currentFile;
     protected Integer currentPosition;
+    protected PermissionScope currentPermissionScope;
+    protected final Map<String, PermissionScope> permissionScopeCache = Maps.newHashMap();
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
     private int consecutiveIoErrors = 0;
 
@@ -80,7 +89,7 @@ public abstract class AbstractImportManager implements ImportManager {
      *
      * @param graph         the framed graph
      * @param scope         the permission scope
-     * @param actioner      the actioner
+     * @param actioner      the user or group performing the action
      * @param importerClass the class of the item importer object
      * @param options       an import options instance
      */
@@ -93,6 +102,7 @@ public abstract class AbstractImportManager implements ImportManager {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
+        this.currentPermissionScope = scope;
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.options = options;
@@ -155,6 +165,9 @@ public abstract class AbstractImportManager implements ImportManager {
 
             for (int i = 1; (currentFile = parser.nextFieldName()) != null; i++) {
                 URL url = new URL(parser.nextTextValue());
+                if (options.inferHierarchy) {
+                    currentPermissionScope = getNextPermissionScope(currentFile);
+                }
 
                 try (InputStream stream = readUrl(url, 0)) {
                     logger.info("Importing URL {} with identifier: {}", i, currentFile);
@@ -370,5 +383,26 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private boolean isSlowDownError(IOException e) {
         return e.getMessage().contains("Server returned HTTP response code: 503");
+    }
+
+    private PermissionScope getNextPermissionScope(String currentFile) {
+        final List<String> localIds = Splitter.on('/').splitToList(currentFile);
+        if (localIds.size() == 1) {
+            return permissionScope;
+        } else {
+            String parentLocalId = localIds.get(localIds.size() - 2);
+            return permissionScopeCache.computeIfAbsent(parentLocalId, local -> {
+                final List<Accessible> collect = StreamSupport.stream(permissionScope.getAllContainedItems().spliterator(), false)
+                        .filter(s -> s.getProperty(Ontology.IDENTIFIER_KEY).equals(local))
+                        .collect(Collectors.toList());
+                if (collect.size() > 1) {
+                    throw new RuntimeException("Hierarchy local identifiers are not unique.");
+                } else if (collect.isEmpty()) {
+                    throw new RuntimeException(String.format("Hierarchy local identifier '%s' not found in scope: %s", local, permissionScope.getId()));
+                } else {
+                    return collect.get(0).as(PermissionScope.class);
+                }
+            });
+        }
     }
 }
