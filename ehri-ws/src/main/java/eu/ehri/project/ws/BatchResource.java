@@ -20,7 +20,6 @@
 package eu.ehri.project.ws;
 
 import com.google.common.base.Charsets;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -30,6 +29,7 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +62,11 @@ public class BatchResource extends AbstractResource {
      * Update a batch of items via JSON containing (partial)
      * data bundles.
      *
-     * @param scope       the ID of there item's permission scope
+     * @param scope       the ID of the item's permission scope
      * @param tolerant    whether to allow individual validation failures
      * @param version     whether to create a version prior to delete
      * @param log         an optional log message
-     * @param commit  actually change the graph
+     * @param commit      actually change the graph
      * @param inputStream a JSON document containing partial bundles containing
      *                    the needed data transformations
      * @return an import log describing the changes committed
@@ -105,12 +105,12 @@ public class BatchResource extends AbstractResource {
     /**
      * Delete a batch of objects via JSON containing their IDs.
      *
-     * @param scope   the ID of there item's permission scope
-     * @param version whether to create a version prior to delete
-     * @param log     an optional log message.
+     * @param scope    the ID of there item's permission scope
+     * @param version  whether to create a version prior to delete
+     * @param log      an optional log message.
      * @param tolerant don't abort on individual errors
-     * @param commit  actually change the graph
-     * @param ids a table containing IDs to delete
+     * @param commit   actually change the graph
+     * @param ids      a table containing IDs to delete
      * @return the number of items deleted
      * @throws IOException          if an error occurs reading the stream
      * @throws DeserializationError if the input data is not well-formed

@@ -19,9 +19,15 @@
 
 package eu.ehri.project.ws;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -63,18 +69,18 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.io.BufferedInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -93,11 +99,13 @@ public class ImportResource extends AbstractResource {
     public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String USE_SOURCE_ID_PARAM = "use-source-id";
+    public static final String FONDS_PARAM = "fonds";
     public static final String HANDLER_PARAM = "handler";
     public static final String TAG_PARAM = "tag";
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
+    public static final String HIERARCHY_FILE = "hierarchy-file";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -245,11 +253,12 @@ public class ImportResource extends AbstractResource {
     @Path("ead")
     public ImportLog importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @DefaultValue("false") @QueryParam(USE_SOURCE_ID_PARAM) Boolean useSourceId,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
+            @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
+            @QueryParam(HIERARCHY_FILE) URI hierarchyFile,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -261,6 +270,11 @@ public class ImportResource extends AbstractResource {
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
 
+            // Read the hierarchy map, if given
+            Map<String, String> hierarchyMap = hierarchyFile != null
+                    ? readHierarchyTsv(uriToString(hierarchyFile))
+                    : null;
+
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
             ImportOptions options = ImportOptions.create(
@@ -268,6 +282,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     useSourceId,
                     defaultLang,
+                    hierarchyMap,
                     propertyFile
             );
             ImportManager importManager = SaxImportManager.create(
@@ -339,12 +354,13 @@ public class ImportResource extends AbstractResource {
     @Path("ead-sync")
     public SyncLog syncEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @QueryParam("fonds") String fonds,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @DefaultValue("false") @QueryParam(USE_SOURCE_ID_PARAM) Boolean useSourceId,
+            @QueryParam(FONDS_PARAM) String fonds,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
+            @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
+            @QueryParam(HIERARCHY_FILE) URI hierarchyFile,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -367,9 +383,14 @@ public class ImportResource extends AbstractResource {
                     ? scope
                     : manager.getEntity(fonds, PermissionScope.class);
 
+            // Read the hierarchy map, if given
+            Map<String, String> hierarchyMap = hierarchyFile != null
+                    ? readHierarchyTsv(uriToString(hierarchyFile))
+                    : null;
+
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, propertyFile);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, hierarchyMap, propertyFile);
             SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
@@ -417,6 +438,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     defaultLang,
+                    null,
                     nameOrDefault(propertyFile, "eag.properties")
             );
             ImportManager importManager = SaxImportManager.create(
@@ -466,6 +488,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     defaultLang,
+                    null,
                     nameOrDefault(propertyFile, "eac.properties")
             );
             ImportManager importManager = SaxImportManager.create(
@@ -513,6 +536,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     lang,
+                    null,
                     null
             );
             ImportManager importManager = CsvImportManager.create(
@@ -748,5 +772,45 @@ public class ImportResource extends AbstractResource {
 
     private static String nameOrDefault(String name, String defaultName) {
         return (name == null || name.trim().isEmpty()) ? defaultName : name;
+    }
+
+    private static Map<String, String> readHierarchyTsv(String tsvText) throws IOException {
+        // Build a schema for header-less TSV
+        final CsvSchema hierarchyReaderSchema = CsvSchema.emptySchema()
+                .withoutHeader()
+                .withLineSeparator("\n")
+                .withColumnSeparator('\t');
+        CsvMapper mapper = new CsvMapper();
+        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        Map<String, String> data = Maps.newHashMap();
+        try (MappingIterator<String[]> iterator = mapper
+                .readerFor(String[].class)
+                .with(hierarchyReaderSchema)
+                .readValues(tsvText) ) {
+            int rowNum = 1;
+            while (iterator.hasNext()) {
+                final String[] row = iterator.next();
+                String id = row[0];
+                if (row.length > 2) {
+                    throw new ImportHierarchyMapError(
+                            String.format("Hierarchy file error: TSV row %d contains more than 2 values", rowNum));
+                }
+                if (row.length > 1 && row[1] != null) {
+                    String parent = row[1].isEmpty() ? null : row[1];
+                    data.put(id, parent);
+                }
+                rowNum++;
+            }
+            return data;
+        }
+    }
+
+    private static String uriToString(URI uri) throws IOException {
+        try (InputStream s = uri.toURL().openStream()) {
+            return new BufferedReader(
+                    new InputStreamReader(s, StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+        }
     }
 }

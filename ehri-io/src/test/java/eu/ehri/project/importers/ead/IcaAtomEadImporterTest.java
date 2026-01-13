@@ -45,7 +45,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "hierarchical-ead.xml";
 
     // Depends on hierarchical-ead.xml
-    protected final String FONDS_LEVEL = "Ctop level fonds";
+    protected final String FONDS_LEVEL = "Ctop_level_fonds";
     protected final String SUBFONDS_LEVEL = "C00001";
     protected final String C2 = "C00002";
     protected final String C2_1 = "C00002-1";

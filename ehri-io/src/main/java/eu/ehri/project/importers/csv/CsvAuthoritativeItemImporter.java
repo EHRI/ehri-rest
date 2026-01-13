@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
@@ -55,23 +56,25 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
-    public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
+    public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScopeFinder scopeFinder,
                                         Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, options, log);
+        super(framedGraph, scopeFinder, actioner, options, log);
     }
 
     @Override
     public AuthoritativeItem importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
+        final BundleManager bundleManager = getBundleManager(localId);
         Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<AuthoritativeItem> mutation = persister.createOrUpdate(unit, AuthoritativeItem.class);
+        Mutation<AuthoritativeItem> mutation = bundleManager.createOrUpdate(unit, AuthoritativeItem.class);
         AuthoritativeItem frame = mutation.getNode();
 
+        final PermissionScope permissionScope = scopeFinder.apply(localId);
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
