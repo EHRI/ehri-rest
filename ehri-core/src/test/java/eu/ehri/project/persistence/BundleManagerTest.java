@@ -81,14 +81,13 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test
-    public void testSaving() throws SerializationError, ValidationError,
-            IntegrityError, ItemNotFound {
+    public void testSaving() throws SerializationError, ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getEntity(ID, DocumentaryUnit.class);
         assertEquals(2, toList(c1.getDescriptions()).size());
 
         Bundle bundle = serializer.entityToBundle(c1);
-        BundleManager persister = new BundleManager(graph);
-        Mutation<DocumentaryUnit> c1redux = persister.update(bundle,
+        BundleManager bundleManager = new BundleManager(graph);
+        Mutation<DocumentaryUnit> c1redux = bundleManager.update(bundle,
                 DocumentaryUnit.class);
 
         assertEquals(toList(c1.getDescriptions()),
@@ -96,14 +95,13 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test
-    public void testSavingAgent() throws SerializationError, ValidationError,
-            IntegrityError, ItemNotFound {
+    public void testSavingAgent() throws SerializationError, ValidationError, ItemNotFound {
         Repository r1 = manager.getEntity("r1", Repository.class);
         assertEquals(1, toList(r1.getDescriptions()).size());
 
         Bundle bundle = serializer.entityToBundle(r1);
-        BundleManager persister = new BundleManager(graph);
-        Mutation<Repository> r1redux = persister.update(bundle, Repository.class);
+        BundleManager bundleManager = new BundleManager(graph);
+        Mutation<Repository> r1redux = bundleManager.update(bundle, Repository.class);
 
         assertEquals(toList(r1.getDescriptions()),
                 toList(r1redux.getNode().getDescriptions()));
@@ -126,8 +124,8 @@ public class BundleManagerTest extends ModelTestBase {
 
         // Restore the item from JSON
         Bundle bundle = Bundle.fromString(json);
-        BundleManager persister = new BundleManager(graph);
-        persister.update(bundle, DocumentaryUnit.class);
+        BundleManager bundleManager = new BundleManager(graph);
+        bundleManager.update(bundle, DocumentaryUnit.class);
 
         // Our deleted description should have come back...
         assertEquals(2, toList(c1.getDescriptions()).size());
@@ -151,8 +149,8 @@ public class BundleManagerTest extends ModelTestBase {
 
         // Delete the *second* date period from the first description...
         Bundle newBundle = DataUtils.deleteItem(bundle, deletePath);
-        BundleManager persister = new BundleManager(graph);
-        Mutation<DocumentaryUnit> mutation = persister.update(newBundle, DocumentaryUnit.class);
+        BundleManager bundleManager = new BundleManager(graph);
+        Mutation<DocumentaryUnit> mutation = bundleManager.update(newBundle, DocumentaryUnit.class);
 
         assertEquals(MutationState.UPDATED, mutation.getState());
 
@@ -187,8 +185,8 @@ public class BundleManagerTest extends ModelTestBase {
         List<DatePeriod> dates = toList(manager.getEntities(
                 EntityClass.DATE_PERIOD, DatePeriod.class));
 
-        BundleManager persister = new BundleManager(graph);
-        Integer numDeleted = persister.delete(bundle);
+        BundleManager bundleManager = new BundleManager(graph);
+        Integer numDeleted = bundleManager.delete(bundle);
         assertTrue(numDeleted > 0);
         assertEquals(
                 dates.size() - 2,
@@ -207,8 +205,8 @@ public class BundleManagerTest extends ModelTestBase {
         Bundle desc = DataUtils.getItem(bundle, "describes[0]");
         Bundle newBundle = desc.removeDataValue(Ontology.NAME_KEY);
 
-        BundleManager persister = new BundleManager(graph);
-        persister.update(newBundle, DocumentaryUnit.class);
+        BundleManager bundleManager = new BundleManager(graph);
+        bundleManager.update(newBundle, DocumentaryUnit.class);
         fail("Bundle with no description name did not throw a ValidationError");
     }
 
@@ -218,8 +216,8 @@ public class BundleManagerTest extends ModelTestBase {
         Bundle b1 = Bundle.fromData(TestData.getTestAgentBundle())
                 .removeDataValue(Ontology.IDENTIFIER_KEY);
 
-        BundleManager persister = new BundleManager(graph);
-        persister.update(b1, Repository.class);
+        BundleManager bundleManager = new BundleManager(graph);
+        bundleManager.update(b1, Repository.class);
         fail("Attempting to update a non-existent bundle did not throw an error");
     }
 

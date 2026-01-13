@@ -239,7 +239,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                         }
                     }
                 } catch (ValidationError ex) {
-                    logger.error("caught validation error: " + ex.getMessage());
+                    logger.error("caught validation error: {}", ex.getMessage());
                 } finally {
                     depth--;
                     scopeIds.pop();

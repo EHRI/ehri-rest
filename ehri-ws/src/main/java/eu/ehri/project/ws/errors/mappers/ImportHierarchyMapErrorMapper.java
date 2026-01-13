@@ -17,40 +17,20 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers.exceptions;
+package eu.ehri.project.ws.errors.mappers;
 
-/**
- * The input data supplied was invalid in some way, detailed by @param cause.
- */
-public class InputParseError extends Exception {
+import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
+import eu.ehri.project.ws.errors.WebDeserializationError;
 
-    private static final long serialVersionUID = -1572846616664011336L;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
-    /**
-     * Constructor.
-     *
-     * @param cause the root exception
-     */
-    public InputParseError(Throwable cause) {
-        super(cause);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param message a description of the error
-     */
-    public InputParseError(String message) {
-        super(message);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param message a description of the error
-     * @param cause the root exception
-     */
-    public InputParseError(String message, Throwable cause) {
-        super(message, cause);
+@Provider
+public class ImportHierarchyMapErrorMapper implements ExceptionMapper<ImportHierarchyMapError> {
+    @Override
+    public Response toResponse(ImportHierarchyMapError e) {
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
     }
 }

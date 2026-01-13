@@ -43,7 +43,7 @@
             <did>
 					<unittitle encodinganalog="3.1.2">Test EAD Item</unittitle>
 					<unitid repositorycode="GB00001" countrycode="GB"
-						encodinganalog="3.1.1">Ctop level fonds</unitid>
+						encodinganalog="3.1.1">Ctop_level_fonds</unitid>
                 
             </did>
 		<dsc type="combined">

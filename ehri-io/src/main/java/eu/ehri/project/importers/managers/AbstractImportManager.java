@@ -28,9 +28,12 @@ import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.DynamicPermissionScopeFinder;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.StaticPermissionScopeFinder;
 import eu.ehri.project.importers.base.ItemImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
@@ -61,7 +64,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private static final int MAX_RETRIES = 3;
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
-    private final JsonFactory factory = new JsonFactory();
+    private static final JsonFactory factory = new JsonFactory();
 
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
@@ -72,6 +75,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     protected String currentFile;
     protected Integer currentPosition;
+    protected PermissionScopeFinder scopeFinder;
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
     private int consecutiveIoErrors = 0;
 
@@ -80,7 +84,7 @@ public abstract class AbstractImportManager implements ImportManager {
      *
      * @param graph         the framed graph
      * @param scope         the permission scope
-     * @param actioner      the actioner
+     * @param actioner      the user or group performing the action
      * @param importerClass the class of the item importer object
      * @param options       an import options instance
      */
@@ -96,6 +100,12 @@ public abstract class AbstractImportManager implements ImportManager {
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.options = options;
+
+        if (options.hierarchyMap != null) {
+            this.scopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyMap);
+        } else {
+            this.scopeFinder = new StaticPermissionScopeFinder(scope);
+        }
     }
 
     /**
@@ -155,9 +165,9 @@ public abstract class AbstractImportManager implements ImportManager {
 
             for (int i = 1; (currentFile = parser.nextFieldName()) != null; i++) {
                 URL url = new URL(parser.nextTextValue());
-
                 try (InputStream stream = readUrl(url, 0)) {
                     logger.info("Importing URL {} with identifier: {}", i, currentFile);
+
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());

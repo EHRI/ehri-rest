@@ -623,7 +623,7 @@ public class ToolsResource extends AbstractResource {
      * ID. The item will be re-parented and a new global ID regenerated.
      *
      * @param commit  actually commit changes
-     * @param mapping a comma-separated CSV file, exluding headers.
+     * @param mapping a comma-separated CSV file, excluding headers.
      * @return CSV data containing two columns: the old global ID, and
      * a newly generated global ID, derived from the new hierarchy.
      * @throws DeserializationError if the input data is not well-formed

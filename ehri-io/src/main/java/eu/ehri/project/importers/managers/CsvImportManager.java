@@ -29,7 +29,9 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.StaticPermissionScopeFinder;
 import eu.ehri.project.importers.base.ItemImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.base.Actioner;
@@ -79,8 +81,8 @@ public class CsvImportManager extends AbstractImportManager {
 
         try {
             ItemImporter<?,?> importer = importerClass
-                    .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportOptions.class, ImportLog.class)
-                    .newInstance(framedGraph, permissionScope, actioner, options, log);
+                    .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
+                    .newInstance(framedGraph, new StaticPermissionScopeFinder(permissionScope), actioner, options, log);
             logger.trace("importer of class {}", importer.getClass());
 
             importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));

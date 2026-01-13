@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9">
+    <eadheader>
+        <eadid>1f</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Minimal EAD 1 - File</titleproper>
+            </titlestmt>
+        </filedesc>
+    </eadheader>
+    <archdesc level="file">
+        <did>
+            <unitid>1f</unitid>
+            <unittitle>Minimal File</unittitle>
+        </did>
+    </archdesc>
+</ead>

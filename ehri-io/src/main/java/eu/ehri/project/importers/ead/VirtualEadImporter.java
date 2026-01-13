@@ -27,6 +27,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -68,42 +69,38 @@ public class VirtualEadImporter extends EadImporter {
     private static final String REPOID = "vcRepository";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
-    public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
+    public VirtualEadImporter(FramedGraph<?> graph, PermissionScopeFinder scopeFinder,
                               Actioner actioner, ImportOptions options, ImportLog log) {
-        super(graph, permissionScope, actioner, options, log);
+        super(graph, scopeFinder, actioner, options, log);
     }
 
     @Override
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
-        BundleManager persister = getPersister(idPath);
-
         Bundle unit = Bundle.of(EntityClass.VIRTUAL_UNIT, extractVirtualUnit(itemData));
 
         if (isVirtualLevel(itemData)) {
-            // Check for missing identifier, throw an exception when there is no ID.
-            if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
-                throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
-                        "Missing identifier " + Ontology.IDENTIFIER_KEY);
-            }
-            logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
+            final String localId = getLocalIdentifier(unit);
+            PermissionScope localScope = scopeFinder.apply(localId);
 
+            BundleManager bundleManager = getBundleManager(localScope, idPath);
             Bundle description = getDescription(itemData);
 
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
-            Mutation<VirtualUnit> mutation = persister.createOrUpdate(unit, VirtualUnit.class);
+            Mutation<VirtualUnit> mutation = bundleManager.createOrUpdate(unit, VirtualUnit.class);
             VirtualUnit frame = mutation.getNode();
+            logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
             // Set the repository/item relationship
             //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
             if (idPath.isEmpty() && mutation.created()) {
-                EntityClass scopeType = manager.getEntityClass(permissionScope);
+                EntityClass scopeType = manager.getEntityClass(localScope);
                 if (scopeType.equals(EntityClass.USER_PROFILE)) {
-                    UserProfile responsibleUser = permissionScope.as(UserProfile.class);
+                    UserProfile responsibleUser = localScope.as(UserProfile.class);
                     frame.setAuthor(responsibleUser);
-                    //the top Virtual Unit does not have a permissionScope. 
+                    //the top Virtual Unit does not have a localScope.
                 } else if (scopeType.equals(EntityClass.VIRTUAL_UNIT)) {
-                    VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
+                    VirtualUnit parent = framedGraph.frame(localScope.asVertex(), VirtualUnit.class);
                     parent.addChild(frame);
                     frame.setPermissionScope(parent);
                 } else {
@@ -152,7 +149,7 @@ public class VirtualEadImporter extends EadImporter {
         return list;
     }
 
-    private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
+    private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) {
         Map<String, Object> unit = Maps.newHashMap();
         if (itemData.get(OBJECT_IDENTIFIER) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));

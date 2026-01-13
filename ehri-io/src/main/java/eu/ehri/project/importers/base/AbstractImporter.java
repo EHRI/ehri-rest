@@ -24,6 +24,8 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ErrorCallback;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
@@ -31,14 +33,16 @@ import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
+import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.persistence.Mutation;
 
 import java.util.List;
 
 public abstract class AbstractImporter<I, T extends Accessible> implements ItemImporter<I, T> {
 
-    protected final PermissionScope permissionScope;
+    protected final PermissionScopeFinder scopeFinder;
     protected final Actioner actioner;
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
@@ -58,34 +62,30 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
         }
     }
 
-    public PermissionScope getPermissionScope() {
-        return permissionScope;
-    }
-
     public Actioner getActioner() {
         return actioner;
     }
 
-    protected BundleManager getPersister(List<String> scopeIds) {
+    protected BundleManager getBundleManager(PermissionScope localScope, List<String> scopeIds) {
         return new BundleManager(framedGraph,
-                Lists.newArrayList(Iterables.concat(permissionScope.idPath(), scopeIds)));
+                Lists.newArrayList(Iterables.concat(localScope.idPath(), scopeIds)));
     }
 
-    public BundleManager getPersister() {
-        return new BundleManager(framedGraph, permissionScope.idPath());
+    public BundleManager getBundleManager(String localId) {
+        return new BundleManager(framedGraph, scopeFinder.apply(localId).idPath());
     }
 
     /**
      * Constructor.
      *
-     * @param graph    the framed graph
-     * @param scope    the permission scope
-     * @param actioner the user performing the import
-     * @param options  the import options
-     * @param log      the log object
+     * @param graph       the framed graph
+     * @param scopeFinder the permission scope finder
+     * @param actioner    the user performing the import
+     * @param options     the import options
+     * @param log         the log object
      */
-    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, Actioner actioner, ImportOptions options, ImportLog log) {
-        this.permissionScope = scope;
+    public AbstractImporter(FramedGraph<?> graph, PermissionScopeFinder scopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
+        this.scopeFinder = scopeFinder;
         this.framedGraph = graph;
         this.actioner = actioner;
         this.log = log;
@@ -105,8 +105,24 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
 
     @Override
     public void handleError(Exception ex) {
-        for (ErrorCallback errorCallback: errorCallbacks) {
+        for (ErrorCallback errorCallback : errorCallbacks) {
             errorCallback.itemError(ex);
         }
+    }
+
+    /**
+     * Fetch the local identifier from the extracted data bundle.
+     *
+     * @param data a data bundle
+     * @return identifier string
+     * @throws ValidationError if the identifier is not found
+     */
+    protected static String getLocalIdentifier(Bundle data) throws ValidationError {
+        final String localId = data.getDataValue(Ontology.IDENTIFIER_KEY);
+        if (localId == null) {
+            throw new ValidationError(data, Ontology.IDENTIFIER_KEY,
+                    Messages.getString("BundleValidator.missingField"));
+        }
+        return localId;
     }
 }

@@ -65,7 +65,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
     @Test
     public void testImportExport1() throws Exception {
         Repository repo = manager.getEntity("r1", Repository.class);
-        testImportExport(repo, "hierarchical-ead.xml", "Ctop level fonds", "eng");
+        testImportExport(repo, "hierarchical-ead.xml", "Ctop_level_fonds", "eng");
     }
 
     @Test

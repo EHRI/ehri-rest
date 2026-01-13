@@ -54,8 +54,8 @@ import java.util.Map;
 
 import static eu.ehri.project.ws.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.eclipse.jetty.util.LazyList.hasEntry;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -108,6 +108,79 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
         assertThat(log.getEventId().orElse(null), notNullValue());
+    }
+
+    @Test
+    public void testImportEadViaJsonUrlMapWithHierarchyFile() throws Exception {
+        String[] map = new String[] {
+                "test-doc\t",
+                "test-doc-2\ttest-doc",
+        };
+        String tsv = Joiner.on("\n").join(map);
+        URI hierarchyFile = getTestHierarchyFileUri(tsv);
+
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(ImmutableMap.of(
+                "ead.xml", Resources.getResource("ead.xml").toURI().toString(),
+                "ead2.xml", Resources.getResource("ead2.xml").toURI().toString()
+        ));
+
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(HIERARCHY_FILE, hierarchyFile)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertStatus(ClientResponse.Status.OK, response);
+        assertEquals(2, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
+        // NB: due to automatic prefix removal the child item will not contain two instances
+        // of 'test_doc', e.g. nl-nl-test_doc-test_doc_2
+        assertEquals("nl-r1-test_doc", log.getCreatedKeys().get("ead.xml").toArray()[0]);
+        assertEquals("nl-r1-test_doc-2", log.getCreatedKeys().get("ead2.xml").toArray()[0]);
+    }
+
+    @Test
+    public void testImportEadViaJsonUrlMapWithMixedHierarchy() throws Exception {
+        String[] map = new String[] {
+          "test-doc\t",
+          "Ctop_level_fonds\ttest-doc",
+          "C00001\tCtop_level_fonds",
+          "C00002\tCtop_level_fonds",
+          "C00002-1\tC00002",
+          "C00002-2\tC00002",
+        };
+        String tsv = Joiner.on("\n").join(map);
+        URI hierarchyFile = getTestHierarchyFileUri(tsv);
+
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(ImmutableMap.of(
+                "ead.xml", Resources.getResource(SINGLE_EAD).toURI().toString(),
+                "hierarchical-ead.xml", Resources.getResource(HIERARCHICAL_EAD).toURI().toString()
+        ));
+
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(HIERARCHY_FILE, hierarchyFile)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+        String output = response.getEntity(String.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
+        assertThat(rootNode.path("details").textValue(),
+                containsString("Hierarchy local identifier 'C00002' not found in scope"));
     }
 
     @Test
@@ -562,6 +635,13 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
             throws Exception {
         byte[] buf = jsonMapper.writer().writeValueAsBytes(data);
         return new ByteArrayInputStream(buf);
+    }
+
+    private URI getTestHierarchyFileUri(String text) throws IOException {
+        File temp = File.createTempFile("test-hierarchy", ".tsv");
+        temp.deleteOnExit();
+        FileUtils.writeStringToFile(temp, text, Charsets.UTF_8);
+        return temp.getAbsoluteFile().toURI();
     }
 
     private String getTestLogFilePath(String text) throws IOException {
