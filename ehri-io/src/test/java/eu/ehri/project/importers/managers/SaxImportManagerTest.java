@@ -20,7 +20,10 @@
 package eu.ehri.project.importers.managers;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
@@ -31,15 +34,18 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.IOHelpers;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,18 +57,27 @@ public class SaxImportManagerTest extends AbstractImporterTest {
 
     @Test
     public void testImportInferHierarchy() throws Exception {
-        final ImmutableMap<String, String> map = ImmutableMap.of(
-                "1c.xml", Resources.getResource("infer1c.xml").toURI().toString(),
-                "1c/1s.xml", Resources.getResource("infer1s.xml").toURI().toString(),
-                "1c/1s/1f.xml", Resources.getResource("infer1f.xml").toURI().toString(),
-                "2c.xml", Resources.getResource("infer2c.xml").toURI().toString()
+        final List<String> tsv = Lists.newArrayList(
+                "1c.xml\t\n",
+                "1s\t1c\n",
+                "1f\t1s\n",
+                "2c\t\n"
         );
+        URI hierarchyFile = hierarchyFileUri(Joiner.on("").join(tsv));
         JsonMapper mapper = new JsonMapper();
+
+        final ImmutableMap<String, String> map = ImmutableMap.of(
+               "1c.xml", Resources.getResource("infer1c.xml").toURI().toString(),
+               "1c/1s.xml", Resources.getResource("infer1s.xml").toURI().toString(),
+               "1c/1s/1f.xml", Resources.getResource("infer1f.xml").toURI().toString(),
+               "2c.xml", Resources.getResource("infer2c.xml").toURI().toString()
+        );
+
         byte[] buf = mapper.writer().writeValueAsBytes(map);
         InputStream stream = new ByteArrayInputStream(buf);
 
         SaxImportManager importer = saxImportManager(EadImporter.class, EadHandler.class,
-                ImportOptions.basic().withImportHierarchy(true));
+                ImportOptions.basic().withHierarchyUri(hierarchyFile));
         ImportLog log = importer.importJson(stream, "Testing Hierarchy Import");
         assertEquals(4, log.getCreated());
 
@@ -101,5 +116,12 @@ public class SaxImportManagerTest extends AbstractImporterTest {
                              .createArchiveInputStream(bis)) {
             return manager.importArchive(archiveInputStream, "Test");
         }
+    }
+
+    private URI hierarchyFileUri(String data) throws Exception {
+        File temp = File.createTempFile("hierarchy-file", ".tsv");
+        temp.deleteOnExit();
+        FileUtils.writeStringToFile(temp, data, Charsets.UTF_8);
+        return temp.toURI();
     }
 }

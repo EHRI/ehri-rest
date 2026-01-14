@@ -112,16 +112,18 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testImportEadViaJsonUrlMapWithInferHierarchy() throws Exception {
+        URI hierarchyFile = getTestHierarchyFileUri("test-doc\t\nfoobar\ttest-doc\n");
+
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(ImmutableMap.of(
-                "test-doc.xml", Resources.getResource("ead.xml").toURI().toString(),
-                "test-doc/hierarchy.xml", Resources.getResource("hierarchical-ead.xml").toURI().toString()
+                "ead.xml", Resources.getResource("ead.xml").toURI().toString(),
+                "foobar.xml", Resources.getResource("hierarchical-ead.xml").toURI().toString()
         ));
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
-                .queryParam(INFER_HIERARCHY_PARAM, true)
+                .queryParam(HIERARCHY_FILE, hierarchyFile)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.APPLICATION_JSON_TYPE)
@@ -586,6 +588,13 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
             throws Exception {
         byte[] buf = jsonMapper.writer().writeValueAsBytes(data);
         return new ByteArrayInputStream(buf);
+    }
+
+    private URI getTestHierarchyFileUri(String text) throws IOException {
+        File temp = File.createTempFile("test-hierarchy", ".tsv");
+        temp.deleteOnExit();
+        FileUtils.writeStringToFile(temp, text, Charsets.UTF_8);
+        return temp.getAbsoluteFile().toURI();
     }
 
     private String getTestLogFilePath(String text) throws IOException {

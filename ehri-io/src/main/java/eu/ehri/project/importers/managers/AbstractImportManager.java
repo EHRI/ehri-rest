@@ -23,6 +23,10 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -48,10 +52,10 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -68,7 +72,13 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private static final int MAX_RETRIES = 3;
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
-    private final JsonFactory factory = new JsonFactory();
+    private static final JsonFactory factory = new JsonFactory();
+
+     // Build a schema for headerless TSV
+     private static final CsvSchema hierarchyReaderSchema = CsvSchema.emptySchema()
+             .withoutHeader()
+             .withLineSeparator("\n")
+             .withColumnSeparator('\t');
 
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
@@ -80,6 +90,7 @@ public abstract class AbstractImportManager implements ImportManager {
     protected String currentFile;
     protected Integer currentPosition;
     protected PermissionScope currentPermissionScope;
+    protected Map<String, String> hierarchyCache = null;
     protected final Map<String, PermissionScope> permissionScopeCache = Maps.newHashMap();
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
     private int consecutiveIoErrors = 0;
@@ -157,6 +168,10 @@ public abstract class AbstractImportManager implements ImportManager {
                 throw new InputParseError("Stream should be an object of name/URL pairs, was: " + jsonToken);
             }
 
+            if (options.hierarchyFile != null) {
+                hierarchyCache = loadHierarchyCache();
+            }
+
             Optional<String> msg = getLogMessage(logMessage);
             ActionManager.EventContext action = new ActionManager(
                     framedGraph, permissionScope).newEventContext(actioner,
@@ -165,12 +180,12 @@ public abstract class AbstractImportManager implements ImportManager {
 
             for (int i = 1; (currentFile = parser.nextFieldName()) != null; i++) {
                 URL url = new URL(parser.nextTextValue());
-                if (options.inferHierarchy) {
-                    currentPermissionScope = getNextPermissionScope(currentFile);
-                }
-
                 try (InputStream stream = readUrl(url, 0)) {
                     logger.info("Importing URL {} with identifier: {}", i, currentFile);
+                    if (options.hierarchyFile != null) {
+                        currentPermissionScope = getNextPermissionScope(currentFile);
+                    }
+
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
@@ -386,11 +401,13 @@ public abstract class AbstractImportManager implements ImportManager {
     }
 
     private PermissionScope getNextPermissionScope(String currentFile) {
-        final List<String> localIds = Splitter.on('/').splitToList(currentFile);
-        if (localIds.size() == 1) {
+        String fileName = Paths.get(currentFile.split("\\?")[0]).getFileName().toString();
+        String baseName = fileName.endsWith(".xml") ? fileName.substring(0, fileName.length() - 4) : fileName;
+        System.out.println("Checking hierarchy cache " + hierarchyCache + " for " + baseName);
+        if (!hierarchyCache.containsKey(baseName)) {
             return permissionScope;
         } else {
-            String parentLocalId = localIds.get(localIds.size() - 2);
+            String parentLocalId = hierarchyCache.get(baseName);
             return permissionScopeCache.computeIfAbsent(parentLocalId, local -> {
                 final List<Accessible> collect = StreamSupport.stream(permissionScope.getAllContainedItems().spliterator(), false)
                         .filter(s -> s.getProperty(Ontology.IDENTIFIER_KEY).equals(local))
@@ -403,6 +420,35 @@ public abstract class AbstractImportManager implements ImportManager {
                     return collect.get(0).as(PermissionScope.class);
                 }
             });
+        }
+    }
+
+    private Map<String, String> loadHierarchyCache() {
+        CsvMapper mapper = new CsvMapper();
+        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        try (InputStream s = options.hierarchyFile.toURL().openStream()) {
+            Map<String, String> data = Maps.newHashMap();
+            String text = new BufferedReader(
+                    new InputStreamReader(s, StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+            try (MappingIterator<String[]> iterator = mapper
+                    .readerFor(String[].class)
+                    .with(hierarchyReaderSchema)
+                    .readValues(text) ) {
+
+                while (iterator.hasNext()) {
+                    final String[] row = iterator.next();
+                    String id = row[0];
+                    if (row.length > 1 && row[1] != null && !row[1].isEmpty()) {
+                        String parent = row[1];
+                        data.put(id, parent);
+                    }
+                }
+                return data;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

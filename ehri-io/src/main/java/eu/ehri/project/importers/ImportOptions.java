@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 
+import java.net.URI;
 import java.util.Optional;
 
 /**
@@ -16,11 +17,11 @@ public class ImportOptions {
     public final boolean updates;
     public final String defaultLang;
     public final boolean useSourceId;
-    public final boolean inferHierarchy;
+    public final URI hierarchyFile;
     public final XmlImportProperties properties;
 
     public static ImportOptions properties(String properties) {
-        return create(false, false, false, null, false, properties);
+        return create(false, false, false, null, null, properties);
     }
 
     /**
@@ -29,28 +30,28 @@ public class ImportOptions {
      * @return an options object
      */
     public static ImportOptions basic() {
-        return create(false, false, false, null, false, null);
+        return create(false, false, false, null, null, null);
     }
 
-    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, boolean inferHierarchy, String properties) {
+    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, URI hierarchyFile, String properties) {
         this(
                 tolerant,
                 updates,
                 useSourceId,
                 Optional.ofNullable(defaultLang).orElse(config.getString("io.import.defaultLang")),
-                inferHierarchy,
+                hierarchyFile,
                 properties == null
                         ? new XmlImportProperties(config.getString("io.import.defaultProperties"))
                         : new XmlImportProperties(properties)
         );
     }
 
-    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, boolean inferHierarchy, XmlImportProperties properties) {
+    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, URI hierarchyFile, XmlImportProperties properties) {
         this.tolerant = tolerant;
         this.updates = updates;
         this.useSourceId = useSourceId;
         this.defaultLang = defaultLang;
-        this.inferHierarchy = inferHierarchy;
+        this.hierarchyFile = hierarchyFile;
         this.properties = properties;
     }
 
@@ -66,34 +67,34 @@ public class ImportOptions {
      * @param properties   a property mapping configuration
      * @return an options object
      */
-    public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, boolean inferHierarchy, String properties) {
-        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, inferHierarchy, properties);
+    public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, URI hierarchyFile, String properties) {
+        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, hierarchyFile, properties);
     }
 
     public ImportOptions withProperties(String properties) {
         XmlImportProperties props = properties == null
                 ? new XmlImportProperties(config.getString("io.import.defaultProperties"))
                 : new XmlImportProperties(properties);
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, props);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, hierarchyFile, props);
     }
 
     public ImportOptions withUpdates(boolean updates) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, hierarchyFile, properties);
     }
 
     public ImportOptions withDefaultLang(String lang) {
-        return new ImportOptions(tolerant, updates, useSourceId, lang, inferHierarchy, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, lang, hierarchyFile, properties);
     }
 
     public ImportOptions withTolerant(boolean tolerant) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, hierarchyFile, properties);
     }
 
     public ImportOptions withUseSourceId(boolean merging) {
-        return new ImportOptions(tolerant, updates, merging, defaultLang, inferHierarchy, properties);
+        return new ImportOptions(tolerant, updates, merging, defaultLang, hierarchyFile, properties);
     }
 
-    public ImportOptions withImportHierarchy(boolean inferHierarchy) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, inferHierarchy, properties);
+    public ImportOptions withHierarchyUri(URI hierarchyFile) {
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, hierarchyFile, properties);
     }
 }

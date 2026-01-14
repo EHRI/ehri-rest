@@ -68,6 +68,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -99,7 +100,7 @@ public class ImportResource extends AbstractResource {
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
-    public static final String INFER_HIERARCHY_PARAM = "infer-hierarchy";
+    public static final String HIERARCHY_FILE = "hierarchy";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -252,7 +253,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
-            @QueryParam(INFER_HIERARCHY_PARAM) @DefaultValue("false") Boolean inferHierarchy,
+            @QueryParam(HIERARCHY_FILE) URI hierarchyFile,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -271,7 +272,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     useSourceId,
                     defaultLang,
-                    inferHierarchy,
+                    hierarchyFile,
                     propertyFile
             );
             ImportManager importManager = SaxImportManager.create(
@@ -349,7 +350,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
-            @QueryParam(INFER_HIERARCHY_PARAM) @DefaultValue("false") Boolean inferHierarchy,
+            @QueryParam(HIERARCHY_FILE) URI hierarchyFile,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -374,7 +375,7 @@ public class ImportResource extends AbstractResource {
 
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, inferHierarchy, propertyFile);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, hierarchyFile, propertyFile);
             SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
@@ -422,7 +423,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     defaultLang,
-                    false,
+                    null,
                     nameOrDefault(propertyFile, "eag.properties")
             );
             ImportManager importManager = SaxImportManager.create(
@@ -472,7 +473,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     defaultLang,
-                    false,
+                    null,
                     nameOrDefault(propertyFile, "eac.properties")
             );
             ImportManager importManager = SaxImportManager.create(
@@ -520,7 +521,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     false,
                     lang,
-                    false,
+                    null,
                     null
             );
             ImportManager importManager = CsvImportManager.create(
