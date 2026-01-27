@@ -27,6 +27,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -68,35 +69,36 @@ public class VirtualEadImporter extends EadImporter {
     private static final String REPOID = "vcRepository";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
-    public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
+    public VirtualEadImporter(FramedGraph<?> graph, PermissionScopeFinder permissionScopeFinder,
                               Actioner actioner, ImportOptions options, ImportLog log) {
-        super(graph, permissionScope, actioner, options, log);
+        super(graph, permissionScopeFinder, actioner, options, log);
     }
 
     @Override
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
-        BundleManager persister = getPersister(idPath);
-
         Bundle unit = Bundle.of(EntityClass.VIRTUAL_UNIT, extractVirtualUnit(itemData));
 
         if (isVirtualLevel(itemData)) {
             // Check for missing identifier, throw an exception when there is no ID.
-            if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+            final String localId = unit.getDataValue(Ontology.IDENTIFIER_KEY);
+            if (localId == null) {
                 throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                         "Missing identifier " + Ontology.IDENTIFIER_KEY);
             }
             logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
 
+            BundleManager bundleManager = getBundleManager(idPath, localId);
             Bundle description = getDescription(itemData);
 
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
-            Mutation<VirtualUnit> mutation = persister.createOrUpdate(unit, VirtualUnit.class);
+            Mutation<VirtualUnit> mutation = bundleManager.createOrUpdate(unit, VirtualUnit.class);
             VirtualUnit frame = mutation.getNode();
             // Set the repository/item relationship
             //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
             if (idPath.isEmpty() && mutation.created()) {
+                PermissionScope permissionScope = permissionScopeFinder.get(localId);
                 EntityClass scopeType = manager.getEntityClass(permissionScope);
                 if (scopeType.equals(EntityClass.USER_PROFILE)) {
                     UserProfile responsibleUser = permissionScope.as(UserProfile.class);

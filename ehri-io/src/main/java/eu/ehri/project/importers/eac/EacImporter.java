@@ -29,6 +29,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPointType;
@@ -68,7 +69,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
      * @param options         the import options
      * @param log             the import log
      */
-    public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
+    public EacImporter(FramedGraph<?> graph, PermissionScopeFinder permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
         super(graph, permissionScope, actioner, options, log);
         linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
     }
@@ -87,9 +88,11 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
     @Override
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
+        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
+        BundleManager bundleManager = new BundleManager(framedGraph, permissionScope.idPath());
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -126,7 +129,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
+        Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
         linkResolver.solveUndeterminedRelationships(frame);
 

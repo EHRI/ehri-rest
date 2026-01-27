@@ -28,6 +28,7 @@ import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.base.Actioner;
@@ -129,8 +130,8 @@ public class SaxImportManager extends AbstractImportManager {
                                      final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
             ItemImporter<?, ?> importer = importerClass
-                    .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportOptions.class, ImportLog.class)
-                    .newInstance(framedGraph, currentPermissionScope, actioner, options, log);
+                    .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
+                    .newInstance(framedGraph, permissionScopeFinder, actioner, options, log);
 
             for (ImportCallback callback : extraCallbacks) {
                 importer.addCallback(callback);

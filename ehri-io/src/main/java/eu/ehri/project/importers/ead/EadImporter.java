@@ -30,6 +30,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPointType;
@@ -40,11 +41,7 @@ import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Messages;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,14 +71,14 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     /**
      * Construct an EadImporter object.
      *
-     * @param graph           the framed graph
-     * @param actioner        the current user
-     * @param permissionScope the permission scope
-     * @param options         the import options
-     * @param log             the log
+     * @param graph       the framed graph
+     * @param actioner    the current user
+     * @param scopeFinder the permission scope
+     * @param options     the import options
+     * @param log         the log
      */
-    public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
-        super(graph, permissionScope, actioner, options, log);
+    public EadImporter(FramedGraph<?> graph, PermissionScopeFinder scopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(graph, scopeFinder, actioner, options, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
         linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
 
@@ -100,26 +97,30 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
-        BundleManager persister = getPersister(idPath);
-
         Bundle description = getDescription(itemData);
 
         // extractIdentifiers does not throw ValidationError on missing ID
         Bundle unit = Bundle.of(unitEntity, ImportHelpers.extractIdentifiers(itemData));
 
+        // Fetch the local identifier
+        final String localId = unit.getDataValue(Ontology.IDENTIFIER_KEY);
+
         // Check for missing identifier, throw an exception when there is no ID.
-        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+        if (localId == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                     Messages.getString("BundleValidator.missingField"));
         }
 
+        BundleManager persister = getBundleManager(idPath, localId);
+
         Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(mergeDescriptions(unit, description, idPath), DocumentaryUnit.class);
+                persister.createOrUpdate(mergeDescriptions(unit, description, idPath, localId), DocumentaryUnit.class);
         logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
+            PermissionScope permissionScope = permissionScopeFinder.get(localId);
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
@@ -201,9 +202,10 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * @param unit       the DocumentaryUnit to be saved
      * @param descBundle the documentsDescription to replace any previous ones with this language
      * @param idPath     the ID path of this bundle (will be relative to the ID path of the permission scope)
+     * @param localId    the unit's local identifier
      * @return A bundle with description relationships merged.
      */
-    protected Bundle mergeDescriptions(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
+    protected Bundle mergeDescriptions(Bundle unit, Bundle descBundle, List<String> idPath, String localId) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
 
@@ -211,7 +213,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
          */
-        List<String> itemIdPath = Lists.newArrayList(getPermissionScope().idPath());
+        List<String> itemIdPath = Lists.newArrayList(permissionScopeFinder.get(localId).idPath());
         itemIdPath.addAll(idPath);
 
 

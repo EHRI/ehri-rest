@@ -29,15 +29,17 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.DynamicPermissionScopeFinder;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.StaticPermissionScopeFinder;
 import eu.ehri.project.importers.base.ItemImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
@@ -53,7 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -61,7 +62,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -89,7 +89,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     protected String currentFile;
     protected Integer currentPosition;
-    protected PermissionScope currentPermissionScope;
+    protected PermissionScopeFinder permissionScopeFinder;
     protected Map<String, String> hierarchyCache = null;
     protected final Map<String, PermissionScope> permissionScopeCache = Maps.newHashMap();
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
@@ -113,10 +113,15 @@ public abstract class AbstractImportManager implements ImportManager {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
-        this.currentPermissionScope = scope;
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.options = options;
+
+        if (options.hierarchyFile != null) {
+            this.permissionScopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyFile);
+        } else {
+            this.permissionScopeFinder = new StaticPermissionScopeFinder(scope);
+        }
     }
 
     /**
@@ -182,9 +187,6 @@ public abstract class AbstractImportManager implements ImportManager {
                 URL url = new URL(parser.nextTextValue());
                 try (InputStream stream = readUrl(url, 0)) {
                     logger.info("Importing URL {} with identifier: {}", i, currentFile);
-                    if (options.hierarchyFile != null) {
-                        currentPermissionScope = getNextPermissionScope(currentFile);
-                    }
 
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {

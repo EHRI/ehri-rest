@@ -26,6 +26,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.Country;
@@ -59,13 +60,13 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
      * Construct an EagImporter object.
      *
      * @param framedGraph     The graph instance
-     * @param permissionScope A permission scope, e.g. a country
+     * @param permissionScopeFinder A permission scope, e.g. a country
      * @param actioner        the current user
      * @param options         the import options
      * @param log             An import log instance
      */
-    public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, options, log);
+    public EagImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, permissionScopeFinder, actioner, options, log);
     }
 
     @Override
@@ -102,10 +103,12 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
      */
     @Override
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {
-
-        BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
-
         Map<String, Object> descmap = ImportHelpers.extractDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
+        final String localId = (String)descmap.get(Ontology.IDENTIFIER_KEY);
+
+        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
+        BundleManager bundleManager = new BundleManager(framedGraph, permissionScope.idPath());
+
         descmap.put(Ontology.IDENTIFIER_KEY, descmap.get(Ontology.IDENTIFIER_KEY) + "#desc");
         Bundle descBundle = Bundle.of(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
@@ -134,7 +137,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
         Bundle unit = Bundle.of(EntityClass.REPOSITORY, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<Repository> mutation = persister.createOrUpdate(unit, Repository.class);
+        Mutation<Repository> mutation = bundleManager.createOrUpdate(unit, Repository.class);
         handleCallbacks(mutation);
 
         if (mutation.created()) {

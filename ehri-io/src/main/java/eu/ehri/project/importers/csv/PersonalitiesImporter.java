@@ -28,7 +28,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
-import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
@@ -55,16 +55,17 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
 
-    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, options.withProperties("personalities.properties"), log);
+    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, permissionScopeFinder, actioner, options.withProperties("personalities.properties"), log);
     }
 
     @Override
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
+        BundleManager persister = getBundleManager(localId);
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
@@ -75,6 +76,7 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
+        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);

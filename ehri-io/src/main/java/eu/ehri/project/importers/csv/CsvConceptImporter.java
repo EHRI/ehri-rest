@@ -29,6 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -46,23 +47,25 @@ import java.util.Map;
  */
 public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
 
-    public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
+    public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder,
                               Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, options, log);
+        super(framedGraph, permissionScopeFinder, actioner, options, log);
     }
 
     @Override
     public AuthoritativeItem importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.CVOC_CONCEPT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.CVOC_CONCEPT_DESCRIPTION));
+        final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
+        BundleManager bundleManager = getBundleManager(localId);
         Bundle unit = Bundle.of(EntityClass.CVOC_CONCEPT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<Concept> mutation = persister.createOrUpdate(unit, Concept.class);
+        Mutation<Concept> mutation = bundleManager.createOrUpdate(unit, Concept.class);
         Concept frame = mutation.getNode();
 
+        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             permissionScope.as(Vocabulary.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
