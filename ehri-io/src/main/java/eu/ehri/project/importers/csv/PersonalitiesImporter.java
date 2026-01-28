@@ -65,7 +65,7 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
-        BundleManager persister = getBundleManager(localId);
+        BundleManager bundleManager = getBundleManager(localId);
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
@@ -73,7 +73,7 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
         Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
             .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
+        Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
         final PermissionScope permissionScope = permissionScopeFinder.get(localId);

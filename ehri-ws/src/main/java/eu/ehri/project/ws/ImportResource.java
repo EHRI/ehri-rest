@@ -104,7 +104,7 @@ public class ImportResource extends AbstractResource {
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
-    public static final String HIERARCHY_FILE = "hierarchy";
+    public static final String HIERARCHY_FILE = "hierarchy-file";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);

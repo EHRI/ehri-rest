@@ -38,6 +38,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
+import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,10 +86,9 @@ public class VirtualEadImporter extends EadImporter {
             final String localId = unit.getDataValue(Ontology.IDENTIFIER_KEY);
             if (localId == null) {
                 throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
-                        "Missing identifier " + Ontology.IDENTIFIER_KEY);
+                        Messages.getString("BundleValidator.missingField"));
             }
             PermissionScope localScope = permissionScopeFinder.get(localId);
-            logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
 
             BundleManager bundleManager = getBundleManager(localScope, idPath);
             Bundle description = getDescription(itemData);
@@ -96,6 +96,7 @@ public class VirtualEadImporter extends EadImporter {
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
             Mutation<VirtualUnit> mutation = bundleManager.createOrUpdate(unit, VirtualUnit.class);
             VirtualUnit frame = mutation.getNode();
+            logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
             // Set the repository/item relationship
             //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
             if (idPath.isEmpty() && mutation.created()) {
