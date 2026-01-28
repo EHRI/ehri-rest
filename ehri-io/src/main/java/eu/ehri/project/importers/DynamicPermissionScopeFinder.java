@@ -1,9 +1,5 @@
 package eu.ehri.project.importers;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
@@ -12,12 +8,6 @@ import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,35 +17,21 @@ import java.util.stream.StreamSupport;
  * Permission scope finder that
  */
 public class DynamicPermissionScopeFinder implements PermissionScopeFinder {
-    // Build a schema for header-less TSV
-    private static final CsvSchema hierarchyReaderSchema = CsvSchema.emptySchema()
-            .withoutHeader()
-            .withLineSeparator("\n")
-            .withColumnSeparator('\t');
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicPermissionScopeFinder.class);
 
     private final PermissionScope topLevelScope;
-
-    private Map<String, String> hierarchyCache = null;
+    private final Map<String, String> hierarchyMap;
     private final Map<String, PermissionScope> permissionScopeCache = Maps.newHashMap();
 
-    private DynamicPermissionScopeFinder(PermissionScope topLevelScope, Map<String, String> hierarchyMap) {
+    public DynamicPermissionScopeFinder(PermissionScope topLevelScope, Map<String, String> hierarchyMap) {
         this.topLevelScope = topLevelScope;
-        hierarchyCache = hierarchyMap;
-    }
-
-    public static DynamicPermissionScopeFinder fromTsv(PermissionScope topLevelScope, String tsvText) throws IOException {
-        return new DynamicPermissionScopeFinder(topLevelScope, loadHierarchyCache(tsvText) );
-    }
-
-    public static DynamicPermissionScopeFinder fromUri(PermissionScope topLevelScope, URI uri) throws IOException {
-        return fromTsv(topLevelScope, readUri(uri));
+        this.hierarchyMap = hierarchyMap;
     }
 
     @Override
     public PermissionScope get(String localId) {
-        String parentLocalId = hierarchyCache.get(localId);
+        String parentLocalId = hierarchyMap.get(localId);
         if (parentLocalId != null) {
             PermissionScope dynamicScope = permissionScopeCache.computeIfAbsent(parentLocalId, local -> {
                 final List<Accessible> collect = StreamSupport.stream(topLevelScope.getAllContainedItems().spliterator(), false)
@@ -73,35 +49,5 @@ public class DynamicPermissionScopeFinder implements PermissionScopeFinder {
             return dynamicScope;
         }
         return topLevelScope;
-    }
-
-    private static Map<String, String> loadHierarchyCache(String tsvText) throws IOException {
-        CsvMapper mapper = new CsvMapper();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-        Map<String, String> data = Maps.newHashMap();
-        try (MappingIterator<String[]> iterator = mapper
-                .readerFor(String[].class)
-                .with(hierarchyReaderSchema)
-                .readValues(tsvText) ) {
-
-            while (iterator.hasNext()) {
-                final String[] row = iterator.next();
-                String id = row[0];
-                if (row.length > 1 && row[1] != null) {
-                    String parent = row[1].isEmpty() ? null : row[1];
-                    data.put(id, parent);
-                }
-            }
-            return data;
-        }
-    }
-
-    private static String readUri(URI uri) throws IOException {
-        try (InputStream s = uri.toURL().openStream()) {
-            return new BufferedReader(
-                    new InputStreamReader(s, StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
-        }
     }
 }

@@ -24,6 +24,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
@@ -46,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,15 +59,13 @@ public class SaxImportManagerTest extends AbstractImporterTest {
 
     @Test
     public void testImportInferHierarchy() throws Exception {
-        final List<String> tsv = Lists.newArrayList(
-                "1c\t\n",
-                "1s\t1c\n",
-                "1f\t1s\n",
-                "2c\t\n"
-        );
-        URI hierarchyFile = hierarchyFileUri(Joiner.on("").join(tsv));
-        JsonMapper mapper = new JsonMapper();
+        Map<String, String> hierarchyMap = Maps.newHashMap();
+        hierarchyMap.put("1c", null);
+        hierarchyMap.put("1s", "1c");
+        hierarchyMap.put("1f", "1s");
+        hierarchyMap.put("2c", null);
 
+        JsonMapper mapper = new JsonMapper();
         final ImmutableMap<String, String> map = ImmutableMap.of(
                "1c.xml", Resources.getResource("infer1c.xml").toURI().toString(),
                "1s.xml", Resources.getResource("infer1s.xml").toURI().toString(),
@@ -77,7 +77,7 @@ public class SaxImportManagerTest extends AbstractImporterTest {
         InputStream stream = new ByteArrayInputStream(buf);
 
         SaxImportManager importer = saxImportManager(EadImporter.class, EadHandler.class,
-                ImportOptions.basic().withHierarchyUri(hierarchyFile));
+                ImportOptions.basic().withHierarchyMap(hierarchyMap));
         ImportLog log = importer.importJson(stream, "Testing Hierarchy Import");
         assertEquals(4, log.getCreated());
 

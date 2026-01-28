@@ -101,12 +101,8 @@ public abstract class AbstractImportManager implements ImportManager {
         this.importerClass = importerClass;
         this.options = options;
 
-        if (options.hierarchyFile != null) {
-            try {
-                this.permissionScopeFinder = DynamicPermissionScopeFinder.fromUri(scope, options.hierarchyFile);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not load permission scope finder", e);
-            }
+        if (options.hierarchyMap != null) {
+            this.permissionScopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyMap);
         } else {
             this.permissionScopeFinder = new StaticPermissionScopeFinder(scope);
         }

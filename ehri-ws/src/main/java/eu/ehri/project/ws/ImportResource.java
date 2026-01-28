@@ -19,9 +19,14 @@
 
 package eu.ehri.project.ws;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -63,10 +68,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.io.BufferedInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -74,8 +76,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -265,6 +269,11 @@ public class ImportResource extends AbstractResource {
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
 
+            // Read the hierarchy map, if given
+            Map<String, String> hierarchyMap = hierarchyFile != null
+                    ? readHierarchyTsv(uriToString(hierarchyFile))
+                    : null;
+
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
             ImportOptions options = ImportOptions.create(
@@ -272,7 +281,7 @@ public class ImportResource extends AbstractResource {
                     allowUpdates,
                     useSourceId,
                     defaultLang,
-                    hierarchyFile,
+                    hierarchyMap,
                     propertyFile
             );
             ImportManager importManager = SaxImportManager.create(
@@ -373,9 +382,14 @@ public class ImportResource extends AbstractResource {
                     ? scope
                     : manager.getEntity(fonds, PermissionScope.class);
 
+            // Read the hierarchy map, if given
+            Map<String, String> hierarchyMap = hierarchyFile != null
+                    ? readHierarchyTsv(uriToString(hierarchyFile))
+                    : null;
+
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, hierarchyFile, propertyFile);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, hierarchyMap, propertyFile);
             SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
@@ -757,5 +771,40 @@ public class ImportResource extends AbstractResource {
 
     private static String nameOrDefault(String name, String defaultName) {
         return (name == null || name.trim().isEmpty()) ? defaultName : name;
+    }
+
+    private static Map<String, String> readHierarchyTsv(String tsvText) throws IOException {
+        // Build a schema for header-less TSV
+        final CsvSchema hierarchyReaderSchema = CsvSchema.emptySchema()
+                .withoutHeader()
+                .withLineSeparator("\n")
+                .withColumnSeparator('\t');
+        CsvMapper mapper = new CsvMapper();
+        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        Map<String, String> data = Maps.newHashMap();
+        try (MappingIterator<String[]> iterator = mapper
+                .readerFor(String[].class)
+                .with(hierarchyReaderSchema)
+                .readValues(tsvText) ) {
+
+            while (iterator.hasNext()) {
+                final String[] row = iterator.next();
+                String id = row[0];
+                if (row.length > 1 && row[1] != null) {
+                    String parent = row[1].isEmpty() ? null : row[1];
+                    data.put(id, parent);
+                }
+            }
+            return data;
+        }
+    }
+
+    private static String uriToString(URI uri) throws IOException {
+        try (InputStream s = uri.toURL().openStream()) {
+            return new BufferedReader(
+                    new InputStreamReader(s, StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+        }
     }
 }
