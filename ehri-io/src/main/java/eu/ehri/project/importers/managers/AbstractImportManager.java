@@ -23,16 +23,10 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.DynamicPermissionScopeFinder;
 import eu.ehri.project.importers.ImportLog;
@@ -54,16 +48,14 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Base ImportManager.
@@ -73,12 +65,6 @@ public abstract class AbstractImportManager implements ImportManager {
     private static final int MAX_RETRIES = 3;
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
     private static final JsonFactory factory = new JsonFactory();
-
-     // Build a schema for headerless TSV
-     private static final CsvSchema hierarchyReaderSchema = CsvSchema.emptySchema()
-             .withoutHeader()
-             .withLineSeparator("\n")
-             .withColumnSeparator('\t');
 
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
@@ -90,8 +76,6 @@ public abstract class AbstractImportManager implements ImportManager {
     protected String currentFile;
     protected Integer currentPosition;
     protected PermissionScopeFinder permissionScopeFinder;
-    protected Map<String, String> hierarchyCache = null;
-    protected final Map<String, PermissionScope> permissionScopeCache = Maps.newHashMap();
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
     private int consecutiveIoErrors = 0;
 
@@ -118,7 +102,11 @@ public abstract class AbstractImportManager implements ImportManager {
         this.options = options;
 
         if (options.hierarchyFile != null) {
-            this.permissionScopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyFile);
+            try {
+                this.permissionScopeFinder = DynamicPermissionScopeFinder.fromUri(scope, options.hierarchyFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not load permission scope finder", e);
+            }
         } else {
             this.permissionScopeFinder = new StaticPermissionScopeFinder(scope);
         }
@@ -171,10 +159,6 @@ public abstract class AbstractImportManager implements ImportManager {
             JsonToken jsonToken = parser.nextValue();
             if (!parser.isExpectedStartObjectToken()) {
                 throw new InputParseError("Stream should be an object of name/URL pairs, was: " + jsonToken);
-            }
-
-            if (options.hierarchyFile != null) {
-                hierarchyCache = loadHierarchyCache();
             }
 
             Optional<String> msg = getLogMessage(logMessage);
@@ -400,57 +384,5 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private boolean isSlowDownError(IOException e) {
         return e.getMessage().contains("Server returned HTTP response code: 503");
-    }
-
-    private PermissionScope getNextPermissionScope(String currentFile) {
-        String fileName = Paths.get(currentFile.split("\\?")[0]).getFileName().toString();
-        String baseName = fileName.endsWith(".xml") ? fileName.substring(0, fileName.length() - 4) : fileName;
-        System.out.println("Checking hierarchy cache " + hierarchyCache + " for " + baseName);
-        if (!hierarchyCache.containsKey(baseName)) {
-            return permissionScope;
-        } else {
-            String parentLocalId = hierarchyCache.get(baseName);
-            return permissionScopeCache.computeIfAbsent(parentLocalId, local -> {
-                final List<Accessible> collect = StreamSupport.stream(permissionScope.getAllContainedItems().spliterator(), false)
-                        .filter(s -> s.getProperty(Ontology.IDENTIFIER_KEY).equals(local))
-                        .collect(Collectors.toList());
-                if (collect.size() > 1) {
-                    throw new RuntimeException("Hierarchy local identifiers are not unique.");
-                } else if (collect.isEmpty()) {
-                    throw new RuntimeException(String.format("Hierarchy local identifier '%s' not found in scope: %s", local, permissionScope.getId()));
-                } else {
-                    return collect.get(0).as(PermissionScope.class);
-                }
-            });
-        }
-    }
-
-    private Map<String, String> loadHierarchyCache() {
-        CsvMapper mapper = new CsvMapper();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-        try (InputStream s = options.hierarchyFile.toURL().openStream()) {
-            Map<String, String> data = Maps.newHashMap();
-            String text = new BufferedReader(
-                    new InputStreamReader(s, StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
-            try (MappingIterator<String[]> iterator = mapper
-                    .readerFor(String[].class)
-                    .with(hierarchyReaderSchema)
-                    .readValues(text) ) {
-
-                while (iterator.hasNext()) {
-                    final String[] row = iterator.next();
-                    String id = row[0];
-                    if (row.length > 1 && row[1] != null && !row[1].isEmpty()) {
-                        String parent = row[1];
-                        data.put(id, parent);
-                    }
-                }
-                return data;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

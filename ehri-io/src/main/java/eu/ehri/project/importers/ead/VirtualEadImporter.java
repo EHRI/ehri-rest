@@ -87,9 +87,10 @@ public class VirtualEadImporter extends EadImporter {
                 throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                         "Missing identifier " + Ontology.IDENTIFIER_KEY);
             }
+            PermissionScope localScope = permissionScopeFinder.get(localId);
             logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
 
-            BundleManager bundleManager = getBundleManager(idPath, localId);
+            BundleManager bundleManager = getBundleManager(localScope, idPath);
             Bundle description = getDescription(itemData);
 
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
@@ -98,14 +99,13 @@ public class VirtualEadImporter extends EadImporter {
             // Set the repository/item relationship
             //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
             if (idPath.isEmpty() && mutation.created()) {
-                PermissionScope permissionScope = permissionScopeFinder.get(localId);
-                EntityClass scopeType = manager.getEntityClass(permissionScope);
+                EntityClass scopeType = manager.getEntityClass(localScope);
                 if (scopeType.equals(EntityClass.USER_PROFILE)) {
-                    UserProfile responsibleUser = permissionScope.as(UserProfile.class);
+                    UserProfile responsibleUser = localScope.as(UserProfile.class);
                     frame.setAuthor(responsibleUser);
-                    //the top Virtual Unit does not have a permissionScope. 
+                    //the top Virtual Unit does not have a localScope.
                 } else if (scopeType.equals(EntityClass.VIRTUAL_UNIT)) {
-                    VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
+                    VirtualUnit parent = framedGraph.frame(localScope.asVertex(), VirtualUnit.class);
                     parent.addChild(frame);
                     frame.setPermissionScope(parent);
                 } else {

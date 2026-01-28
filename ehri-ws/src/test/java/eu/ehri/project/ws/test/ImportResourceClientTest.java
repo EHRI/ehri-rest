@@ -112,12 +112,12 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testImportEadViaJsonUrlMapWithInferHierarchy() throws Exception {
-        URI hierarchyFile = getTestHierarchyFileUri("test-doc\t\nfoobar\ttest-doc\n");
+        URI hierarchyFile = getTestHierarchyFileUri("test-doc\t\nCtop_level_fonds\ttest-doc\n");
 
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(ImmutableMap.of(
                 "ead.xml", Resources.getResource("ead.xml").toURI().toString(),
-                "foobar.xml", Resources.getResource("hierarchical-ead.xml").toURI().toString()
+                "hierarchical-ead.xml", Resources.getResource("hierarchical-ead.xml").toURI().toString()
         ));
 
         String logText = "Testing import";

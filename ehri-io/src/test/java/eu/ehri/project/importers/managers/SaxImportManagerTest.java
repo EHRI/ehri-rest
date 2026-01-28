@@ -58,7 +58,7 @@ public class SaxImportManagerTest extends AbstractImporterTest {
     @Test
     public void testImportInferHierarchy() throws Exception {
         final List<String> tsv = Lists.newArrayList(
-                "1c.xml\t\n",
+                "1c\t\n",
                 "1s\t1c\n",
                 "1f\t1s\n",
                 "2c\t\n"
@@ -68,8 +68,8 @@ public class SaxImportManagerTest extends AbstractImporterTest {
 
         final ImmutableMap<String, String> map = ImmutableMap.of(
                "1c.xml", Resources.getResource("infer1c.xml").toURI().toString(),
-               "1c/1s.xml", Resources.getResource("infer1s.xml").toURI().toString(),
-               "1c/1s/1f.xml", Resources.getResource("infer1f.xml").toURI().toString(),
+               "1s.xml", Resources.getResource("infer1s.xml").toURI().toString(),
+               "1f.xml", Resources.getResource("infer1f.xml").toURI().toString(),
                "2c.xml", Resources.getResource("infer2c.xml").toURI().toString()
         );
 

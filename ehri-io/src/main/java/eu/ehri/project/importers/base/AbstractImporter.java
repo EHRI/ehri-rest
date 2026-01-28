@@ -30,6 +30,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 
@@ -61,9 +62,9 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
         return actioner;
     }
 
-    protected BundleManager getBundleManager(List<String> scopeIds, String localId) {
+    protected BundleManager getBundleManager(PermissionScope localScope, List<String> scopeIds) {
         return new BundleManager(framedGraph,
-                Lists.newArrayList(Iterables.concat(permissionScopeFinder.get(localId).idPath(), scopeIds)));
+                Lists.newArrayList(Iterables.concat(localScope.idPath(), scopeIds)));
     }
 
     public BundleManager getBundleManager(String localId) {
@@ -73,11 +74,11 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     /**
      * Constructor.
      *
-     * @param graph       the framed graph
-     * @param scopeFinder the permission scope finder
-     * @param actioner    the user performing the import
-     * @param options     the import options
-     * @param log         the log object
+     * @param graph    the framed graph
+     * @param scopeFinder    the permission scope finder
+     * @param actioner the user performing the import
+     * @param options  the import options
+     * @param log      the log object
      */
     public AbstractImporter(FramedGraph<?> graph, PermissionScopeFinder scopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
         this.permissionScopeFinder = scopeFinder;
@@ -100,7 +101,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
 
     @Override
     public void handleError(Exception ex) {
-        for (ErrorCallback errorCallback : errorCallbacks) {
+        for (ErrorCallback errorCallback: errorCallbacks) {
             errorCallback.itemError(ex);
         }
     }

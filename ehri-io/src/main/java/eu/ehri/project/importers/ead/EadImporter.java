@@ -111,23 +111,25 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                     Messages.getString("BundleValidator.missingField"));
         }
 
-        BundleManager persister = getBundleManager(idPath, localId);
+        // Look up the current permission scope for this item:
+        PermissionScope localScope = permissionScopeFinder.get(localId);
+
+        BundleManager bundleManager = getBundleManager(localScope, idPath);
 
         Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(mergeDescriptions(unit, description, idPath, localId), DocumentaryUnit.class);
+                bundleManager.createOrUpdate(mergeDescriptions(localScope, unit, description, idPath), DocumentaryUnit.class);
         logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
-            PermissionScope permissionScope = permissionScopeFinder.get(localId);
-            EntityClass scopeType = manager.getEntityClass(permissionScope);
+            EntityClass scopeType = manager.getEntityClass(localScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
-                Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
+                Repository repository = framedGraph.frame(localScope.asVertex(), Repository.class);
                 frame.setRepository(repository);
                 frame.setPermissionScope(repository);
             } else if (scopeType.equals(unitEntity)) {
-                DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
+                DocumentaryUnit parent = framedGraph.frame(localScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
                 frame.setPermissionScope(parent);
             } else {
@@ -199,13 +201,13 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * the description is replaced. If the description is from another source, it is added to the
      * bundle's descriptions.
      *
+     * @param localScope the current permission scope for this item
      * @param unit       the DocumentaryUnit to be saved
      * @param descBundle the documentsDescription to replace any previous ones with this language
      * @param idPath     the ID path of this bundle (will be relative to the ID path of the permission scope)
-     * @param localId    the unit's local identifier
      * @return A bundle with description relationships merged.
      */
-    protected Bundle mergeDescriptions(Bundle unit, Bundle descBundle, List<String> idPath, String localId) throws ValidationError {
+    protected Bundle mergeDescriptions(PermissionScope localScope, Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
 
@@ -213,7 +215,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
          */
-        List<String> itemIdPath = Lists.newArrayList(permissionScopeFinder.get(localId).idPath());
+        List<String> itemIdPath = Lists.newArrayList(localScope.idPath());
         itemIdPath.addAll(idPath);
 
 
