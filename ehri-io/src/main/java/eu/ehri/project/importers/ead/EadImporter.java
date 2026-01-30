@@ -133,7 +133,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
 
         Optional<LinkResolver> resolver = options.getLinkResolver();
         if (resolver.isPresent()) {
-            resolver.get().solveUndeterminedRelationships(frame);
+            mutation = resolver.get().resolveLinks(mutation);
         }
         handleCallbacks(mutation);
 

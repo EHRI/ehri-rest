@@ -131,7 +131,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         HistoricalAgent frame = mutation.getNode();
         Optional<LinkResolver> resolver = options.getLinkResolver();
         if (resolver.isPresent()) {
-            resolver.get().solveUndeterminedRelationships(frame);
+            mutation = resolver.get().resolveLinks(mutation);
         }
 
         // There may or may not be a specific scope here...

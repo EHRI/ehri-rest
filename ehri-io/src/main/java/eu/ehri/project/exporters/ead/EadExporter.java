@@ -21,7 +21,7 @@ package eu.ehri.project.exporters.ead;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.*;
@@ -29,6 +29,7 @@ import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -91,30 +92,39 @@ public interface EadExporter extends XmlExporter<DocumentaryUnit> {
         return Optional.empty();
     }
 
+    // Vocabulary-link attributes (source + authority identifier) for an origination tag.
+    static Map<String, String> getCreatorAttributes(AccessPoint creatorAccessPoint, String identifierAttr) {
+        return getVocabAttributes(creatorAccessPoint, identifierAttr, Entities.HISTORICAL_AGENT);
+    }
+
+    // Vocabulary-link attributes (source + authority/concept identifier) for a controlaccess tag.
+    static Map<String, String> getAccessPointAttributes(AccessPoint accessPoint, String identifierAttr) {
+        return getVocabAttributes(accessPoint, identifierAttr, Entities.CVOC_CONCEPT, Entities.HISTORICAL_AGENT);
+    }
+
     /**
-     * Get any attributes to the origination/persname (or corpname, famname) tag,
-     * specifically the source of the vocabulary and the authority file ID.
-     *
-     * @param creatorAccessPoint an access point instance
-     * @return an attribute map, possibly empty
+     * @param identifierAttr the attribute name used to hold the authority identifier
+     *                       (schema-specific, e.g. "authfilenumber" for EAD2002 or
+     *                       "identifier" for EAD3)
      */
-    static Map<String, String> getCreatorAttributes(AccessPoint creatorAccessPoint) {
-        for (Link link : creatorAccessPoint.getLinks()) {
+    static Map<String, String> getVocabAttributes(AccessPoint accessPoint, String identifierAttr, String... targetTypes) {
+        Set<String> types = ImmutableSet.copyOf(targetTypes);
+        for (Link link : accessPoint.getLinks()) {
             for (Entity target : link.getLinkTargets()) {
-                if (target.getType().equals(Entities.HISTORICAL_AGENT)) {
-                    HistoricalAgent item = target.as(HistoricalAgent.class);
+                if (types.contains(target.getType())) {
+                    AuthoritativeItem item = target.as(AuthoritativeItem.class);
                     try {
                         return ImmutableMap.of(
                                 "source", item.getAuthoritativeSet().getId(),
-                                "authfilenumber", item.getIdentifier()
+                                identifierAttr, item.getIdentifier()
                         );
                     } catch (NullPointerException e) {
-                        logger.warn("HistoricalAgent creator item with missing set: {}", item.getId());
+                        logger.warn("Authoritative item with missing set: {}", item.getId());
                     }
                 }
             }
         }
-        return Maps.newHashMap();
+        return Collections.emptyMap();
     }
 
     /**

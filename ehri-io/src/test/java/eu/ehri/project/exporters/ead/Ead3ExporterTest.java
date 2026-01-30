@@ -23,10 +23,12 @@ import eu.ehri.project.exporters.test.XmlExporterTest;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
+import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Repository;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Ignore;
@@ -39,6 +41,7 @@ import java.io.InputStream;
 import java.util.ResourceBundle;
 
 import static eu.ehri.project.test.XmlTestHelpers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
@@ -217,6 +220,37 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/dsc/c01/did/unitdatestructured/datesingle/@standarddate");
         assertXPath(doc, "0",
                 "count(//ead/archdesc/dsc/c01/did/unitdatestructured/daterange)");
+    }
+
+    @Test
+    public void testAccessPointVocabLinkRoundTrip() throws Exception {
+        Repository repo = manager.getEntity("r1", Repository.class);
+        InputStream ios = ClassLoader.getSystemResourceAsStream("conceptlink-ead3.xml");
+        SaxImportManager.create(graph, repo, adminUser,
+                EadImporter.class, EadHandler.class, ImportOptions.properties("ead3.properties")
+                        .withLinkResolver(LinkResolver.create(graph, adminUser, getPidGeneratorCallback())))
+                .withPreCallback(getPidGeneratorCallback())
+                .importInputStream(ios, "Testing concept link import");
+
+        DocumentaryUnit unit = graph.frame(getVertexByIdentifier(graph, "clink-1"), DocumentaryUnit.class);
+        HistoricalAgent a1 = manager.getEntity("a1", HistoricalAgent.class);
+        // The @identifier/@source attributes on controlaccess/persname, controlaccess/subject
+        // and origination/persname all resolve to links against the same authority record.
+        assertEquals(3, toList(unit.getLinks()).stream()
+                .filter(link -> toList(link.getLinkTargets()).contains(a1)).count());
+
+        Ead3Exporter exporter = new Ead3Exporter(api(adminUser));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exporter.export(unit, baos, "eng");
+        String xml = baos.toString("UTF-8");
+        isValidEad(xml);
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "a1", "//ead/archdesc/controlaccess/persname/@identifier");
+        assertXPath(doc, "auths", "//ead/archdesc/controlaccess/persname/@source");
+        assertXPath(doc, "a1", "//ead/archdesc/controlaccess/subject/@identifier");
+        assertXPath(doc, "auths", "//ead/archdesc/controlaccess/subject/@source");
+        assertXPath(doc, "a1", "//ead/archdesc/did/origination/persname/@identifier");
+        assertXPath(doc, "auths", "//ead/archdesc/did/origination/persname/@source");
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {

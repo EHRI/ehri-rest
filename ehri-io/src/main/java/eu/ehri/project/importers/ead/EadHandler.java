@@ -22,6 +22,7 @@ package eu.ehri.project.importers.ead;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
@@ -36,6 +37,7 @@ import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -44,6 +46,7 @@ import org.xml.sax.SAXException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -60,7 +63,13 @@ public class EadHandler extends SaxXmlHandler {
     static final String EADID = "eadid",
             RECORDID = "recordid",
             ARCHDESC = "archdesc",
-            DID = "did";
+            DID = "did",
+            PART = "part";
+
+    // EAD3 elements that can wrap an access point's name in one or more <part> children.
+    private static final Set<String> ACCESS_POINT_ELEMENTS = ImmutableSet.of(
+            "persname", "corpname", "subject", "geogname", "famname", "genreform", "name"
+    );
 
     // EAD file-level keys which are added to the data of the top-level
     // archdesc element. Note: tag->property mappings must exist for these
@@ -93,6 +102,9 @@ public class EadHandler extends SaxXmlHandler {
      */
     private final Stack<String> scopeIds = new Stack<>();
 
+    // <part> text collected so far for the access point element currently open.
+    private final List<String> pendingParts = new ArrayList<>();
+
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c\\d*$");
 
@@ -123,6 +135,9 @@ public class EadHandler extends SaxXmlHandler {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        if (ACCESS_POINT_ELEMENTS.contains(qName)) {
+            pendingParts.clear();
+        }
         super.startElement(uri, localName, qName, attributes);
 
         if (isUnitDelimiter(qName)) { //a new DocumentaryUnit should be created
@@ -176,11 +191,22 @@ public class EadHandler extends SaxXmlHandler {
      */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        //the child closes, add the new DocUnit to the list, establish some relations
-        super.endElement(uri, localName, qName);
+        if (qName.equals(PART) && isInsideAccessPointElement()) {
+            // Collect <part> text rather than let each one become its own access point.
+            String text = StringUtils.normalizeSpace(currentText.pop().toString());
+            if (!text.isEmpty()) {
+                pendingParts.add(text);
+            }
+        } else {
+            //the child closes, add the new DocUnit to the list, establish some relations
+            super.endElement(uri, localName, qName);
+            if (ACCESS_POINT_ELEMENTS.contains(qName) && !pendingParts.isEmpty()) {
+                putPropertyInCurrentGraph(getMappedProperty(currentPath), String.join(" ", pendingParts));
+                pendingParts.clear();
+            }
+        }
 
         // If this is the <eadid> element, store its content
-
         if (qName.equals(EADID)) {
             eadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
             logger.trace("Found {}: {}", EADID, eadId);
@@ -401,15 +427,24 @@ public class EadHandler extends SaxXmlHandler {
 
     @Override
     protected boolean needToCreateSubNode(String qName) {
+        if (qName.equals(PART) && isInsideAccessPointElement()) {
+            // The wrapping element is the sub-node boundary, not its <part> children.
+            return false;
+        }
         //child or parent unit:
         boolean need = isUnitDelimiter(qName);
-        //controlAccess 
+        //controlAccess
         String path = getMappedProperty(currentPath);
         if (path != null) {
             need = need || path.endsWith("AccessPoint");
         }
         boolean subs = possibleSubNodes.containsKey(getMappedProperty(currentPath));
         return need || subs;
+    }
+
+    // Whether the current (top-of-stack) element's parent is an access point.
+    private boolean isInsideAccessPointElement() {
+        return currentPath.size() >= 2 && ACCESS_POINT_ELEMENTS.contains(currentPath.get(currentPath.size() - 2));
     }
 
     /**

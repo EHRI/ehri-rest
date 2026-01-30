@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.base.AbstractImporterTest;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
 
@@ -55,16 +56,21 @@ public class Ead3ImporterTest extends AbstractImporterTest {
          *  - 2 description
          *  - 1 system event
          *  - 3 event link
-         *  - 5 access points
+         *  - 4 access points
          *  - 2 maintenance events
          *  - 5 date periods
          *  - 1 unknown properties
          */
-        assertEquals(origCount + 21, getNodeCount(graph));
+        assertEquals(origCount + 20, getNodeCount(graph));
 
         DocumentaryUnitDescription desc = manager.getEntity("nl-r1-t1.eng-test_1_eng", DocumentaryUnitDescription.class);
         assertNotNull(desc);
         assertThat(desc.getProperty("languageOfMaterial"), containsInAnyOrder("eng"));
         assertThat(desc.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
+
+        // The origination/persname's two <part>s ("EHRI", "2010-2024") are joined
+        // into a single access point's name, rather than becoming two access points.
+        List<AccessPoint> creators = toList(desc.getAccessPoints());
+        assertEquals(1, creators.stream().filter(ap -> "EHRI 2010-2024".equals(ap.getName())).count());
     }
 }

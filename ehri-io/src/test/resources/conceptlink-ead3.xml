@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="http://ead3.archivists.org/schema/">
+	<control>
+		<recordid>conceptlink-test-1</recordid>
+		<filedesc>
+			<titlestmt>
+				<titleproper>Concept Link Test</titleproper>
+				<author>EHRI</author>
+			</titlestmt>
+			<publicationstmt>
+				<p>EHRI</p>
+			</publicationstmt>
+		</filedesc>
+		<maintenancestatus value="new"/>
+		<maintenanceagency>
+			<agencyname>EHRI</agencyname>
+		</maintenanceagency>
+		<languagedeclaration>
+			<language langcode="eng"/>
+			<script scriptcode="Latn"/>
+		</languagedeclaration>
+		<maintenancehistory>
+			<maintenanceevent>
+				<eventtype value="created"/>
+				<eventdatetime>March 2021</eventdatetime>
+				<agenttype value="human"/>
+				<agent>Mike</agent>
+			</maintenanceevent>
+		</maintenancehistory>
+	</control>
+	<archdesc level="collection">
+		<did>
+			<unittitle label="Title:">Concept Link Test Item</unittitle>
+			<unitid label="Collection Number:">clink-1</unitid>
+			<origination label="creator">
+				<persname identifier="a1" source="auths">
+					<part>An Authority 1</part>
+				</persname>
+			</origination>
+		</did>
+		<controlaccess>
+			<persname identifier="a1" source="auths">
+				<part>An Authority 1</part>
+			</persname>
+			<subject identifier="a1" source="auths">
+				<part>An Authority 1 as subject</part>
+			</subject>
+		</controlaccess>
+	</archdesc>
+</ead>

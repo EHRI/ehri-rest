@@ -25,14 +25,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.definitions.ContactInfo;
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Named;
-import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
@@ -255,7 +253,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 tag(sw, "origination", () -> {
                     String name = creatorAccessPoint.getName();
                     String tagName = creatorTags.get(EadExporter.getCreatorTagName(creatorAccessPoint, langCode).orElse("person"));
-                    Map<String, String> attrs = EadExporter.getCreatorAttributes(creatorAccessPoint);
+                    Map<String, String> attrs = EadExporter.getCreatorAttributes(creatorAccessPoint, "authfilenumber");
                     tag(sw, tagName, name, attrs);
                 });
             }
@@ -361,30 +359,10 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 AccessPointType type = entry.getKey();
                 for (AccessPoint accessPoint : entry.getValue()) {
                     tag(sw, controlAccessMappings.get(type), accessPoint.getName(),
-                            getAccessPointAttributes(accessPoint));
+                            EadExporter.getAccessPointAttributes(accessPoint, "authfilenumber"));
                 }
             });
         }
-    }
-
-    private Map<String, String> getAccessPointAttributes(AccessPoint accessPoint) {
-        for (Link link : accessPoint.getLinks()) {
-            for (Entity target : link.getLinkTargets()) {
-                if (target.getType().equals(Entities.CVOC_CONCEPT) ||
-                        target.getType().equals(Entities.HISTORICAL_AGENT)) {
-                    AuthoritativeItem item = target.as(AuthoritativeItem.class);
-                    try {
-                        return ImmutableMap.of(
-                                "source", item.getAuthoritativeSet().getId(),
-                                "authfilenumber", item.getIdentifier()
-                        );
-                    } catch (NullPointerException e) {
-                        logger.warn("Authoritative item with missing set: {}", item.getId());
-                    }
-                }
-            }
-        }
-        return Collections.emptyMap();
     }
 
     private void addPropertyValues(XMLStreamWriter sw, DocumentaryUnit unit, Entity item, String langCode) {
