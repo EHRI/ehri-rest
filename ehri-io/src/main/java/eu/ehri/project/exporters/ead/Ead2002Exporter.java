@@ -28,7 +28,9 @@ import javax.xml.stream.XMLStreamWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
+import static eu.ehri.project.exporters.ead.EadExporter.textFieldAttrs;
+import static eu.ehri.project.exporters.ead.EadExporter.getLevelAttrs;
+import static eu.ehri.project.exporters.ead.EadExporter.getEventDescription;
 
 public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
@@ -131,7 +133,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 tag(sw, "archdesc", getLevelAttrs(descOpt, "collection"), () -> {
                     addDataSection(sw, unit, desc, langCode, repoOpt);
                     addPropertyValues(sw, unit, desc, langCode);
-                    Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
+                    Iterable<DocumentaryUnit> orderedChildren = EadExporter.getOrderedChildren(api, unit);
                     if (orderedChildren.iterator().hasNext()) {
                         tag(sw, "dsc", () -> {
                             for (DocumentaryUnit child : orderedChildren) {
@@ -196,7 +198,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 tag(sw, "revisiondesc", () -> {
                     for (List<SystemEvent> agg : eventList) {
                         SystemEvent event = agg.get(0);
-                        String eventDesc = getEventDescription(event.getEventType());
+                        String eventDesc = getEventDescription(i18n, event.getEventType());
                         tag(sw, "change", () -> {
                             tag(sw, "date", new DateTime(event.getTimestamp()).toString());
                             if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
@@ -217,7 +219,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
             addDatePeriods(sw, desc);
-            addOrigination(sw, desc);
+            addOrigination(sw, desc, langCode);
             addDidProperties(sw, desc);
             repoOpt.ifPresent(repo -> {
                 addRepositoryInfo(sw, repo, langCode);
@@ -225,7 +227,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         });
     }
 
-    private void addOrigination(XMLStreamWriter sw, Description desc) {
+    private void addOrigination(XMLStreamWriter sw, Description desc, String langCode) {
         List<AccessPoint> creators = StreamSupport.stream(desc.getAccessPoints().spliterator(), false)
                 .filter(ap -> ap.getRelationshipType().equals(AccessPointType.creator))
                 .sorted(Comparator.comparing(Named::getName))
@@ -234,45 +236,12 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             for (AccessPoint creatorAccessPoint : creators) {
                 tag(sw, "origination", () -> {
                     String name = creatorAccessPoint.getName();
-                    String tagName = getCreatorTagName(creatorAccessPoint);
-                    Map<String, String> attrs = getCreatorAttributes(creatorAccessPoint);
+                    String tagName = creatorTags.get(EadExporter.getCreatorTagName(creatorAccessPoint, langCode).orElse("person"));
+                    Map<String, String> attrs = EadExporter.getCreatorAttributes(creatorAccessPoint);
                     tag(sw, tagName, name, attrs);
                 });
             }
         }
-    }
-
-    private String getCreatorTagName(AccessPoint creatorAccessPoint) {
-        final String defaultValue = "persname";
-        for (Link link : creatorAccessPoint.getLinks()) {
-            for (Entity target : link.getLinkTargets()) {
-                if (target.getType().equals(Entities.HISTORICAL_AGENT)) {
-                    HistoricalAgent item = target.as(HistoricalAgent.class);
-                    return creatorTags.getOrDefault(
-                            (String) item.getProperty(Isaar.typeOfEntity.name()), defaultValue);
-                }
-            }
-        }
-        return defaultValue;
-    }
-
-    private Map<String, String> getCreatorAttributes(AccessPoint creatorAccessPoint) {
-        for (Link link : creatorAccessPoint.getLinks()) {
-            for (Entity target : link.getLinkTargets()) {
-                if (target.getType().equals(Entities.HISTORICAL_AGENT)) {
-                    HistoricalAgent item = target.as(HistoricalAgent.class);
-                    try {
-                        return ImmutableMap.of(
-                                "source", item.getAuthoritativeSet().getId(),
-                                "authfilenumber", item.getIdentifier()
-                        );
-                    } catch (NullPointerException e) {
-                        logger.warn("HistoricalAgent creator item with missing set: {}", item.getId());
-                    }
-                }
-            }
-        }
-        return Maps.newHashMap();
     }
 
     private void addRepositoryInfo(XMLStreamWriter sw, Repository repo, String langCode) {
@@ -345,7 +314,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 addControlAccess(sw, desc);
             });
 
-            for (DocumentaryUnit child : getOrderedChildren(subUnit)) {
+            for (DocumentaryUnit child : EadExporter.getOrderedChildren(api, subUnit)) {
                 addEadLevel(sw, num + 1, child, descOpt, langCode);
             }
         });
@@ -406,7 +375,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 }
             }
             if (pair.getKey().equals(IsadG.locationOfOriginals)) {
-                List<String> copyInfo = getCopyInfo(unit, langCode);
+                List<String> copyInfo = EadExporter.getCopyInfo(unit, langCode);
                 if (!copyInfo.isEmpty()) {
                     tag(sw, pair.getValue(), () -> {
                         for (String note : copyInfo) {
@@ -418,7 +387,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         }
         for (Object v : coerceList(item.getProperty(IsadG.datesOfDescriptions))) {
             tag(sw, "processinfo", textFieldAttrs(IsadG.datesOfDescriptions), () -> {
-                tag(sw, Lists.newArrayList("p", "date"), () -> cData(sw, v.toString()));
+                tag(sw, path("p", "date"), () -> cData(sw, v.toString()));
             });
         }
         if (available.contains(IsadG.sources.name())) {
@@ -429,53 +398,6 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     }
                 });
             });
-        }
-    }
-
-    private Map<String, String> textFieldAttrs(IsadG field, String... kvs) {
-        Preconditions.checkArgument(kvs.length % 2 == 0);
-        Map<String, String> attrs = field.getAnalogueEncoding()
-                .map(Collections::singleton)
-                .orElse(Collections.emptySet())
-                .stream().collect(Collectors.toMap(e -> "encodinganalog", e -> e));
-        for (int i = 0; i < kvs.length; i += 2) {
-            attrs.put(kvs[0], kvs[i + 1]);
-        }
-        return attrs;
-    }
-
-    private Map<String, String> getLevelAttrs(Optional<Description> descOpt, String defaultLevel) {
-        String level = descOpt
-                .map(d -> d.<String>getProperty(IsadG.levelOfDescription))
-                .orElse(defaultLevel);
-        return level != null ? ImmutableMap.of("level", level) : Collections.emptyMap();
-    }
-
-    // Sort the children by identifier. FIXME: This might be a bad assumption!
-    private Iterable<DocumentaryUnit> getOrderedChildren(DocumentaryUnit unit) {
-        return api
-                .query()
-                .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC)
-                .withLimit(-1)
-                .withStreaming(true)
-                .page(unit.getChildren(), DocumentaryUnit.class);
-    }
-
-    private List<String> getCopyInfo(DocumentaryUnit unit, String langCode) {
-        return StreamSupport.stream(unit.getLinks().spliterator(), false)
-                .filter(link ->
-                        Objects.equals(link.getLinkType(), LinkType.copy)
-                                && Objects.equals(link.getLinkSource(), unit))
-                .map(Link::getDescription)
-                .filter(d -> Objects.nonNull(d) && !d.trim().isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    private String getEventDescription(EventTypes eventType) {
-        try {
-            return i18n.getString(eventType.name());
-        } catch (MissingResourceException e) {
-            return eventType.name();
         }
     }
 }
