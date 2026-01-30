@@ -131,7 +131,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all,
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam("batch") @DefaultValue("-1") int batchSize)
-                throws ItemNotFound, PermissionDenied, HierarchyError {
+            throws ItemNotFound, PermissionDenied, HierarchyError {
         try (final Tx tx = beginTx()) {
             Table out = deleteContents(id, all, version, batchSize);
             tx.success();
@@ -170,6 +170,20 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         }
     }
 
+    /**
+     * Import a set of top-level documentary units to a repository.
+     *
+     * @param id       the repository ID
+     * @param tolerant whether to accept individual validation errors
+     * @param commit   actually commit changes
+     * @param data     a list of repository bundles
+     * @return an import log
+     * @throws ItemNotFound         if the repository is not found
+     * @throws DeserializationError if the data is malformed
+     * @throws ValidationError      if any items do not validate
+     * @throws PermissionDenied     if the user is unable to
+     *                              perform the action
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -212,7 +226,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Path("{id:[^/]+}/eag")
     @Produces(MediaType.TEXT_XML)
     public Response exportEag(@PathParam("id") String id,
-            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
+                              final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             checkExists(id, cls);
