@@ -73,7 +73,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         Repository repo = manager.getEntity("r1", Repository.class);
         String xml = testImportExport(repo, "comprehensive-ead.xml",
                 "Resource (call) |||.Ident (num) |||", "eng");
-        //System.out.println(xml);
+//        System.out.println(xml);
         Document doc = parseDocument(xml);
         if (config.getBoolean("io.export.ead.includeRevisions")) {
             assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
@@ -103,6 +103,9 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
         assertXPath(doc, "Source information |||",
                 "//ead/archdesc/processinfo/p/bibref");
+        assertXPath(doc, "Bowers, Kate, 1963- |||", "//ead/archdesc/did/origination[1]/persname/text()");
+        assertXPath(doc, "Test|||, Name|||, Ms.|||, Number|||, Suffix|||, Title|||, (Fuller form|||), 1880-1980|||, qualifier|||",
+                "//ead/archdesc/did/origination[2]/persname/text()");
     }
 
     @Test
