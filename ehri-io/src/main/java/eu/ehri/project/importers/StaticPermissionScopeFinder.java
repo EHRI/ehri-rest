@@ -14,7 +14,7 @@ public class StaticPermissionScopeFinder implements PermissionScopeFinder {
     }
 
     @Override
-    public PermissionScope get(String localId) {
+    public PermissionScope apply(String localId) {
         return scope;
     }
 }

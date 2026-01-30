@@ -88,31 +88,24 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
      * @param itemData The raw data map
-     * @param idPath   The identifiers of parent documents,
-     *                 not including those of the overall permission scope
+     * @param idPath   The identifiers of parent units, not including
+     *                 those of the overall permission scope
      * @return the new unit
      * @throws ValidationError when data constraints are not met
      */
     @Override
-    public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
-            throws ValidationError {
+    public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
 
         Bundle description = getDescription(itemData);
 
         // extractIdentifiers does not throw ValidationError on missing ID
         Bundle unit = Bundle.of(unitEntity, ImportHelpers.extractIdentifiers(itemData));
 
-        // Fetch the local identifier
-        final String localId = unit.getDataValue(Ontology.IDENTIFIER_KEY);
-
-        // Check for missing identifier, throw an exception when there is no ID.
-        if (localId == null) {
-            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
-                    Messages.getString("BundleValidator.missingField"));
-        }
+        // Get the local identifier
+        final String localId = getLocalIdentifier(unit);
 
         // Look up the current permission scope for this item:
-        PermissionScope localScope = permissionScopeFinder.get(localId);
+        PermissionScope localScope = scopeFinder.apply(localId);
 
         BundleManager bundleManager = getBundleManager(localScope, idPath);
 
@@ -159,8 +152,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
 
         Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION).addData(raw);
 
-        // Add dates and descriptions to the bundle since they're @Dependent
-        // relations.
+        // Add dates and descriptions to the bundle since they are @Dependent relations.
         for (Map<String, Object> dpb : extractedDates) {
             descBuilder.addRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }

@@ -30,7 +30,7 @@ public class DynamicPermissionScopeFinder implements PermissionScopeFinder {
     }
 
     @Override
-    public PermissionScope get(String localId) {
+    public PermissionScope apply(String localId) {
         String parentLocalId = hierarchyMap.get(localId);
         if (parentLocalId != null) {
             PermissionScope dynamicScope = permissionScopeCache.computeIfAbsent(parentLocalId, local -> {

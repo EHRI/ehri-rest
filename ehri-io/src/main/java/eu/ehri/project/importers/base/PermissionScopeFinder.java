@@ -2,7 +2,9 @@ package eu.ehri.project.importers.base;
 
 import eu.ehri.project.models.base.PermissionScope;
 
-public interface PermissionScopeFinder {
+import java.util.function.Function;
+
+public interface PermissionScopeFinder extends Function<String, PermissionScope> {
     /**
      * Retrieve the permission scope for the given identifier.
      *
@@ -10,5 +12,5 @@ public interface PermissionScopeFinder {
      *
      * @return a permission scope instance
      */
-    PermissionScope get(String localId);
+    PermissionScope apply(String localId);
 }

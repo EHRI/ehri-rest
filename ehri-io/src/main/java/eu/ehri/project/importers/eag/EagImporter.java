@@ -70,8 +70,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
     }
 
     @Override
-    public Repository importItem(Map<String, Object> itemData, List<String> idPath) throws
-            ValidationError {
+    public Repository importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
         return importItem(itemData);
     }
 
@@ -103,14 +102,10 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
      */
     @Override
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> descmap = ImportHelpers.extractDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
-        final String localId = (String)descmap.get(Ontology.IDENTIFIER_KEY);
-
-        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
-        BundleManager bundleManager = new BundleManager(framedGraph, permissionScope.idPath());
-
-        descmap.put(Ontology.IDENTIFIER_KEY, descmap.get(Ontology.IDENTIFIER_KEY) + "#desc");
-        Bundle descBundle = Bundle.of(EntityClass.REPOSITORY_DESCRIPTION, descmap);
+        Bundle descBundle = Bundle.of(EntityClass.REPOSITORY_DESCRIPTION,
+                ImportHelpers.extractDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION));
+        final String localId = getLocalIdentifier(descBundle);
+        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, localId + "#desc");
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -136,7 +131,9 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
 
         Bundle unit = Bundle.of(EntityClass.REPOSITORY, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        final PermissionScope permissionScope = scopeFinder.apply(localId);
 
+        BundleManager bundleManager = getBundleManager(localId);
         Mutation<Repository> mutation = bundleManager.createOrUpdate(unit, Repository.class);
         handleCallbacks(mutation);
 

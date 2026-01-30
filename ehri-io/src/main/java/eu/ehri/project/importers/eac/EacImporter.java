@@ -90,12 +90,8 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
-        final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
-        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
-        BundleManager bundleManager = new BundleManager(framedGraph, permissionScope.idPath());
 
-        // Add dates and descriptions to the bundle since they're @Dependent
-        // relations.
+        // Add dates and descriptions to the bundle since they are @Dependent relations.
         for (Map<String, Object> dpb : ImportHelpers.extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
@@ -128,6 +124,9 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
         Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        final String localId = getLocalIdentifier(unit);
+        final PermissionScope permissionScope = scopeFinder.apply(localId);
+        BundleManager bundleManager = new BundleManager(framedGraph, permissionScope.idPath());
 
         Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();

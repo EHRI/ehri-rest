@@ -38,7 +38,6 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,13 +81,8 @@ public class VirtualEadImporter extends EadImporter {
         Bundle unit = Bundle.of(EntityClass.VIRTUAL_UNIT, extractVirtualUnit(itemData));
 
         if (isVirtualLevel(itemData)) {
-            // Check for missing identifier, throw an exception when there is no ID.
-            final String localId = unit.getDataValue(Ontology.IDENTIFIER_KEY);
-            if (localId == null) {
-                throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
-                        Messages.getString("BundleValidator.missingField"));
-            }
-            PermissionScope localScope = permissionScopeFinder.get(localId);
+            final String localId = getLocalIdentifier(unit);
+            PermissionScope localScope = scopeFinder.apply(localId);
 
             BundleManager bundleManager = getBundleManager(localScope, idPath);
             Bundle description = getDescription(itemData);

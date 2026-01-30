@@ -74,7 +74,7 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
         Mutation<AuthoritativeItem> mutation = bundleManager.createOrUpdate(unit, AuthoritativeItem.class);
         AuthoritativeItem frame = mutation.getNode();
 
-        final PermissionScope permissionScope = permissionScopeFinder.get(localId);
+        final PermissionScope permissionScope = scopeFinder.apply(localId);
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
