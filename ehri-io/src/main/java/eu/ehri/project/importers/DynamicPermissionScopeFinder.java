@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
+import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
@@ -31,6 +32,10 @@ public class DynamicPermissionScopeFinder implements PermissionScopeFinder {
 
     @Override
     public PermissionScope apply(String localId) {
+        if (!hierarchyMap.containsKey(localId)) {
+            throw new ImportHierarchyMapError(String.format("Hierarchy map does not contain unit local identifier: '%s'", localId));
+        }
+
         String parentLocalId = hierarchyMap.get(localId);
         if (parentLocalId != null) {
             PermissionScope dynamicScope = permissionScopeCache.computeIfAbsent(parentLocalId, local -> {
@@ -38,9 +43,9 @@ public class DynamicPermissionScopeFinder implements PermissionScopeFinder {
                         .filter(s -> s.getProperty(Ontology.IDENTIFIER_KEY).equals(local))
                         .collect(Collectors.toList());
                 if (collect.size() > 1) {
-                    throw new RuntimeException("Hierarchy local identifiers are not unique.");
+                    throw new ImportHierarchyMapError("Hierarchy local identifiers are not unique.");
                 } else if (collect.isEmpty()) {
-                    throw new RuntimeException(String.format("Hierarchy local identifier '%s' not found in scope: %s", local, topLevelScope.getId()));
+                    throw new ImportHierarchyMapError(String.format("Hierarchy local identifier '%s' not found in scope: %s", local, topLevelScope.getId()));
                 } else {
                     return collect.get(0).as(PermissionScope.class);
                 }

@@ -1,10 +1,10 @@
 package eu.ehri.project.importers.base;
 
+import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
 import eu.ehri.project.models.base.PermissionScope;
 
-import java.util.function.Function;
-
-public interface PermissionScopeFinder extends Function<String, PermissionScope> {
+@FunctionalInterface
+public interface PermissionScopeFinder {
     /**
      * Retrieve the permission scope for the given identifier.
      *
@@ -12,5 +12,5 @@ public interface PermissionScopeFinder extends Function<String, PermissionScope>
      *
      * @return a permission scope instance
      */
-    PermissionScope apply(String localId);
+    PermissionScope apply(String localId) throws ImportHierarchyMapError;
 }

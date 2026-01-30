@@ -111,8 +111,17 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testImportEadViaJsonUrlMapWithInferHierarchy() throws Exception {
-        URI hierarchyFile = getTestHierarchyFileUri("test-doc\t\nCtop_level_fonds\ttest-doc\n");
+    public void testImportEadViaJsonUrlMapWithMixedHierarchy() throws Exception {
+        String[] map = new String[] {
+          "test-doc\t",
+          "Ctop_level_fonds\ttest-doc",
+          "C00001\tCtop_level_fonds",
+          "C00002\tCtop_level_fonds",
+          "C00002-1\tC00002",
+          "C00002-2\tC00002",
+        };
+        String tsv = Joiner.on("\n").join(map);
+        URI hierarchyFile = getTestHierarchyFileUri(tsv);
 
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(ImmutableMap.of(
@@ -129,11 +138,8 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
-
-        ImportLog log = response.getEntity(ImportLog.class);
-        assertEquals(6, log.getCreated());
-        assertEquals(logText, log.getLogMessage().orElse(null));
-        assertThat(log.getEventId().orElse(null), notNullValue());
+        System.out.println(response.getEntity(String.class));
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
     }
 
     @Test

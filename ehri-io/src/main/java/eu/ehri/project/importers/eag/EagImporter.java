@@ -59,14 +59,14 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
     /**
      * Construct an EagImporter object.
      *
-     * @param framedGraph     The graph instance
-     * @param permissionScopeFinder A permission scope, e.g. a country
-     * @param actioner        the current user
-     * @param options         the import options
-     * @param log             An import log instance
+     * @param framedGraph The graph instance
+     * @param scopeFinder A permission scope, e.g. a country
+     * @param actioner    the current user
+     * @param options     the import options
+     * @param log         An import log instance
      */
-    public EagImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScopeFinder, actioner, options, log);
+    public EagImporter(FramedGraph<?> framedGraph, PermissionScopeFinder scopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, scopeFinder, actioner, options, log);
     }
 
     @Override

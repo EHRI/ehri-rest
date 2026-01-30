@@ -20,37 +20,19 @@
 package eu.ehri.project.importers.exceptions;
 
 /**
- * The input data supplied was invalid in some way, detailed by @param cause.
+ * An error thrown when a provided hierarchy map is
+ * irregular or does not contain all units being
+ * imported.
  */
-public class InputParseError extends Exception {
-
-    private static final long serialVersionUID = -1572846616664011336L;
-
-    /**
-     * Constructor.
-     *
-     * @param cause the root exception
-     */
-    public InputParseError(Throwable cause) {
-        super(cause);
-    }
+public class ImportHierarchyMapError extends RuntimeException {
+    private static final long serialVersionUID = -6677437433328782099L;
 
     /**
      * Constructor.
      *
      * @param message a description of the error
      */
-    public InputParseError(String message) {
+    public ImportHierarchyMapError(String message) {
         super(message);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param message a description of the error
-     * @param cause the root exception
-     */
-    public InputParseError(String message, Throwable cause) {
-        super(message, cause);
     }
 }

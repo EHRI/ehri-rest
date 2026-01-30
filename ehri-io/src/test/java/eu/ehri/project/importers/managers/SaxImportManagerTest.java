@@ -21,9 +21,7 @@ package eu.ehri.project.importers.managers;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import eu.ehri.project.importers.ImportLog;
@@ -31,6 +29,7 @@ import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
+import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.IOHelpers;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -46,19 +45,18 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 
 public class SaxImportManagerTest extends AbstractImporterTest {
 
     @Test
-    public void testImportInferHierarchy() throws Exception {
+    public void testImportWithHierarchyFile() throws Exception {
         Map<String, String> hierarchyMap = Maps.newHashMap();
         hierarchyMap.put("1c", null);
         hierarchyMap.put("1s", "1c");
@@ -84,6 +82,31 @@ public class SaxImportManagerTest extends AbstractImporterTest {
         String[] ids = {"nl-r1-1c", "nl-r1-1c-1s", "nl-r1-1c-1s-1f", "nl-r1-2c"};
         for (String id : ids) {
             assertThat(manager.getEntityUnchecked(id, DocumentaryUnit.class), notNullValue());
+        }
+    }
+
+    @Test
+    public void testImportHierarchicalWithHierarchyFile() throws Exception {
+        Map<String, String> hierarchyMap = Maps.newHashMap();
+        hierarchyMap.put("test-doc", null);
+        hierarchyMap.put("Ctop_level_fonds", "test-doc");
+
+        JsonMapper mapper = new JsonMapper();
+        final ImmutableMap<String, String> map = ImmutableMap.of(
+                "ead.xml", Resources.getResource("ead.xml").toURI().toString(),
+                "hierarchical-ead.xml", Resources.getResource("hierarchical-ead.xml").toURI().toString()
+        );
+
+        byte[] buf = mapper.writer().writeValueAsBytes(map);
+        InputStream stream = new ByteArrayInputStream(buf);
+
+        SaxImportManager importer = saxImportManager(EadImporter.class, EadHandler.class,
+                ImportOptions.basic().withHierarchyMap(hierarchyMap));
+        try {
+            importer.importJson(stream, "Testing Hierarchy Import");
+            fail("Importing a hierarchy w/ incomplete map should throw an exception");
+        } catch (ImportHierarchyMapError e) {
+            assertThat(e.getMessage(), containsString("Hierarchy map does not contain unit local identifier"));
         }
     }
 

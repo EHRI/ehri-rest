@@ -352,13 +352,4 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     private String escapeValueForKey(String value) {
         return value.replaceAll("[\\s=:]", "_");
     }
-
-    /**
-     * Print a text representation of the graph on `System.out`.
-     */
-    protected void printGraph() {
-        for (String key : currentGraphPath.peek().keySet()) {
-            System.out.println(key + ":" + currentGraphPath.peek().get(key));
-        }
-    }
 }

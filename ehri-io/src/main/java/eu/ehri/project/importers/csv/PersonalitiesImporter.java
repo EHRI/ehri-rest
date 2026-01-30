@@ -55,8 +55,8 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
 
-    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScopeFinder, actioner, options.withProperties("personalities.properties"), log);
+    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScopeFinder scopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, scopeFinder, actioner, options.withProperties("personalities.properties"), log);
     }
 
     @Override

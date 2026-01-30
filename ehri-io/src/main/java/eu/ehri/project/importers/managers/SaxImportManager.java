@@ -131,7 +131,7 @@ public class SaxImportManager extends AbstractImportManager {
         try {
             ItemImporter<?, ?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
-                    .newInstance(framedGraph, permissionScopeFinder, actioner, options, log);
+                    .newInstance(framedGraph, scopeFinder, actioner, options, log);
 
             for (ImportCallback callback : extraCallbacks) {
                 importer.addCallback(callback);

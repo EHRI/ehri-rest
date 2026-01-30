@@ -47,9 +47,9 @@ import java.util.Map;
  */
 public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
 
-    public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder,
+    public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScopeFinder scopeFinder,
                               Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScopeFinder, actioner, options, log);
+        super(framedGraph, scopeFinder, actioner, options, log);
     }
 
     @Override

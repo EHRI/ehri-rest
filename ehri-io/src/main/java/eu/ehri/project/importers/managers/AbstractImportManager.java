@@ -75,7 +75,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     protected String currentFile;
     protected Integer currentPosition;
-    protected PermissionScopeFinder permissionScopeFinder;
+    protected PermissionScopeFinder scopeFinder;
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
     private int consecutiveIoErrors = 0;
 
@@ -102,9 +102,9 @@ public abstract class AbstractImportManager implements ImportManager {
         this.options = options;
 
         if (options.hierarchyMap != null) {
-            this.permissionScopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyMap);
+            this.scopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyMap);
         } else {
-            this.permissionScopeFinder = new StaticPermissionScopeFinder(scope);
+            this.scopeFinder = new StaticPermissionScopeFinder(scope);
         }
     }
 

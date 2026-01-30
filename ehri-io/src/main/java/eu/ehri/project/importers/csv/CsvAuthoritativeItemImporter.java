@@ -56,9 +56,9 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
-    public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScopeFinder permissionScopeFinder,
+    public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScopeFinder scopeFinder,
                                         Actioner actioner, ImportOptions options, ImportLog log) {
-        super(framedGraph, permissionScopeFinder, actioner, options, log);
+        super(framedGraph, scopeFinder, actioner, options, log);
     }
 
     @Override

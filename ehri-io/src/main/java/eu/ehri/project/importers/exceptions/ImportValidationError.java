@@ -25,8 +25,8 @@ import eu.ehri.project.exceptions.ValidationError;
  * The input data supplied was invalid in some way, detailed by @param cause.
  */
 public class ImportValidationError extends Exception {
-    private static final long serialVersionUID = -5295648478089620968L;
 
+    private static final long serialVersionUID = 4942301328836524092L;
     private final String context;
     private final ValidationError cause;
     /**

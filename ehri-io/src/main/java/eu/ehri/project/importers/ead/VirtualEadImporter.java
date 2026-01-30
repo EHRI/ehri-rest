@@ -69,9 +69,9 @@ public class VirtualEadImporter extends EadImporter {
     private static final String REPOID = "vcRepository";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
-    public VirtualEadImporter(FramedGraph<?> graph, PermissionScopeFinder permissionScopeFinder,
+    public VirtualEadImporter(FramedGraph<?> graph, PermissionScopeFinder scopeFinder,
                               Actioner actioner, ImportOptions options, ImportLog log) {
-        super(graph, permissionScopeFinder, actioner, options, log);
+        super(graph, scopeFinder, actioner, options, log);
     }
 
     @Override
@@ -149,7 +149,7 @@ public class VirtualEadImporter extends EadImporter {
         return list;
     }
 
-    private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
+    private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) {
         Map<String, Object> unit = Maps.newHashMap();
         if (itemData.get(OBJECT_IDENTIFIER) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
