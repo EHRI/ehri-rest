@@ -14,6 +14,7 @@ import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.base.Named;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
@@ -87,6 +88,12 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     ContactInfo.fax,
                     ContactInfo.webpage,
                     ContactInfo.email);
+
+    private static final Map<String, String> creatorTags = ImmutableMap.<String, String>builder()
+            .put("corporateBody", "corpname")
+            .put("family", "famname")
+            .put("person", "persname")
+            .build();
 
     private final Api api;
 
@@ -210,6 +217,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
             addDatePeriods(sw, desc);
+            addOrigination(sw, desc);
             addDidProperties(sw, desc);
             repoOpt.ifPresent(repo -> {
                 addRepositoryInfo(sw, repo, langCode);
@@ -217,13 +225,63 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         });
     }
 
+    private void addOrigination(XMLStreamWriter sw, Description desc) {
+        List<AccessPoint> creators = StreamSupport.stream(desc.getAccessPoints().spliterator(), false)
+                .filter(ap -> ap.getRelationshipType().equals(AccessPointType.creator))
+                .sorted(Comparator.comparing(Named::getName))
+                .collect(Collectors.toList());
+        if (!creators.isEmpty()) {
+            for (AccessPoint creatorAccessPoint : creators) {
+                tag(sw, "origination", () -> {
+                    String name = creatorAccessPoint.getName();
+                    String tagName = getCreatorTagName(creatorAccessPoint);
+                    Map<String, String> attrs = getCreatorAttributes(creatorAccessPoint);
+                    tag(sw, tagName, name, attrs);
+                });
+            }
+        }
+    }
+
+    private String getCreatorTagName(AccessPoint creatorAccessPoint) {
+        final String defaultValue = "persname";
+        for (Link link : creatorAccessPoint.getLinks()) {
+            for (Entity target : link.getLinkTargets()) {
+                if (target.getType().equals(Entities.HISTORICAL_AGENT)) {
+                    HistoricalAgent item = target.as(HistoricalAgent.class);
+                    return creatorTags.getOrDefault(
+                            (String) item.getProperty(Isaar.typeOfEntity.name()), defaultValue);
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    private Map<String, String> getCreatorAttributes(AccessPoint creatorAccessPoint) {
+        for (Link link : creatorAccessPoint.getLinks()) {
+            for (Entity target : link.getLinkTargets()) {
+                if (target.getType().equals(Entities.HISTORICAL_AGENT)) {
+                    HistoricalAgent item = target.as(HistoricalAgent.class);
+                    try {
+                        return ImmutableMap.of(
+                                "source", item.getAuthoritativeSet().getId(),
+                                "authfilenumber", item.getIdentifier()
+                        );
+                    } catch (NullPointerException e) {
+                        logger.warn("HistoricalAgent creator item with missing set: {}", item.getId());
+                    }
+                }
+            }
+        }
+        return Maps.newHashMap();
+    }
+
     private void addRepositoryInfo(XMLStreamWriter sw, Repository repo, String langCode) {
         LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode)
-            .ifPresent(repoDesc -> {
-                tag(sw, "repository", () -> {
-                    tag(sw, "corpname", repoDesc.getName());
+                .ifPresent(repoDesc -> {
+                    tag(sw, "repository", () -> {
+                        tag(sw, "corpname", repoDesc.getName());
+                    });
                 });
-            });
     }
 
     private void addDidProperties(XMLStreamWriter sw, Description desc) {
