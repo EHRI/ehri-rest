@@ -107,6 +107,9 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/did/unitdatestructured/daterange/fromdate");
         assertXPath(doc, "1999",
                 "//ead/archdesc/did/unitdatestructured/daterange/todate");
+        assertXPath(doc, "Bowers, Kate, 1963- |||", "//ead/archdesc/did/origination[1]/persname/part/text()");
+        assertXPath(doc, "Test|||, Name|||, Ms.|||, Number|||, Suffix|||, Title|||, (Fuller form|||), 1880-1980|||, qualifier|||",
+                "//ead/archdesc/did/origination[2]/persname/part/text()");
     }
 
     @Test
