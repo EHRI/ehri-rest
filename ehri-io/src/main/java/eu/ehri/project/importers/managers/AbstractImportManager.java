@@ -177,7 +177,7 @@ public abstract class AbstractImportManager implements ImportManager {
                         throw new ImportValidationError(e.getMessage(), e);
                     }
                 } catch (IOException | InputParseError e) {
-                    e.printStackTrace();
+                    logger.error("Input parse error", e);
                     log.addError(formatErrorLocation(), e.getMessage());
                     // Error regardless of tolerant setting if more than 5 consecutive items
                     // fail to download... this prevents an endless blocking stall...

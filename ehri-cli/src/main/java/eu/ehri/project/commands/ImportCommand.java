@@ -156,7 +156,7 @@ public abstract class ImportCommand extends BaseCommand {
                     .withUpdates(cmdLine.hasOption("allow-updates"))
                     .withTolerant(cmdLine.hasOption("tolerant"))
                     .withUseSourceId(cmdLine.hasOption("use-source-id"))
-                    .withDefaultLang(lang);
+                    .withLang(lang);
 
             ImportLog log = SaxImportManager.create(graph, scope, user,
                     importer,

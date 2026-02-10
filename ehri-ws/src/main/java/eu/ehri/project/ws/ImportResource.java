@@ -108,6 +108,8 @@ public class ImportResource extends AbstractResource {
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
     public static final String HIERARCHY_FILE = "hierarchy-file";
+    public static final String FIELD_SEP_PARAM = "field-separator";
+    public static final String ARRAY_SEP_PARAM = "array-separator";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -155,8 +157,8 @@ public class ImportResource extends AbstractResource {
     @Path("skos")
     public ImportLog importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
             @QueryParam(BASE_URI_PARAM) String baseURI,
             @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
             @QueryParam(CONCEPT_SCHEME_PARAM) URI conceptScheme,
@@ -427,8 +429,8 @@ public class ImportResource extends AbstractResource {
     @Path("eag")
     public ImportLog importEag(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(LANG_PARAM) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
@@ -477,8 +479,8 @@ public class ImportResource extends AbstractResource {
     @Path("eac")
     public ImportLog importEac(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(LANG_PARAM) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
@@ -528,25 +530,47 @@ public class ImportResource extends AbstractResource {
     @Path("csv")
     public ImportLog importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
+            @QueryParam(FIELD_SEP_PARAM) String fieldSep,
+            @QueryParam(ARRAY_SEP_PARAM) String arraySep,
+            @QueryParam(HIERARCHY_FILE) String hierarchyFile,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
+            checkConfigFileReference(propertyFile);
+            checkConfigFileReference(hierarchyFile);
+
+            if (fieldSep != null) {
+                if (fieldSep.length() != 1) {
+                    throw new DeserializationError(
+                            String.format("Field separator must be a single character, found: %s ", fieldSep));
+                }
+            }
+
+            // Read the hierarchy map, if given
+            Map<String, String> hierarchyMap = hierarchyFile != null
+                    ? readHierarchyTsv(readFile(hierarchyFile))
+                    : null;
+
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(
+            ImportOptions options = ImportOptions.csv(
                     tolerant,
                     allowUpdates,
-                    false,
+                    useSourceId,
                     lang,
-                    null,
-                    null
+                    fieldSep != null ? fieldSep.charAt(0) : null,
+                    arraySep,
+                    hierarchyMap,
+                    propertyFile
             );
             ImportManager importManager = CsvImportManager.create(
                     graph,

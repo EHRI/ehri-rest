@@ -82,7 +82,7 @@ public class GenericEadImporterTest extends AbstractImporterTest {
     @Test
     public void testImportWithLang() throws Exception {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu.xml")) {
-            ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
+            ImportOptions options = ImportOptions.basic().withLang("fre");
             ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
                     .importInputStream(ios, "Test language import");
             assertEquals(1, log.getCreated());
@@ -93,7 +93,7 @@ public class GenericEadImporterTest extends AbstractImporterTest {
     @Test
     public void testImportWithDefaultLang() throws Exception {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-no-lang.xml")) {
-            ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
+            ImportOptions options = ImportOptions.basic().withLang("fre");
             ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
                     .importInputStream(ios, "Test language import");
             assertEquals(1, log.getCreated());

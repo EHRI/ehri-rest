@@ -21,6 +21,7 @@ package eu.ehri.project.importers.managers;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
@@ -29,7 +30,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
-import eu.ehri.project.importers.StaticPermissionScopeFinder;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -52,8 +52,6 @@ import java.util.Map;
  */
 public class CsvImportManager extends AbstractImportManager {
 
-    private static final Character VALUE_DELIMITER = ';';
-
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
     private CsvImportManager(FramedGraph<?> framedGraph,
@@ -72,7 +70,7 @@ public class CsvImportManager extends AbstractImportManager {
      * Import CSV from the given InputStream, as part of the given action.
      *
      * @param stream  the input stream
-     * @param context the event context in which the ingest is happening
+     * @param context the event context in which the ingest operation is taking place
      * @param log     an import log instance
      */
     @Override
@@ -80,15 +78,18 @@ public class CsvImportManager extends AbstractImportManager {
             throws IOException, ValidationError, InputParseError {
 
         try {
-            ItemImporter<?,?> importer = importerClass
+            ItemImporter<?, ?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
-                    .newInstance(framedGraph, new StaticPermissionScopeFinder(permissionScope), actioner, options, log);
+                    .newInstance(framedGraph, scopeFinder, actioner, options, log);
             logger.trace("importer of class {}", importer.getClass());
 
             importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
-            CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(VALUE_DELIMITER).withHeader();
+            CsvSchema schema = CsvSchema.emptySchema()
+                    .withColumnSeparator(options.defaultFieldSep)
+                    .withArrayElementSeparator(options.defaultArraySep)
+                    .withHeader();
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
 
             try (InputStreamReader s = new InputStreamReader(stream, Charsets.UTF_8);
@@ -101,19 +102,23 @@ public class CsvImportManager extends AbstractImportManager {
                                 entry.getKey().replaceAll("\\s", ""), entry.getValue());
                     }
                     try {
-                        ((ItemImporter<Map<String, Object>, ?>)importer).importItem(dataMap);
+                        ((ItemImporter<Map<String, Object>, ?>) importer).importItem(dataMap);
                     } catch (ValidationError e) {
                         if (isTolerant()) {
-                            logger.error("Validation error importing item: {}", e);
+                            logger.error(String.format("Validation error importing item: '%s'", tag), e);
                         } else {
                             throw e;
                         }
                     }
                 }
+                // When an error reading CSV data is thrown it is -- counterintuitively --
+                // a JSON mapping exception wrapping a CsvMappingException.
+            } catch (RuntimeJsonMappingException e) {
+                throw new InputParseError(e.getCause().getMessage());
             }
         } catch (IllegalAccessException | InvocationTargetException |
-                InstantiationException | NoSuchMethodException |
-                ClassCastException e) {
+                 InstantiationException | NoSuchMethodException |
+                 ClassCastException e) {
             throw new RuntimeException(e);
         }
     }

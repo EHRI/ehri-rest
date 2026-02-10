@@ -115,7 +115,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
             ImportOptions options = ImportOptions.basic()
                     .withTolerant(cmdLine.hasOption("tolerant"))
                     .withUpdates(cmdLine.hasOption("allow-updates"))
-                    .withDefaultLang(cmdLine.getOptionValue("lang"));
+                    .withLang(cmdLine.getOptionValue("lang"));
 
             ImportLog log = CsvImportManager.create(graph, scope, user, importer, options)
                     .importFiles(filePaths, logMessage);
