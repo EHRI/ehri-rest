@@ -25,9 +25,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.ImportResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadHandler;
@@ -35,6 +35,7 @@ import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.ImportResource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -49,12 +50,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static eu.ehri.project.ws.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
-import static org.eclipse.jetty.util.LazyList.hasEntry;
+import static eu.ehri.project.ws.ImportResource.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -381,8 +382,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertStatus(ClientResponse.Status.BAD_REQUEST, response);
         String output = response.getEntity(String.class);
         JsonNode rootNode = jsonMapper.readTree(output);
-        assertTrue("Has correct error messages", rootNode.path("details").toString()
-                .contains("EOF reading input data"));
+        assertThat(rootNode.path("details").toString(), containsString("EOF reading input data"));
     }
 
     @Test
@@ -577,6 +577,92 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
         assertThat(log.getEventId().orElse(null), notNullValue());
+    }
+
+    @Test
+    public void testImportCsv() {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("simple.csv");
+        String logText = "Testing CSV import";
+        URI uri = getImportUrl("csv", "r1", logText, false)
+                .queryParam(FIELD_SEP_PARAM, ",")
+                .queryParam(COMMIT_PARAM, true)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(CSV_MEDIA_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        assertStatus(ClientResponse.Status.OK, response);
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(4, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
+    }
+
+    @Test
+    public void testImportBadCsv() throws Exception {
+        // Get the path of a CSV file
+        InputStream payloadStream = getPayloadStream(ImmutableMap.of(
+                "simple.csv", Resources.getResource("simple.csv").toURI().toString()
+        ));
+        String logText = "Testing CSV import with the wrong delimiter";
+        URI uri = getImportUrl("csv", "r1", logText, false)
+                .queryParam(FIELD_SEP_PARAM, ";") // Different from import file
+                .queryParam(COMMIT_PARAM, true)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        // This particular CSV produces a parse error when used with the wrong delimiter.
+        assertThat(response.getEntity(JsonNode.class).path("details").textValue(),
+                containsString("Too many entries: expected at most 1 " +
+                        "(value #1 (42 chars) \"25-09-2014,,,Before 2011: French and Dutch\")"));
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+    }
+
+    @Test
+    public void testImportCsvWithHierarchy() throws Exception {
+        String[] map = new String[] {
+                "kd1\t",
+                "kd2\tkd1",
+                "kd3\tkd2",
+                "kd4\tkd3",
+        };
+        String tsv = Joiner.on("\n").join(map);
+        URI hierarchyFile = getTestHierarchyFileUri(tsv);
+        // Get the path of a CSV file
+        InputStream payloadStream = getPayloadStream(ImmutableMap.of(
+                "simple.csv", Resources.getResource("simple.csv").toURI().toString()
+        ));
+        String logText = "Testing CSV import";
+        URI uri = getImportUrl("csv", "r1", logText, false)
+                .queryParam(FIELD_SEP_PARAM, ",")
+                .queryParam(COMMIT_PARAM, true)
+                .queryParam(HIERARCHY_FILE, hierarchyFile)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        assertStatus(ClientResponse.Status.OK, response);
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(4, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
+        Multimap<String, String> createdKeys = log.getCreatedKeys();
+        List<String> created = new ArrayList<>(createdKeys.get("simple.csv"));
+        assertThat(created, hasItem("nl-r1-kd1"));
+        assertThat(created, hasItem("nl-r1-kd1-kd2"));
+        assertThat(created, hasItem("nl-r1-kd1-kd2-kd3"));
+        assertThat(created, hasItem("nl-r1-kd1-kd2-kd3-kd4"));
     }
 
     @Test

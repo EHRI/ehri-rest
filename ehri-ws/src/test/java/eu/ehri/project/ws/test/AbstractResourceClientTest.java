@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -33,11 +34,10 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.ws.providers.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDeserializer;
+import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.ws.providers.*;
 
 import javax.ws.rs.core.MediaType;
@@ -72,7 +72,8 @@ public class AbstractResourceClientTest extends RunningServerTest {
                 TableProvider.class,
                 BundleProvider.class,
                 ImportLogProvider.class,
-                SyncLogProvider.class
+                SyncLogProvider.class,
+                JacksonJsonProvider.class
         ).forEach(p -> config.getClasses().add(p));
         Lists.newArrayList(additionalProviders)
                 .forEach(p -> config.getClasses().add(p));
