@@ -141,7 +141,8 @@ public class JenaSkosExporter implements SkosExporter {
 
             // if there are no broader concepts, assume it's a top concept
             if (!concept.getBroaderConcepts().iterator().hasNext()) {
-                vocabResource.addProperty(SKOS.topConceptOf, resource);
+                vocabResource.addProperty(SKOS.hasTopConcept, resource);
+                resource.addProperty(SKOS.topConceptOf, vocabResource);
             }
 
             for (Concept other : concept.getBroaderConcepts()) {
