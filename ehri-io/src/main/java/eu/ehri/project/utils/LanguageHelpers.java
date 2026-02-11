@@ -22,19 +22,36 @@ import java.util.Optional;
  */
 public class LanguageHelpers {
 
-    private static final Map<String, Locale> locale2Map;
-    private static final Map<String, String> locale3Map;
+    private static final Map<String, Locale> locale2To3Map;
+    private static final Map<String, String> locale3To2Map;
     private static final Map<String, Locale> localeNameMap;
 
+    /**
+     * Newer 2-letter codes that map to legacy codes.
+     */
+    private static final Map<String, String> aliases = ImmutableMap.of(
+            "he", "iw",
+            "yi", "ji",
+            "id", "in"
+    );
+
     static {
-        String[] languages = Locale.getISOLanguages();
-        locale2Map = Maps.newHashMapWithExpectedSize(languages.length);
-        locale3Map = Maps.newHashMapWithExpectedSize(languages.length);
-        localeNameMap = Maps.newHashMapWithExpectedSize(languages.length);
+        List<String> languages = Lists.newArrayList(Locale.getISOLanguages());
+
+        // Java's Locale uses obsolete codes for backwards compatibility.
+        for (Map.Entry<String, String> pair : aliases.entrySet()) {
+            languages.replaceAll(s -> s.equalsIgnoreCase(pair.getValue()) ? pair.getKey() : s);
+        }
+        locale2To3Map = Maps.newHashMapWithExpectedSize(languages.size());
+        locale3To2Map = Maps.newHashMapWithExpectedSize(languages.size());
+        localeNameMap = Maps.newHashMapWithExpectedSize(languages.size());
         for (String language : languages) {
             Locale locale = new Locale(language);
-            locale2Map.put(language, locale);
-            locale3Map.put(locale.getISO3Language(), language);
+            locale2To3Map.put(language, locale);
+            if (aliases.containsKey(language)) {
+                locale2To3Map.put(aliases.get(language), locale);
+            }
+            locale3To2Map.put(locale.getISO3Language(), language);
             localeNameMap.put(locale.getDisplayLanguage(Locale.ENGLISH).toLowerCase(), locale);
         }
     }
@@ -387,11 +404,11 @@ public class LanguageHelpers {
             return Optional.empty();
         }
         String codeLower = twoOrThree.toLowerCase();
-        if (twoOrThree.length() == 2 && locale2Map.containsKey(twoOrThree)) {
-            return Optional.of(locale2Map.get(twoOrThree).getISO3Language());
+        if (twoOrThree.length() == 2 && locale2To3Map.containsKey(twoOrThree)) {
+            return Optional.of(locale2To3Map.get(twoOrThree).getISO3Language());
         } else if (twoOrThree.length() == 3 && iso639BibTermLookup.containsKey(twoOrThree)) {
             return Optional.of(iso639BibTermLookup.get(twoOrThree));
-        } else if (locale3Map.containsKey(codeLower)) {
+        } else if (locale3To2Map.containsKey(codeLower)) {
             return Optional.of(codeLower);
         }
         return Optional.empty();
@@ -405,8 +422,8 @@ public class LanguageHelpers {
      * no conversion was found
      */
     public static String iso639DashTwoCode(String nameOrCode) {
-        if (nameOrCode.length() == 2 && locale2Map.containsKey(nameOrCode)) {
-            return locale2Map.get(nameOrCode).getISO3Language();
+        if (nameOrCode.length() == 2 && locale2To3Map.containsKey(nameOrCode)) {
+            return locale2To3Map.get(nameOrCode).getISO3Language();
         } else if (nameOrCode.length() == 3 && iso639BibTermLookup.containsKey(nameOrCode)) {
             return iso639BibTermLookup.get(nameOrCode);
         } else if (nameOrCode.length() > 3 && localeNameMap.containsKey(nameOrCode.toLowerCase())) {
@@ -427,10 +444,10 @@ public class LanguageHelpers {
      * no conversion was found
      */
     public static String iso639DashOneCode(String nameOrCode) {
-        if (nameOrCode.length() == 3 && locale3Map.containsKey(nameOrCode)) {
-            return locale3Map.get(nameOrCode);
+        if (nameOrCode.length() == 3 && locale3To2Map.containsKey(nameOrCode)) {
+            return locale3To2Map.get(nameOrCode);
         } else if (nameOrCode.length() == 3 && iso639BibTermLookup.containsKey(nameOrCode)) {
-            return locale3Map.get(iso639BibTermLookup.get(nameOrCode));
+            return locale3To2Map.get(iso639BibTermLookup.get(nameOrCode));
         } else if (nameOrCode.length() > 3 && localeNameMap.containsKey(nameOrCode.toLowerCase())) {
             return localeNameMap.get(nameOrCode.toLowerCase()).getLanguage();
         } else if (nameOrCode.length() > 2 && nameOrCode.contains("-")) {
@@ -454,13 +471,13 @@ public class LanguageHelpers {
      * @return a language name, with the original code as a fall back
      */
     public static String codeToName(String code) {
-        if (code.length() == 2 && locale2Map.containsKey(code)) {
-            return locale2Map.get(code).getDisplayLanguage(Locale.ENGLISH);
+        if (code.length() == 2 && locale2To3Map.containsKey(code)) {
+            return locale2To3Map.get(code).getDisplayLanguage(Locale.ENGLISH);
         } else if (code.length() == 3) {
             String termCode = iso639BibTermLookup.getOrDefault(code, code);
-            String twoCode = locale3Map.get(termCode);
-            if (locale2Map.containsKey(twoCode)) {
-                return locale2Map.get(twoCode).getDisplayLanguage(Locale.ENGLISH);
+            String twoCode = locale3To2Map.get(termCode);
+            if (locale2To3Map.containsKey(twoCode)) {
+                return locale2To3Map.get(twoCode).getDisplayLanguage(Locale.ENGLISH);
             }
         }
         return code;
