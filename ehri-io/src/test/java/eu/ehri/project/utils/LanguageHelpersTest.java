@@ -44,6 +44,8 @@ public class LanguageHelpersTest {
         assertEquals(Optional.of("sqi"), LanguageHelpers.convertCode("sq"));
         assertEquals(Optional.of("sqi"), LanguageHelpers.convertCode("alb"));
         assertEquals(Optional.of("eng"), LanguageHelpers.convertCode("en"));
+        assertEquals(Optional.of("heb"), LanguageHelpers.convertCode("he"));
+        assertEquals(Optional.of("heb"), LanguageHelpers.convertCode("iw"));
         assertEquals(Optional.empty(), LanguageHelpers.convertCode(null));
         assertEquals(Optional.empty(), LanguageHelpers.convertCode("unknown"));
     }
@@ -54,6 +56,7 @@ public class LanguageHelpersTest {
         assertEquals("cs", LanguageHelpers.iso639DashOneCode("ces"));
         assertEquals("cs", LanguageHelpers.iso639DashOneCode("cze"));
         assertEquals("sq", LanguageHelpers.iso639DashOneCode("sqi"));
+        assertEquals("he", LanguageHelpers.iso639DashOneCode("heb"));
         assertEquals("en", LanguageHelpers.iso639DashOneCode("English"));
         assertEquals("en-Latn", LanguageHelpers.iso639DashOneCode("eng-Latn"));
         assertEquals("en", LanguageHelpers.iso639DashOneCode("eng-"));
