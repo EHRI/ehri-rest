@@ -26,7 +26,7 @@ import eu.ehri.project.persistence.ErrorSet;
 /**
  * Represents the failure of incoming data to confirm to
  * some expected format. Like the {@link Bundle} class,
- * errors are held as a sub-tree corresponding to the
+ * errors are held as a subtree corresponding to the
  * branches of the incoming data.
  */
 public class ValidationError extends Exception {

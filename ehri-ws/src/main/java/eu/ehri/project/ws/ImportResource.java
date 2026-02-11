@@ -27,8 +27,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -47,8 +45,10 @@ import eu.ehri.project.importers.ead.EadSync;
 import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
+import eu.ehri.project.importers.exceptions.ImportHierarchyMapError;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
@@ -57,6 +57,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -97,6 +98,7 @@ public class ImportResource extends AbstractResource {
 
     public static final String BASE_URI_PARAM = "baseURI";
     public static final String URI_SUFFIX_PARAM = "suffix";
+    public static final String CONCEPT_SCHEME_PARAM = "concept-scheme";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String USE_SOURCE_ID_PARAM = "use-source-id";
     public static final String FONDS_PARAM = "fonds";
@@ -125,21 +127,23 @@ public class ImportResource extends AbstractResource {
      *     </code>
      * </pre>
      *
-     * @param scopeId      the id of the import scope (i.e. repository)
-     * @param tolerant     whether or not to die on the first validation error
-     * @param logMessage   log message for import. If this refers to an accessible local file
-     *                     its contents will be used.
-     * @param baseURI      a URI prefix common to ingested items that will be removed
-     *                     from each item's URI to obtain the local identifier.
-     * @param uriSuffix    a URI suffix common to ingested items that will be removed
-     *                     from each item's URI to obtain the local identifier.
-     * @param format       the RDF format of the POSTed data
-     * @param commit       commit the operation to the database. The default
-     *                     mode is to operate as a dry-run
-     * @param allowUpdates allow the operation to update existing items
-     * @param lang         the default language of description fields if not inferrable
-     *                     the data
-     * @param stream       a stream of SKOS data in a valid format.
+     * @param scopeId       the id of the import scope (i.e. repository)
+     * @param tolerant      whether to die on the first validation error
+     * @param logMessage    log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param baseURI       a URI prefix common to ingested items that will be removed
+     *                      from each item's URI to obtain the local identifier.
+     * @param uriSuffix     a URI suffix common to ingested items that will be removed
+     *                      from each item's URI to obtain the local identifier.
+     * @param conceptScheme the URI of the specific concept scheme in the input data. This
+     *                      can differentiate multiple schemes if given.
+     * @param format        the RDF format of the POSTed data
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
+     * @param allowUpdates  allow the operation to update existing items
+     * @param lang          the default language of description fields if not inferrable
+     *                      the data
+     * @param stream        a stream of SKOS data in a valid format.
      * @return a JSON object showing how many records were created,
      * updated, or unchanged.
      * @throws ItemNotFound         if the scope does not exist
@@ -155,6 +159,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(BASE_URI_PARAM) String baseURI,
             @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
+            @QueryParam(CONCEPT_SCHEME_PARAM) URI conceptScheme,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(FORMAT_PARAM) String format,
@@ -175,6 +180,7 @@ public class ImportResource extends AbstractResource {
                     .setDefaultLang(lang)
                     .setBaseURI(baseURI)
                     .setURISuffix(uriSuffix)
+                    .setConceptScheme(conceptScheme)
                     .importFile(stream, getLogMessage(logMessage).orElse(null));
             if (commit) {
                 logger.debug("Committing SKOS import transaction...");
@@ -185,6 +191,8 @@ public class ImportResource extends AbstractResource {
             throw new DeserializationError("Unable to parse input: " + e.getMessage());
         } catch (NoReaderForLangException e) {
             throw new DeserializationError("Unable to read language: " + format);
+        } catch (InvalidInputFormatError e) {
+            throw new DeserializationError(e.getMessage());
         }
     }
 
@@ -258,7 +266,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
-            @QueryParam(HIERARCHY_FILE) URI hierarchyFile,
+            @QueryParam(HIERARCHY_FILE) String hierarchyFile,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -268,11 +276,11 @@ public class ImportResource extends AbstractResource {
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
-            checkPropertyFile(propertyFile);
+            checkConfigFileReference(propertyFile);
 
             // Read the hierarchy map, if given
             Map<String, String> hierarchyMap = hierarchyFile != null
-                    ? readHierarchyTsv(uriToString(hierarchyFile))
+                    ? readHierarchyTsv(readFile(hierarchyFile))
                     : null;
 
             // Run the import!
@@ -360,7 +368,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
-            @QueryParam(HIERARCHY_FILE) URI hierarchyFile,
+            @QueryParam(HIERARCHY_FILE) String hierarchyFile,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -371,7 +379,9 @@ public class ImportResource extends AbstractResource {
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
-            checkPropertyFile(propertyFile);
+            checkConfigFileReference(propertyFile);
+            checkConfigFileReference(hierarchyFile);
+
             Class<? extends SaxXmlHandler> handler
                     = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
             Class<? extends ItemImporter<?, ?>> importer
@@ -385,7 +395,7 @@ public class ImportResource extends AbstractResource {
 
             // Read the hierarchy map, if given
             Map<String, String> hierarchyMap = hierarchyFile != null
-                    ? readHierarchyTsv(uriToString(hierarchyFile))
+                    ? readHierarchyTsv(readFile(hierarchyFile))
                     : null;
 
             // Run the sync...
@@ -429,7 +439,7 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
-            checkPropertyFile(propertyFile);
+            checkConfigFileReference(propertyFile);
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
@@ -479,7 +489,7 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
-            checkPropertyFile(propertyFile);
+            checkConfigFileReference(propertyFile);
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
@@ -528,7 +538,6 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
-
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
             ImportOptions options = ImportOptions.create(
@@ -710,7 +719,7 @@ public class ImportResource extends AbstractResource {
         return files;
     }
 
-    private static void checkPropertyFile(String properties) throws DeserializationError {
+    private static void checkConfigFileReference(String properties) throws DeserializationError {
         // Null properties are allowed
         if (properties != null) {
             java.nio.file.Path file = Paths.get(properties);
@@ -718,7 +727,7 @@ public class ImportResource extends AbstractResource {
                 try {
                     new URL(properties);
                 } catch (MalformedURLException e) {
-                    throw new DeserializationError("Properties file '" + properties + "' " +
+                    throw new DeserializationError("Config file '" + properties + "' " +
                             "either does not exist as a regular file or is an invalid URL.");
                 }
             }
@@ -786,7 +795,7 @@ public class ImportResource extends AbstractResource {
         try (MappingIterator<String[]> iterator = mapper
                 .readerFor(String[].class)
                 .with(hierarchyReaderSchema)
-                .readValues(tsvText) ) {
+                .readValues(tsvText)) {
             int rowNum = 1;
             while (iterator.hasNext()) {
                 final String[] row = iterator.next();
@@ -805,8 +814,8 @@ public class ImportResource extends AbstractResource {
         }
     }
 
-    private static String uriToString(URI uri) throws IOException {
-        try (InputStream s = uri.toURL().openStream()) {
+    private static String readFile(String fileOrUri) throws IOException {
+        try (InputStream s = new URL(fileOrUri).openStream()) {
             return new BufferedReader(
                     new InputStreamReader(s, StandardCharsets.UTF_8))
                     .lines()
