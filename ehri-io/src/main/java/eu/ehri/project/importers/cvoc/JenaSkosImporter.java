@@ -33,12 +33,9 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.definitions.SkosMultilingual;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -50,11 +47,7 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.persistence.*;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
@@ -65,11 +58,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
-import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.SKOS;
-import org.apache.jena.vocabulary.SKOSXL;
+import org.apache.jena.vocabulary.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,13 +67,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -111,6 +94,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String baseURI;
     private final String suffix;
     private final String defaultLang;
+    private final URI conceptSchemeURI;
     private static final String DEFAULT_LANG = Locale.ENGLISH.getISO3Language();
     private static final Bundle linkTemplate = Bundle.of(EntityClass.LINK)
             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, config.getString("io.import.defaultLinkText"))
@@ -119,16 +103,20 @@ public final class JenaSkosImporter implements SkosImporter {
     /**
      * Constructor
      *
-     * @param framedGraph The framed graph
-     * @param actioner    The actioner
-     * @param vocabulary  The target vocabulary
-     * @param tolerant    Whether or not to ignore single item validation errors.
-     * @param format      The RDF format
-     * @param defaultLang The language to use for elements without specified language
+     * @param framedGraph      The framed graph
+     * @param actioner         The actioner
+     * @param vocabulary       The target vocabulary
+     * @param tolerant         Whether to ignore single item validation errors.
+     * @param format           The RDF format
+     * @param defaultLang      The language to use for elements without specified language
+     * @param conceptSchemeURI The URI of the concept scheme to import, if more than one
+     *                         is present in the input RDF. If omitted a single scheme is
+     *                         assumed, and an error will be thrown if more than one is found.
      */
     private JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
                              Vocabulary vocabulary, boolean tolerant, boolean allowUpdates,
-                             String baseURI, String suffix, String format, String defaultLang) {
+                             String baseURI, String suffix, String format, String defaultLang,
+                             URI conceptSchemeURI) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
@@ -140,6 +128,7 @@ public final class JenaSkosImporter implements SkosImporter {
         this.suffix = suffix;
         this.format = format;
         this.defaultLang = defaultLang;
+        this.conceptSchemeURI = conceptSchemeURI;
         this.dao = new BundleManager(framedGraph, vocabulary.idPath());
     }
 
@@ -174,37 +163,36 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param actioner    The actioner
      * @param vocabulary  The target vocabulary
      */
-    public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
-            Vocabulary vocabulary) {
-        this(framedGraph, actioner, vocabulary, false, false, null, null, null, DEFAULT_LANG);
+    public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner, Vocabulary vocabulary) {
+        this(framedGraph, actioner, vocabulary, false, false, null, null, null, DEFAULT_LANG, null);
     }
 
     @Override
     public JenaSkosImporter setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: {}", tolerant);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI);
     }
 
     @Override
     public JenaSkosImporter setBaseURI(String prefix) {
         logger.debug("Setting importer base URI: {}", prefix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, prefix, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, prefix, suffix, format, defaultLang, conceptSchemeURI);
     }
 
     @Override
     public JenaSkosImporter setURISuffix(String suffix) {
         logger.debug("Setting importer URI: suffix {}", suffix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI);
     }
 
     @Override
     public JenaSkosImporter setFormat(String format) {
         logger.debug("Setting importer format: {}", format);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI);
     }
 
     @Override
@@ -212,14 +200,21 @@ public final class JenaSkosImporter implements SkosImporter {
         logger.debug("Setting importer default language: {}", lang);
         return new JenaSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format,
-                LanguageHelpers.iso639DashTwoCode(lang));
+                LanguageHelpers.iso639DashTwoCode(lang), conceptSchemeURI);
     }
 
     @Override
     public JenaSkosImporter allowUpdates(boolean allowUpdates) {
         logger.debug("Setting importer allow updates: {}", true);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI);
+    }
+
+    @Override
+    public JenaSkosImporter setConceptScheme(URI conceptSchemeURI) {
+        logger.debug("Setting importer concept scheme: {}", conceptSchemeURI);
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI);
     }
 
     /**
@@ -231,7 +226,7 @@ public final class JenaSkosImporter implements SkosImporter {
      */
     @Override
     public ImportLog importFile(String filePath, String logMessage)
-            throws IOException, ValidationError {
+            throws IOException, ValidationError, InvalidInputFormatError {
         try (InputStream ios = Files.newInputStream(Paths.get(filePath))) {
             return importFile(ios, logMessage);
         }
@@ -245,7 +240,7 @@ public final class JenaSkosImporter implements SkosImporter {
      * @return A log of imported nodes
      */
     @Override
-    public ImportLog importFile(InputStream ios, String logMessage) throws ValidationError {
+    public ImportLog importFile(InputStream ios, String logMessage) throws ValidationError, InvalidInputFormatError {
 
         // Create a new action for this import
         Optional<String> logMsg = getLogMessage(logMessage);
@@ -254,7 +249,7 @@ public final class JenaSkosImporter implements SkosImporter {
         // Create a manifest to store the results of the import.
         ImportLog log = new ImportLog(logMsg.orElse(null));
 
-        // NB: We rely in inference here, despite a sketchy understanding of how it works ;)
+        // NB: We rely on inference here, despite a sketchy understanding of how it works ;)
         // The RDFS.subPropertyOf lets us fetch SKOS-XL pref/alt/hidden labels using
         // the same property name as the plain SKOS variants.
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RULE_INF);
@@ -266,17 +261,19 @@ public final class JenaSkosImporter implements SkosImporter {
             // inference on the model means we get consistent behaviour when syncing
             // these relationships, regardless of how they are defined in the RDF...
             model.add(SKOS.broader, OWL.inverseOf, SKOS.narrower);
+            // Likewise for topConceptOf/hasTopConcept
+            model.add(SKOS.hasTopConcept, OWL.inverseOf, SKOS.topConceptOf);
 
+            // Read the data...
             model.read(ios, null, format);
+
             URI uri = SkosRDFVocabulary.CONCEPT.getURI();
-            OntClass conceptClass = model.getOntClass(uri.toString());
-            logger.trace("in import file: {}", uri);
             Map<Resource, Concept> imported = Maps.newHashMap();
 
-            ExtendedIterator<? extends OntResource> itemIterator = conceptClass.listInstances();
+            final ExtendedIterator<? extends Resource> conceptsIterator = getConceptIterator(model);
             try {
-                while (itemIterator.hasNext()) {
-                    Resource item = itemIterator.next();
+                while (conceptsIterator.hasNext()) {
+                    Resource item = conceptsIterator.next();
 
                     try {
                         Mutation<Concept> graphConcept = importConcept(item);
@@ -311,7 +308,7 @@ public final class JenaSkosImporter implements SkosImporter {
                     }
                 }
             } finally {
-                itemIterator.close();
+                conceptsIterator.close();
             }
 
             for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
@@ -434,6 +431,58 @@ public final class JenaSkosImporter implements SkosImporter {
         return unknown;
     }
 
+    private ExtendedIterator<? extends Resource> getConceptIterator(OntModel model) throws InvalidInputFormatError {
+        Optional<OntResource> scheme = getConceptScheme(model);
+        if (scheme.isPresent()) {
+            return model.listSubjectsWithProperty(SKOS.inScheme, scheme.get());
+        } else {
+            URI uri = SkosRDFVocabulary.CONCEPT.getURI();
+            OntClass conceptClass = model.getOntClass(uri.toString());
+            return conceptClass.listInstances();
+        }
+    }
+
+    /**
+     * If we have a concept scheme URI, find the matching instance.
+     *
+     * @param model the RDF model
+     * @return the (single) concept scheme, the matching one, or null
+     * @throws InvalidInputFormatError if more than one scheme exists and no matching
+     *                                 URI is given or if no matching URIs are found
+     */
+    private Optional<OntResource> getConceptScheme(OntModel model) throws InvalidInputFormatError {
+        URI schemeUri = SkosRDFVocabulary.CONCEPT_SCHEME.getURI();
+        OntClass conceptSchemeClass = model.getOntClass(schemeUri.toString());
+
+        if (conceptSchemeClass == null && conceptSchemeURI != null) {
+            throw new InvalidInputFormatError(
+                        String.format("No valid ConceptScheme instances found, but conceptSchemeURI '%s' provided", conceptSchemeURI));
+        }
+
+        if (conceptSchemeClass != null) {
+            List<? extends OntResource> ontResources = Lists.newArrayList(conceptSchemeClass.listInstances());
+            if (ontResources.size() > 1) {
+                if (conceptSchemeURI == null) {
+                    throw new InvalidInputFormatError("Multiple ConceptScheme instances found, and no scheme URI provided");
+                }
+                for (OntResource ontResource : ontResources) {
+                    if (ontResource.getURI().equalsIgnoreCase(conceptSchemeURI.toString())) {
+                        return Optional.of(ontResource);
+                    }
+                }
+                throw new InvalidInputFormatError("No ConceptScheme instance found for URI: " + conceptSchemeURI);
+            } else if (ontResources.size() == 1 && conceptSchemeURI != null) {
+                final OntResource ontResource = ontResources.get(0);
+                final String uri = ontResource.getURI();
+                if (!uri.equalsIgnoreCase(conceptSchemeURI.toString())) {
+                    throw new InvalidInputFormatError(String.format("Specified concept scheme '%s' not found, existing: '%s'", conceptSchemeURI, uri));
+                }
+                return Optional.of(ontResource);
+            }
+        }
+        return Optional.empty();
+    }
+
     private Optional<AuthoritativeItem> findRelatedConcept(String name) {
         if (name != null) {
             String[] domains = name.split("/");
@@ -461,14 +510,14 @@ public final class JenaSkosImporter implements SkosImporter {
         // NB: this should be possible with simply item.listProperties(propUri)
         // but for some reason that doesn't work... I can't grok why.
         return item.listProperties().filterKeep(statement ->
-                statement.getPredicate()
-                        .hasURI(propUri.toString()))
+                        statement.getPredicate()
+                                .hasURI(propUri.toString()))
                 .mapWith(Statement::getObject).toList();
     }
 
     private void connectRelation(Concept current, Resource item, Map<Resource, Concept> others,
-            URI propUri, Function<Concept, Iterable<Concept>> getter,
-            BiConsumer<Concept, Concept> addFunc, BiConsumer<Concept, Concept> dropFunc) {
+                                 URI propUri, Function<Concept, Iterable<Concept>> getter,
+                                 BiConsumer<Concept, Concept> addFunc, BiConsumer<Concept, Concept> dropFunc) {
         Set<Concept> existingRelations = Sets.newHashSet(getter.apply(current));
         Set<Concept> newRelations = getObjectWithPredicate(item, propUri)
                 .stream()

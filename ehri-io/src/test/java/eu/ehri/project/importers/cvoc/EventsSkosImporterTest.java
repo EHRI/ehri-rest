@@ -127,7 +127,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     }
 
     @Test
-    public void withOutsideScheme() throws ItemNotFound, IOException, InputParseError, ValidationError {
+    public void withOutsideScheme() throws Exception {
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
             SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)

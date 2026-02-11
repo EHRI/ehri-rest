@@ -26,6 +26,7 @@ import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.junit.Test;
+import org.neo4j.storageengine.api.txstate.GraphState;
 
 import java.io.InputStream;
 import java.util.List;

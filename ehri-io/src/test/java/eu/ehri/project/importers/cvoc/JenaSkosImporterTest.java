@@ -24,12 +24,15 @@ import com.google.common.collect.Ordering;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.definitions.SkosMultilingual;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 
@@ -159,6 +162,29 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
             ImportLog importLog2 = importer
                     .importFile(ios2, "simple 1");
             assertEquals(1, importLog2.getUnchanged());
+        }
+    }
+
+    @Test(expected = InvalidInputFormatError.class)
+    public void testImportMissingConceptScheme() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                .setFormat("RDF/XML")
+                .setConceptScheme(URI.create("http://example.com/foobar"));
+        try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE3)) {
+            importer
+                    .importFile(ios1, "concept scheme import");
+        }
+    }
+
+    @Test
+    public void testImportSpecificConceptScheme() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                .setFormat("RDF/XML")
+                .setConceptScheme(URI.create("http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"));
+        try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE3)) {
+            ImportLog importLog = importer
+                    .importFile(ios1, "concept scheme import");
+            assertEquals(23, importLog.getCreated());
         }
     }
 

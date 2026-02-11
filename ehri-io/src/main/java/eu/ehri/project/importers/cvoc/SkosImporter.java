@@ -22,9 +22,11 @@ package eu.ehri.project.importers.cvoc;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 
 public interface SkosImporter {
@@ -40,7 +42,7 @@ public interface SkosImporter {
      * @throws ValidationError if data constraints are not met
      */
     ImportLog importFile(String filePath, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ValidationError, InvalidInputFormatError;
 
     /**
      * Import an input stream with a given log message.
@@ -53,7 +55,7 @@ public interface SkosImporter {
      * @throws ValidationError if data constraints are not met
      */
     ImportLog importFile(InputStream ios, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ValidationError, InvalidInputFormatError;
 
     /**
      * Switch the importer mode to one that is tolerant
@@ -105,4 +107,13 @@ public interface SkosImporter {
      * @return A new SKOS importer
      */
     SkosImporter allowUpdates(boolean allowUpdates);
+
+    /**
+     * Set the target concept scheme to import. This is only necessary when the
+     * input data contains more than one scheme.
+     *
+     * @param conceptSchemeURI the URI to import
+     * @return A new SKOS importer
+     */
+    SkosImporter setConceptScheme(URI conceptSchemeURI);
 }

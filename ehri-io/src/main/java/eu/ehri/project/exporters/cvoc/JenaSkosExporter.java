@@ -19,7 +19,6 @@
 
 package eu.ehri.project.exporters.cvoc;
 
-import com.google.common.collect.ImmutableMap;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
@@ -53,8 +52,7 @@ public class JenaSkosExporter implements SkosExporter {
     private final Vocabulary vocabulary;
     private final String format;
 
-    public JenaSkosExporter(final FramedGraph<?> framedGraph, final Vocabulary vocabulary,
-            String format) {
+    public JenaSkosExporter(final FramedGraph<?> framedGraph, final Vocabulary vocabulary, String format) {
         this.framedGraph = framedGraph;
         this.vocabulary = vocabulary;
         this.format = format;
@@ -65,8 +63,7 @@ public class JenaSkosExporter implements SkosExporter {
     }
 
     public JenaSkosExporter setFormat(String format) {
-        return new JenaSkosExporter(
-                framedGraph, vocabulary, format);
+        return new JenaSkosExporter(framedGraph, vocabulary, format);
     }
 
     @Override
@@ -90,7 +87,6 @@ public class JenaSkosExporter implements SkosExporter {
     }
 
     public Model export(String base) {
-
         String baseUri = base == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : base;
         Iterable<Concept> concepts = vocabulary.getConcepts();
         Model model = ModelFactory.createDefaultModel();
