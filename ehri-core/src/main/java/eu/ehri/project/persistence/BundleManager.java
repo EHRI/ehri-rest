@@ -27,10 +27,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -190,10 +187,15 @@ public final class BundleManager {
             createDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
             return node;
         } catch (IntegrityError e) {
-            // Mmmn, if we get here, it means that there's been an ID generation error
-            // which was not handled by an exception.. so throw a runtime error...
-            throw new RuntimeException(
-                    "Unexpected state: ID generation error not handled by IdGenerator class " + e.getMessage());
+            // If we get here, it means that there's been an ID generation error
+            // which was not handled by an exception... this can happen in odd circumstances like:
+            // - an item was renamed (local identifier, causing graph ID to change)
+            // - it is exported from e.g. one system
+            // - it is re-imported to a different system via the bundle
+            // - it is assumed the item is to be created anew, but the generated
+            //   identifiers of its dependent node items already exist
+            throw new RuntimeIntegrityError(
+                    "ID generation error not handled by IdGenerator class " + e.getMessage(), e);
         }
     }
 

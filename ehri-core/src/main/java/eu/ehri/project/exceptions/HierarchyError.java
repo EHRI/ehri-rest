@@ -1,6 +1,7 @@
 package eu.ehri.project.exceptions;
 
 public class HierarchyError extends Exception {
+    private static final long serialVersionUID = 512957887884288755L;
     private final String id;
     private final int childCount;
 
