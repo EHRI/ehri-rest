@@ -31,7 +31,7 @@ import eu.ehri.project.persistence.ErrorSet;
  */
 public class ValidationError extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 50546690504818248L;
     private final ErrorSet errorSet;
     private final Bundle bundle;
 

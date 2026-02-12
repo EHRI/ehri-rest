@@ -25,10 +25,10 @@ package eu.ehri.project.exceptions;
  * properties that must be unique across the entire
  * graph (e.g. identifiers.)
  */
-public class IntegrityError extends Exception {
-    private static final long serialVersionUID = -1058375533465199120L;
+public class RuntimeIntegrityError extends RuntimeException {
+    private static final long serialVersionUID = 2117496038626194196L;
 
-    public IntegrityError(String idValue) {
-        super("Integrity error for id value: " + idValue);
+    public RuntimeIntegrityError(String message, Throwable cause) {
+        super(message, cause);
     }
 }

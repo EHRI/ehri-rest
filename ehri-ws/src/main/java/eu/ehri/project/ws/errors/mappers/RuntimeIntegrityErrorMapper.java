@@ -17,18 +17,29 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.exceptions;
+package eu.ehri.project.ws.errors.mappers;
+
+import eu.ehri.project.exceptions.RuntimeIntegrityError;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.ws.errors.WebDeserializationError;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
 
 /**
- * Represents the violation of an integrity constraint
- * during data persistence, typically due to
- * properties that must be unique across the entire
- * graph (e.g. identifiers.)
+ * Serialize an integrity error.
  */
-public class IntegrityError extends Exception {
-    private static final long serialVersionUID = -1058375533465199120L;
-
-    public IntegrityError(String idValue) {
-        super("Integrity error for id value: " + idValue);
+@Provider
+public class RuntimeIntegrityErrorMapper implements ExceptionMapper<RuntimeIntegrityError> {
+    @Override
+    public Response toResponse(RuntimeIntegrityError e) {
+        return WebDeserializationError.errorToJson(
+                Status.INTERNAL_SERVER_ERROR,
+                e.getMessage(),
+                "This can occur when attempting to import, patch, or update items that have been " +
+                        "renamed (local identifiers changed).");
     }
 }

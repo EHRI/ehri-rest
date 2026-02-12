@@ -8,10 +8,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
@@ -173,7 +170,7 @@ public class BatchOperations {
                         throw e;
                     } else {
                         log.addError(bundle.getId(), e.getMessage());
-                        logger.warn("Validation error patching {}: {}", bundle.getId(), e);
+                        logger.warn(String.format("Validation error patching: %s", bundle.getId()), e);
                     }
                 }
             }
