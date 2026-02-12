@@ -122,6 +122,7 @@
         <jackson.version>2.10.5</jackson.version>
         <junit.version>4.13.1</junit.version>
         <jersey.version>1.19.4</jersey.version>
+        <logback.version>1.2.13</logback.version>
     </properties>
 
     <build>
