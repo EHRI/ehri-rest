@@ -34,10 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class BundesarchiveSplitTest extends AbstractImporterTest {
@@ -67,13 +64,13 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)
         // - 1 more DocumentDescription
-        // - 1 more DatePeriod
+        // - 0 more DatePeriods
         // - 1 more UnknownProperties
         // - 3 more Relationships
         // - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 5 more MaintenanceEvents (4 revised, 1 created)
-        int newCount = origCount + 9 + 1 + 4 + 1;
+        int newCount = origCount + 8 + 1 + 4 + 1;
         printGraph(graph);
 
         assertEquals(newCount, getNodeCount(graph));
@@ -94,14 +91,14 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         for (DocumentaryUnitDescription d : archUnit.getDocumentDescriptions()) {
             assertEquals("Reichsschatzmeister der NSDAP", d.getName());
         }
-        //test dates
+        // test dates (support for parsing these was removed, so they're just
+        // strings now and not DatePeriods)
         for (DocumentaryUnitDescription d : archUnit.getDocumentDescriptions()) {
-            // Single date is just a string
-            assertFalse(d.getPropertyKeys().contains("unitDates"));
+            // Single date is not parsable as a range or year
+            String unitDates = d.getProperty("unitDates");
+            assertNotNull(unitDates);
             List<DatePeriod> datePeriods = Lists.newArrayList(d.getDatePeriods());
-            assertEquals(1, datePeriods.size());
-            assertEquals("1906-01-01", datePeriods.get(0).getStartDate());
-            assertEquals("1919-12-31", datePeriods.get(0).getEndDate());
+            assertEquals(0, datePeriods.size());
         }
     }
 }

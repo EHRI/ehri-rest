@@ -30,7 +30,10 @@ import eu.ehri.project.importers.ErrorCallback;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.links.LinkResolver;
+import eu.ehri.project.importers.util.DateParser;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -48,6 +51,8 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     protected final GraphManager manager;
     protected final ImportOptions options;
     protected final ImportLog log;
+    protected final DateParser dateParser;
+    protected final LinkResolver linkResolver;
     private final List<ImportCallback> callbacks = Lists.newArrayList();
     private final List<ErrorCallback> errorCallbacks = Lists.newArrayList();
 
@@ -91,6 +96,8 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
         this.log = log;
         this.options = options;
         manager = GraphManagerFactory.getInstance(graph);
+        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
+        dateParser = new DateParser();
     }
 
     @Override
