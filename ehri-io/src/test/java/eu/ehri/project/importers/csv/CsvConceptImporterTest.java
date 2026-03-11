@@ -63,7 +63,8 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
-            CsvImportManager.create(graph, authoritativeSet, adminUser, CsvConceptImporter.class, ImportOptions.basic())
+            CsvImportManager.create(graph, authoritativeSet, adminUser, CsvConceptImporter.class,
+                            ImportOptions.basic().withFieldSeparator(';'))
                     .importInputStream(ios, logMessage);
         }
         /*

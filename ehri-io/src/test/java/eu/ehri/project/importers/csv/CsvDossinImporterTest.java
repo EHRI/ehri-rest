@@ -53,7 +53,9 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
 
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("simple.csv")) {
             ImportLog importLog = CsvImportManager.create(graph, ps, adminUser, EadImporter.class,
-                            ImportOptions.basic().withFieldSeparator(',').withArraySeparator("||"))
+                            ImportOptions.basic()
+                                    .withFieldSeparator(',')
+                                    .withArraySeparator("||"))
                     .importInputStream(ios, logMessage);
             System.out.println(importLog);
             // After...

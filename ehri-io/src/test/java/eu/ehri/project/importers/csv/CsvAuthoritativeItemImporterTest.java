@@ -58,8 +58,9 @@ public class CsvAuthoritativeItemImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_CSV);
 
         List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = CsvImportManager.create(graph, authoritativeSet, adminUser,
-                CsvAuthoritativeItemImporter.class, ImportOptions.basic()).importInputStream(ios, logMessage);
+        ImportLog log = CsvImportManager.create(graph, authoritativeSet, adminUser, CsvAuthoritativeItemImporter.class,
+                ImportOptions.basic().withFieldSeparator(';'))
+                .importInputStream(ios, logMessage);
         assertEquals(9, log.getCreated());
         printGraph(graph);
 

@@ -621,7 +621,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         // This particular CSV produces a parse error when used with the wrong delimiter.
         assertThat(response.getEntity(JsonNode.class).path("details").textValue(),
                 containsString("Too many entries: expected at most 1 " +
-                        "(value #1 (42 chars) \"25-09-2014,,,Before 2011: French and Dutch\")"));
+                        "(value #1 (30 chars) \"25-09-2014,,,English,Latin,kd1\")"));
         assertStatus(ClientResponse.Status.BAD_REQUEST, response);
     }
 
