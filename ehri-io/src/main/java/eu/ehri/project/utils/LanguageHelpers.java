@@ -9,12 +9,7 @@ import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -34,6 +29,173 @@ public class LanguageHelpers {
             "yi", "ji",
             "id", "in"
     );
+
+    private static final ImmutableBiMap<String, String> scriptCodesToNames = ImmutableBiMap.<String, String>builder()
+            .put("Afak", "Afaka")
+            .put("Aghb", "Caucasian Albanian")
+            .put("Arab", "Arabic")
+            .put("Armi", "Imperial Aramaic")
+            .put("Armn", "Armenian")
+            .put("Avst", "Avestan")
+            .put("Bali", "Balinese")
+            .put("Bamu", "Bamum")
+            .put("Bass", "Bassa Vah")
+            .put("Batk", "Batak")
+            .put("Beng", "Bengali")
+            .put("Blis", "Blissymbols")
+            .put("Bopo", "Bopomofo")
+            .put("Brah", "Brahmi")
+            .put("Brai", "Braille")
+            .put("Bugi", "Buginese")
+            .put("Buhd", "Buhid")
+            .put("Cakm", "Chakma")
+            .put("Cans", "Unified Canadian Aboriginal Syllabics")
+            .put("Cari", "Carian")
+            .put("Cham", "Cham")
+            .put("Cher", "Cherokee")
+            .put("Cirt", "Cirth")
+            .put("Copt", "Coptic")
+            .put("Cprt", "Cypriot")
+            .put("Cyrl", "Cyrillic")
+            .put("Cyrs", "Cyrillic (Old Church Slavonic variant)")
+            .put("Deva", "Devanagari (Nagari)")
+            .put("Dsrt", "Deseret (Mormon)")
+            .put("Dupl", "Duployan shorthand")
+            .put("Egyd", "Egyptian demotic")
+            .put("Egyh", "Egyptian hieratic")
+            .put("Egyp", "Egyptian hieroglyphs")
+            .put("Elba", "Elbasan")
+            .put("Ethi", "Ethiopic (Geʻez)")
+            .put("Geok", "Khutsuri (Asomtavruli and Nuskhuri)")
+            .put("Geor", "Georgian (Mkhedruli)")
+            .put("Glag", "Glagolitic")
+            .put("Goth", "Gothic")
+            .put("Gran", "Grantha")
+            .put("Grek", "Greek")
+            .put("Gujr", "Gujarati")
+            .put("Guru", "Gurmukhi")
+            .put("Hang", "Hangul (Hangŭl, Hangeul)")
+            .put("Hani", "Han (Hanzi, Kanji, Hanja)")
+            .put("Hano", "Hanunoo (Hanunóo)")
+            .put("Hans", "Han (Simplified variant)")
+            .put("Hant", "Han (Traditional variant)")
+            .put("Hebr", "Hebrew")
+            .put("Hira", "Hiragana")
+            .put("Hluw", "Anatolian Hieroglyphs")
+            .put("Hmng", "Pahawh Hmong")
+            .put("Hrkt", "Japanese syllabaries")
+            .put("Hung", "Old Hungarian (Hungarian Runic)")
+            .put("Inds", "Indus (Harappan)")
+            .put("Ital", "Old Italic")
+            .put("Java", "Javanese")
+            .put("Jpan", "Japanese")
+            .put("Jurc", "Jurchen")
+            .put("Kali", "Kayah Li")
+            .put("Kana", "Katakana")
+            .put("Khar", "Kharoshthi")
+            .put("Khmr", "Khmer")
+            .put("Khoj", "Khojki")
+            .put("Knda", "Kannada")
+            .put("Kore", "Korean (alias for Hangul + Han)")
+            .put("Kpel", "Kpelle")
+            .put("Kthi", "Kaithi")
+            .put("Lana", "Tai Tham (Lanna)")
+            .put("Laoo", "Lao")
+            .put("Latf", "Latin (Fraktur variant)")
+            .put("Latg", "Latin (Gaelic variant)")
+            .put("Latn", "Latin")
+            .put("Lepc", "Lepcha (Róng)")
+            .put("Limb", "Limbu")
+            .put("Lina", "Linear A")
+            .put("Linb", "Linear B")
+            .put("Lisu", "Lisu (Fraser)")
+            .put("Loma", "Loma")
+            .put("Lyci", "Lycian")
+            .put("Lydi", "Lydian")
+            .put("Mahj", "Mahajani")
+            .put("Mand", "Mandaic, Mandaean")
+            .put("Mani", "Manichaean")
+            .put("Maya", "Mayan hieroglyphs")
+            .put("Mend", "Mende")
+            .put("Merc", "Meroitic Cursive")
+            .put("Mero", "Meroitic Hieroglyphs")
+            .put("Mlym", "Malayalam")
+            .put("Mong", "Mongolian")
+            .put("Moon", "Moon")
+            .put("Mroo", "Mro, Mru")
+            .put("Mtei", "Meitei Mayek (Meithei, Meetei)")
+            .put("Mymr", "Myanmar (Burmese)")
+            .put("Narb", "Old North Arabian")
+            .put("Nbat", "Nabataean")
+            .put("Nkgb", "Nakhi Geba")
+            .put("Nkoo", "N’Ko")
+            .put("Nshu", "Nüshu")
+            .put("Ogam", "Ogham")
+            .put("Olck", "Ol Chiki (Ol Cemet’, Ol, Santali)")
+            .put("Orkh", "Old Turkic, Orkhon Runic")
+            .put("Orya", "Oriya")
+            .put("Osma", "Osmanya")
+            .put("Palm", "Palmyrene")
+            .put("Perm", "Old Permic")
+            .put("Phag", "Phags-pa")
+            .put("Phli", "Inscriptional Pahlavi")
+            .put("Phlp", "Psalter Pahlavi")
+            .put("Phlv", "Book Pahlavi")
+            .put("Phnx", "Phoenician")
+            .put("Plrd", "Miao (Pollard)")
+            .put("Prti", "Inscriptional Parthian")
+            .put("Qaaa", "Reserved for private use (start)")
+            .put("Qabx", "Reserved for private use (end)")
+            .put("Rjng", "Rejang (Redjang, Kaganga)")
+            .put("Roro", "Rongorongo")
+            .put("Runr", "Runic")
+            .put("Samr", "Samaritan")
+            .put("Sara", "Sarati")
+            .put("Sarb", "Old South Arabian")
+            .put("Saur", "Saurashtra")
+            .put("Sgnw", "SignWriting")
+            .put("Shaw", "Shavian (Shaw)")
+            .put("Shrd", "Sharada, Śāradā")
+            .put("Sind", "Khudawadi, Sindhi")
+            .put("Sinh", "Sinhala")
+            .put("Sora", "Sora Sompeng")
+            .put("Sund", "Sundanese")
+            .put("Sylo", "Syloti Nagri")
+            .put("Syrc", "Syriac")
+            .put("Syre", "Syriac (Estrangelo variant)")
+            .put("Syrj", "Syriac (Western variant)")
+            .put("Syrn", "Syriac (Eastern variant)")
+            .put("Tagb", "Tagbanwa")
+            .put("Takr", "Takri, Ṭākrī, Ṭāṅkrī")
+            .put("Tale", "Tai Le")
+            .put("Talu", "New Tai Lue")
+            .put("Taml", "Tamil")
+            .put("Tang", "Tangut")
+            .put("Tavt", "Tai Viet")
+            .put("Telu", "Telugu")
+            .put("Teng", "Tengwar")
+            .put("Tfng", "Tifinagh (Berber)")
+            .put("Tglg", "Tagalog (Baybayin, Alibata)")
+            .put("Thaa", "Thaana")
+            .put("Thai", "Thai")
+            .put("Tibt", "Tibetan")
+            .put("Tirh", "Tirhuta")
+            .put("Ugar", "Ugaritic")
+            .put("Vaii", "Vai")
+            .put("Visp", "Visible Speech")
+            .put("Wara", "Warang Citi (Varang Kshiti)")
+            .put("Wole", "Woleai")
+            .put("Xpeo", "Old Persian")
+            .put("Xsux", "Cuneiform, Sumero-Akkadian")
+            .put("Yiii", "Yi")
+            .put("Zinh", "Code for inherited script")
+            .put("Zmth", "Mathematical notation")
+            .put("Zsym", "Symbols")
+            .put("Zxxx", "Code for unwritten documents")
+            .put("Zyyy", "Code for undetermined script")
+            .put("Zzzz", "Code for uncoded script")
+            .build();
+
 
     static {
         List<String> languages = Lists.newArrayList(Locale.getISOLanguages());
@@ -496,5 +658,27 @@ public class LanguageHelpers {
             return new java.util.Locale(Locale.ENGLISH.getLanguage(), code)
                     .getDisplayCountry(Locale.ENGLISH);
         }
+    }
+
+    /**
+     * Convert an ISO 15924 script code to its (English) name.
+     *
+     * @param code the 4-letter script code
+     * @return the script name, or the code as a fallback
+     */
+    public static String scriptCodeToName(String code) {
+        return scriptCodesToNames.getOrDefault(code, code);
+    }
+
+    /**
+     * Try and convert a script name to its ISO 15924 code.
+     *
+     * @param scriptName the script name
+     * @return an optional script code, if found
+     */
+    public static Optional<String> scriptNameToCode(String scriptName) {
+        return scriptCodesToNames.containsValue(scriptName)
+                ? Optional.ofNullable(scriptCodesToNames.inverse().get(scriptName))
+                : Optional.empty();
     }
 }

@@ -21,6 +21,7 @@ package eu.ehri.project.importers.util;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
@@ -58,7 +59,7 @@ public class ImportHelpers {
      * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
      */
     public static final String LANGUAGE_KEY_PREFIX = "language";
-
+    public static final String SCRIPT_KEY_PREFIX = "script";
     private static final Logger logger = LoggerFactory.getLogger(ImportHelpers.class);
     private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
     private static final NodeProperties nodeProperties = loadNodeProperties();
@@ -86,7 +87,7 @@ public class ImportHelpers {
      *
      * @param key    a property key
      * @param value  a property value
-     * @param entity the EntityClass with which this frameMap must comply
+     * @param entity the EntityClass with which this Map must comply
      * @return an object which, if the input was a list, will be joined by newlines
      */
     public static Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
@@ -95,6 +96,16 @@ public class ImportHelpers {
                 && nodeProperties.isMultivaluedProperty(entity.getName(), key))) {
             logger.trace("Flattening array property value: {}: {}", key, value);
             return stringJoiner.join((List<?>) value);
+        } else {
+            return value;
+        }
+    }
+
+    public static Object explodeMultivaluedProperties(String key, String value, EntityClass entity, Splitter splitter) {
+        if (nodeProperties.hasProperty(entity.getName(), key)
+           && nodeProperties.isMultivaluedProperty(entity.getName(), key)) {
+            logger.trace("Exploding array property value: {}: {}", key, value);
+            return splitter.splitToList(value);
         } else {
             return value;
         }
@@ -241,9 +252,13 @@ public class ImportHelpers {
     private static String normaliseValue(String property, String value) {
         String trimmedValue = StringUtils.normalizeSpace(value);
         // Language codes are converted to their 3-letter alternates
-        return property.startsWith(LANGUAGE_KEY_PREFIX)
-                ? LanguageHelpers.iso639DashTwoCode(trimmedValue)
-                : trimmedValue;
+        if (property.startsWith(LANGUAGE_KEY_PREFIX)) {
+            return LanguageHelpers.iso639DashTwoCode(trimmedValue);
+        } else if (property.startsWith(SCRIPT_KEY_PREFIX)) {
+            return LanguageHelpers.scriptNameToCode(trimmedValue).orElse(trimmedValue);
+        } else {
+            return trimmedValue;
+        }
     }
 
     public static List<Map<String, Object>> extractSubNodes(String type, Map<String, Object> data) {
