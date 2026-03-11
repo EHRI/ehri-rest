@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
@@ -88,9 +89,11 @@ public class CsvImportManager extends AbstractImportManager {
 
             CsvSchema schema = CsvSchema.emptySchema()
                     .withColumnSeparator(options.defaultFieldSep)
-                    .withArrayElementSeparator(options.defaultArraySep)
                     .withHeader();
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
+            // Despite Jackson having support for array elements in the CsvSchema, we're only
+            // parsing as a simple map, so we need to do the splitting ourselves.
+            final Splitter arraySplitter = Splitter.on(options.defaultArraySep).trimResults().omitEmptyStrings();
 
             try (InputStreamReader s = new InputStreamReader(stream, Charsets.UTF_8);
                  MappingIterator<Map<String, String>> valueIterator = reader.readValues(s)) {
@@ -98,8 +101,17 @@ public class CsvImportManager extends AbstractImportManager {
                     Map<String, String> rawData = valueIterator.next();
                     Map<String, Object> dataMap = Maps.newHashMap();
                     for (Map.Entry<String, String> entry : rawData.entrySet()) {
-                        ImportHelpers.putPropertyInGraph(dataMap,
-                                entry.getKey().replaceAll("\\s", ""), entry.getValue());
+                        final String property = entry.getKey().replaceAll("\\s", "");
+                        final String value = entry.getValue();
+
+                        // FIXME: ideally we'd know for sure if the field is multi-valued?
+                        // For now just assume if the array separator is present, it's an array.
+                        if (value.contains(options.defaultArraySep)) {
+                            arraySplitter.split(value)
+                                    .forEach(v -> ImportHelpers.putPropertyInGraph(dataMap, property, v));
+                        } else {
+                            ImportHelpers.putPropertyInGraph(dataMap, property, value);
+                        }
                     }
                     try {
                         ((ItemImporter<Map<String, Object>, ?>) importer).importItem(dataMap);

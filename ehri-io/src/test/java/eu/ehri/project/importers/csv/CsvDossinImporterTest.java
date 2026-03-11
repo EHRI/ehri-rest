@@ -25,12 +25,15 @@ import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 
 
@@ -48,8 +51,9 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        try (InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv")) {
-            ImportLog importLog = CsvImportManager.create(graph, ps, adminUser, EadImporter.class, ImportOptions.basic())
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("simple.csv")) {
+            ImportLog importLog = CsvImportManager.create(graph, ps, adminUser, EadImporter.class,
+                            ImportOptions.basic().withFieldSeparator(',').withArraySeparator("||"))
                     .importInputStream(ios, logMessage);
             System.out.println(importLog);
             // After...
@@ -66,6 +70,11 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
              */
             assertEquals(count + 22, getNodeCount(graph));
             DocumentaryUnit unit = manager.getEntity("nl-r1-kd3", DocumentaryUnit.class);
+
+            DocumentaryUnitDescription d1 = unit.getDescriptions().iterator().next().as(DocumentaryUnitDescription.class);
+            assertEquals("eng", d1.getLanguageOfDescription());
+            assertThat(d1.getProperty("languageOfMaterial"), containsInAnyOrder("nld", "eng", "fra"));
+            assertEquals("Latn", d1.getProperty("scriptOfMaterial"));
             assertEquals(ps, unit.getRepository());
         }
     }
