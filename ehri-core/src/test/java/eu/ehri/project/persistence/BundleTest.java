@@ -304,6 +304,16 @@ public class BundleTest {
     }
 
     @Test
+    public void testWithCreationData() throws Exception {
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar");
+        Bundle bundle2 = newDesc.withCreationDataValue("__hello", "world");
+        Map<String, Object> cdata = bundle2.getCreationData();
+        assertTrue(cdata.containsKey("__hello"));
+        assertEquals("world", cdata.get("__hello"));
+    }
+
+    @Test
     public void testWithMetaData() throws Exception {
         Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")

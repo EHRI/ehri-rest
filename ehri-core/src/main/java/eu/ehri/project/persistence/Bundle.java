@@ -386,6 +386,15 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
+     * Get the bundle creation data.
+     *
+     * @return The data to be used at creation time only.
+     */
+    public Map<String, Object> getCreationData() {
+        return ImmutableMap.copyOf(Maps.filterValues(creationData, Objects::nonNull));
+    }
+
+    /**
      * Get the bundle data, including that set only for item creation.
      *
      * @return The full data map
