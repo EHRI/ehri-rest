@@ -114,7 +114,7 @@ public abstract class ImportCommand extends BaseCommand {
 
     @Override
     public int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws Exception {
+                               CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
@@ -159,10 +159,10 @@ public abstract class ImportCommand extends BaseCommand {
                     .withLang(lang);
 
             ImportLog log = SaxImportManager.create(graph, scope, user,
-                    importer,
-                    handler,
-                    options,
-                    Lists.newArrayList())
+                            importer,
+                            handler,
+                            options
+                    )
                     .importFiles(filePaths, logMessage);
             System.out.println(log);
 

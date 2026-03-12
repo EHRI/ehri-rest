@@ -33,6 +33,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
@@ -53,6 +54,7 @@ import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -77,6 +79,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -110,6 +113,27 @@ public class ImportResource extends AbstractResource {
     public static final String HIERARCHY_FILE = "hierarchy-file";
     public static final String FIELD_SEP_PARAM = "field-separator";
     public static final String ARRAY_SEP_PARAM = "array-separator";
+
+    private static String generatePid() {
+        // Generate a unique 8-character identifier from an alphabet:
+        String alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
+        int length = 8;
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            // Pick a random index from 0 to alphabet.length() - 1
+            int index = random.nextInt(alphabet.length());
+
+            // Add the character at that index to our string
+            sb.append(alphabet.charAt(index));
+        }
+        return sb.toString();
+    }
+
+    private static final PreImportCallback genPID =
+            (b) -> b.withCreationDataValue(EntityType.PID_KEY, generatePid());
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -304,7 +328,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER),
                     options
-            );
+            ).withPreCallback(genPID);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -414,7 +438,9 @@ public class ImportResource extends AbstractResource {
                     propertyFile,
                     version
             );
-            SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
+            SaxImportManager importManager = SaxImportManager
+                    .create(graph, scope, user, importer, handler, options)
+                    .withPreCallback(genPID);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
             EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager);
@@ -473,7 +499,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, EagImporter.class.getName()),
                     getHandlerCls(handlerClass, EagHandler.class.getName()),
                     options
-            );
+            ).withPreCallback(genPID);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -595,7 +621,7 @@ public class ImportResource extends AbstractResource {
                     getCurrentActioner(),
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     options
-            );
+            ).withPreCallback(genPID);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {

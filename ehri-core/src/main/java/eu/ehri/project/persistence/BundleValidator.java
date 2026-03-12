@@ -40,6 +40,11 @@ public final class BundleValidator {
     private final GraphManager manager;
     private final List<String> scopes;
 
+    private enum ValidationType {
+        create,
+        update
+    }
+
     public BundleValidator(GraphManager manager, Collection<String> scopes) {
         this.manager = manager;
         this.scopes = Lists.newArrayList(Optional.ofNullable(scopes)
@@ -53,7 +58,7 @@ public final class BundleValidator {
      * @return A new bundle with generated IDs.
      */
     Bundle validateForCreate(Bundle bundle) throws ValidationError {
-        validateData(bundle);
+        validateData(bundle, ValidationType.create);
         Bundle withIds = bundle.generateIds(scopes);
         ErrorSet createErrors = validateTreeForCreate(withIds);
         if (!createErrors.isEmpty()) {
@@ -69,7 +74,7 @@ public final class BundleValidator {
      * @return A new bundle with generated IDs.
      */
     Bundle validateForUpdate(Bundle bundle) throws ValidationError {
-        validateData(bundle);
+        validateData(bundle, ValidationType.update);
         Bundle withIds = bundle.generateIds(scopes);
         ErrorSet updateErrors = validateTreeForUpdate(withIds);
         if (!updateErrors.isEmpty()) {
@@ -85,15 +90,11 @@ public final class BundleValidator {
      * @param bundle a Bundle to validate
      * @throws ValidationError if any errors were found during validation of the bundle
      */
-    private void validateData(Bundle bundle) throws ValidationError {
-        ErrorSet es = validateTreeData(bundle);
+    private void validateData(Bundle bundle, ValidationType op) throws ValidationError {
+        ErrorSet es = validateTreeData(bundle, op);
         if (!es.isEmpty()) {
             throw new ValidationError(bundle, es);
         }
-    }
-
-    private enum ValidationType {
-        data, create, update
     }
 
     /**
@@ -139,36 +140,46 @@ public final class BundleValidator {
      * @return errors an ErrorSet that may contain errors for missing/empty mandatory fields
      * and missing entity types
      */
-    private ErrorSet validateTreeData(Bundle bundle) {
+    private ErrorSet validateTreeData(Bundle bundle, ValidationType op) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
-        checkFields(bundle, builder);
+        checkFields(bundle, builder, op);
         checkEntityType(bundle, builder);
-        checkChildren(bundle, builder, ValidationType.data);
+        checkChildData(bundle, builder, op);
         return builder.build();
     }
 
-    private void checkChildren(Bundle bundle,
-            ErrorSet.Builder builder, ValidationType type) {
+    private void checkChildData(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
         final Set<String> ids = Sets.newHashSet();
         for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
             Bundle child = entry.getValue();
-            ErrorSet errorSet = type == ValidationType.data
-                    ? validateTreeData(child)
-                    : (type == ValidationType.create
-                        ? validateTreeForCreate(child)
-                        : validateTreeForUpdate(child));
-            if (errorSet.isEmpty() && child.getId() != null) {
-                if (ids.contains(child.getId())) {
-                    ListMultimap<String, String> errs = child.getType().getIdGen()
-                            .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
-                    for (Map.Entry<String, String> err : errs.entries()) {
-                        errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
-                    }
-                } else {
-                    ids.add(child.getId());
+            ErrorSet errorSet = validateTreeData(child, op);
+            combineErrorSets(bundle, builder, entry, errorSet, child, ids);
+        }
+    }
+
+    private static void combineErrorSets(Bundle bundle, ErrorSet.Builder builder, Map.Entry<String, Bundle> entry, ErrorSet errorSet, Bundle child, Set<String> ids) {
+        if (errorSet.isEmpty() && child.getId() != null) {
+            if (ids.contains(child.getId())) {
+                ListMultimap<String, String> errs = child.getType().getIdGen()
+                        .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
+                for (Map.Entry<String, String> err : errs.entries()) {
+                    errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
                 }
+            } else {
+                ids.add(child.getId());
             }
-            builder.addRelation(entry.getKey(), errorSet);
+        }
+        builder.addRelation(entry.getKey(), errorSet);
+    }
+
+    private void checkChildren(Bundle bundle, ErrorSet.Builder builder, ValidationType type) {
+        final Set<String> ids = Sets.newHashSet();
+        for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
+            Bundle child = entry.getValue();
+            ErrorSet errorSet = type == ValidationType.create
+                        ? validateTreeForCreate(child)
+                        : validateTreeForUpdate(child);
+            combineErrorSets(bundle, builder, entry, errorSet, child, ids);
         }
     }
 
@@ -186,9 +197,9 @@ public final class BundleValidator {
     /**
      * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
      */
-    private static void checkFields(Bundle bundle, ErrorSet.Builder builder) {
+    private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
-            checkField(bundle, builder, key);
+            checkField(bundle, builder, key, op);
         }
         Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
         for (Map.Entry<String, Set<String>> entry : enumPropertyKeys.entrySet()) {
@@ -210,12 +221,16 @@ public final class BundleValidator {
      * Check the data holds a given field and that the field is not empty.
      *
      * @param name The field name
+     * @param op the validation operation type
      */
-    private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name) {
-        if (!bundle.getData().containsKey(name)) {
+    private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name, ValidationType op) {
+        Map<String, Object> bundleData = op == ValidationType.create
+                ? bundle.getAllCreationData()
+                : bundle.getData();
+        if (!bundleData.containsKey(name)) {
             builder.addError(name, Messages.getString("BundleValidator.missingField"));
         } else {
-            Object value = bundle.getData().get(name);
+            Object value = bundleData.get(name);
             if (value == null) {
                 builder.addError(name, Messages.getString("BundleValidator.emptyField"));
             } else if (value instanceof String) {

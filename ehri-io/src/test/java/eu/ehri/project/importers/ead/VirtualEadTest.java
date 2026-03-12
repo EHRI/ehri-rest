@@ -26,6 +26,7 @@ import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.VirtualUnit;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -125,7 +126,7 @@ public class VirtualEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO2);
         Bundle documentaryUnit1Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1)
-                .withDataValue(Ontology.PERSISTENT_IDENTIFIER_KEY, "pid-" + UNIT1);
+                .withDataValue(EntityType.PID_KEY, "pid-" + UNIT1);
         Bundle documentDescription1Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1 + "desc")
                 .withDataValue(Ontology.NAME_KEY, UNIT1 + "title")
@@ -133,7 +134,7 @@ public class VirtualEadTest extends AbstractImporterTest {
 
         Bundle documentaryUnit2Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2)
-                .withDataValue(Ontology.PERSISTENT_IDENTIFIER_KEY, "pid-" + UNIT2);
+                .withDataValue(EntityType.PID_KEY, "pid-" + UNIT2);
         Bundle documentDescription2Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2 + "desc")
                 .withDataValue(Ontology.NAME_KEY, UNIT2 + "title")

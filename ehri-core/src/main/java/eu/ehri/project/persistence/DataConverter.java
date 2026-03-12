@@ -276,6 +276,8 @@ class DataConverter {
         String id = (String) data.get(Bundle.ID_KEY);
         EntityClass type = getType(data);
 
+
+
         // Guava's immutable collections don't allow null values.
         // Since Neo4j doesn't either it's safest to trip these out
         // at the deserialization stage. I can't think of a use-case

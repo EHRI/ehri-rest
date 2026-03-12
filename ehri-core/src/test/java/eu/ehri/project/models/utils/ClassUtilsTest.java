@@ -68,7 +68,7 @@ public class ClassUtilsTest {
     public void testGetPropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet(
                 Ontology.IDENTIFIER_KEY,
-                Ontology.PERSISTENT_IDENTIFIER_KEY,
+                EntityType.PID_KEY,
                 EntityType.ID_KEY,
                 EntityType.TYPE_KEY
         );
@@ -78,8 +78,7 @@ public class ClassUtilsTest {
     @Test
     public void testGetMandatoryPropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet(
-                Ontology.IDENTIFIER_KEY,
-                Ontology.PERSISTENT_IDENTIFIER_KEY
+                Ontology.IDENTIFIER_KEY
         );
         assertEquals(keys, ClassUtils.getMandatoryPropertyKeys(DocumentaryUnit.class));
     }

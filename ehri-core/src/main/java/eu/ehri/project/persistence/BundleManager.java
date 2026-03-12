@@ -182,8 +182,7 @@ public final class BundleManager {
      */
     private Vertex createInner(Bundle bundle) {
         try {
-            Vertex node = manager.createVertex(bundle.getId(), bundle.getType(),
-                    bundle.getData());
+            Vertex node = manager.createVertex(bundle.getId(), bundle.getType(), bundle.getAllCreationData());
             createDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
             return node;
         } catch (IntegrityError e) {

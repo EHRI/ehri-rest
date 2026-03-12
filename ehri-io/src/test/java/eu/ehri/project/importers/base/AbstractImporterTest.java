@@ -69,7 +69,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      */
     protected final PreImportCallback pidGeneratorCallback = (b) -> {
         if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
-            return b.withDataValue(Ontology.PERSISTENT_IDENTIFIER_KEY, "pid-" + b.getDataValue(Ontology.IDENTIFIER_KEY));
+            return b.withCreationDataValue(EntityType.PID_KEY, "pid-" + b.getDataValue(Ontology.IDENTIFIER_KEY));
         } else {
             return b;
         }

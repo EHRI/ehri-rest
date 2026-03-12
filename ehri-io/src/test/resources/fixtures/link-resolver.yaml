@@ -5,7 +5,7 @@
   type: DocumentaryUnit
   data:
     identifier: c5
-    _pid: c5-12345678
+    __pid: c5-12345678
   relationships:
     describes:
       - id: cd5

@@ -23,6 +23,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -97,7 +98,9 @@ public class PermissionScopeTest extends AbstractFixtureTest {
     @Test
     public void testIdentifierIdRelationships() throws Exception {
 
-        Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
+        Bundle docBundle = Bundle
+                .fromData(TestData.getTestDocBundle())
+                .withCreationDataValue(EntityType.PID_KEY, "some-pid-01");
         Repository repo = manager.getEntity("r1", Repository.class);
         BundleManager dao = new BundleManager(graph, repo.idPath());
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);

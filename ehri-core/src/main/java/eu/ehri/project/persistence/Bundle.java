@@ -34,6 +34,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.neo4j.cypher.internal.compiler.v2_3.planner.logical.plans.OuterHashJoin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,7 @@ public final class Bundle implements NestableData<Bundle> {
     private final String id;
     private final EntityClass type;
     private final Map<String, Object> data;
+    private final Map<String, Object> creationData;
     private final ImmutableMap<String, Object> meta;
     private final ImmutableListMultimap<String, Bundle> relations;
 
@@ -82,6 +84,7 @@ public final class Bundle implements NestableData<Bundle> {
     public static final String DATA_KEY = "data";
     public static final String TYPE_KEY = "type";
     public static final String META_KEY = "meta";
+    public static final String CREATION_DATA_KEY = "cdata";
 
     /**
      * Properties that are "managed", i.e. automatically set
@@ -95,6 +98,7 @@ public final class Bundle implements NestableData<Bundle> {
         private final EntityClass type;
         final Multimap<String, Bundle> relations = ArrayListMultimap.create();
         final Map<String, Object> data = Maps.newHashMap();
+        final Map<String, Object> creationData = Maps.newHashMap();
         final Map<String, Object> meta = Maps.newHashMap();
 
         public Builder setId(String id) {
@@ -138,6 +142,11 @@ public final class Bundle implements NestableData<Bundle> {
             return this;
         }
 
+        public Builder addCreationDataValue(String key, Object value) {
+            creationData.put(key, value);
+            return this;
+        }
+
         public Builder addDataMultiValue(String key, Object value) {
             if (!data.containsKey(key)) {
                 data.put(key, value);
@@ -164,7 +173,7 @@ public final class Bundle implements NestableData<Bundle> {
         }
 
         public Bundle build() {
-            return of(id, type, data, relations, meta);
+            return of(id, type, data, creationData, relations, meta);
         }
     }
 
@@ -179,10 +188,11 @@ public final class Bundle implements NestableData<Bundle> {
      * @param temp      A marker to indicate the ID has been generated
      */
     private Bundle(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
+            Map<String, Object> creationData, Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
+        this.creationData = filterData(creationData);
         this.meta = ImmutableMap.copyOf(meta);
         this.relations = ImmutableListMultimap.copyOf(relations);
         this.temp = temp;
@@ -199,7 +209,7 @@ public final class Bundle implements NestableData<Bundle> {
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations) {
-        return of(id, type, data, relations, Maps.newHashMap());
+        return of(id, type, data, Maps.newHashMap(), relations, Maps.newHashMap());
     }
 
     /**
@@ -213,8 +223,8 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations, Map<String, Object> meta) {
-        return new Bundle(id, type, data, relations, meta, false);
+            Map<String, Object> creationData, Multimap<String, Bundle> relations, Map<String, Object> meta) {
+        return new Bundle(id, type, data, creationData, relations, meta, false);
     }
 
     /**
@@ -237,7 +247,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(EntityClass type) {
-        return of(null, type, Maps.newHashMap(), ArrayListMultimap
+        return of(null, type, Maps.newHashMap(), Maps.newHashMap(), ArrayListMultimap
                 .create(), Maps.newHashMap());
     }
 
@@ -249,7 +259,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(EntityClass type, Map<String, Object> data) {
-        return of(null, type, data, ArrayListMultimap.create(),
+        return of(null, type, data, Maps.newHashMap(), ArrayListMultimap.create(),
                 Maps.newHashMap());
     }
 
@@ -271,7 +281,7 @@ public final class Bundle implements NestableData<Bundle> {
      */
     public Bundle withId(String id) {
         checkNotNull(id);
-        return new Bundle(id, type, data, relations, meta, temp);
+        return new Bundle(id, type, data, creationData, relations, meta, temp);
     }
 
     /**
@@ -314,6 +324,29 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
+     * Set the value of the Bundle's creation data, which is
+     * ignored when an existing item is updated.
+     * @return A new bundle with value as key
+     */
+    public Bundle withCreationData(Map<String, Object> creationData) {
+        return new Bundle(id, type, data, creationData, relations, meta, temp);
+    }
+
+    /**
+     * Set a value in the bundle's creation data. If value is null,
+     * this Bundle is returned.
+     *
+     * @param key   The data key
+     * @param value The data value
+     * @return A new bundle with value as key
+     */
+    public Bundle withCreationDataValue(String key, Object value) {
+        Map<String, Object> newData = Maps.newHashMap(creationData);
+        newData.put(key, value);
+        return withCreationData(newData);
+    }
+
+    /**
      * Set a value in the bundle's metadata.
      *
      * @param key   The metadata key
@@ -353,6 +386,17 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
+     * Get the bundle data, including that set only for item creation.
+     *
+     * @return The full data map
+     */
+    public Map<String, Object> getAllCreationData() {
+        final Map<String, Object> reg = Maps.filterValues(data, Objects::nonNull);
+        reg.putAll(Maps.filterValues(creationData, Objects::nonNull));
+        return ImmutableMap.copyOf(reg);
+    }
+
+    /**
      * Get the bundle metadata
      *
      * @return The full metadata map
@@ -378,7 +422,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return The new bundle
      */
     public Bundle withData(Map<String, Object> data) {
-        return new Bundle(id, type, data, relations, meta, temp);
+        return new Bundle(id, type, data, creationData, relations, meta, temp);
     }
 
     /**
@@ -388,7 +432,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return The new bundle
      */
     public Bundle withMetaData(Map<String, Object> meta) {
-        return new Bundle(id, type, data, relations, meta, temp);
+        return new Bundle(id, type, data, creationData, relations, meta, temp);
     }
 
     /**
@@ -429,7 +473,7 @@ public final class Bundle implements NestableData<Bundle> {
      */
     @Override
     public Bundle replaceRelations(Multimap<String, Bundle> relations) {
-        return new Bundle(id, type, data, relations, meta, temp);
+        return new Bundle(id, type, data, creationData, relations, meta, temp);
     }
 
     /**
@@ -443,7 +487,7 @@ public final class Bundle implements NestableData<Bundle> {
         Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
         tmp.putAll(others);
-        return new Bundle(id, type, data, tmp, meta, temp);
+        return new Bundle(id, type, data, creationData, tmp, meta, temp);
     }
 
     /**
@@ -469,7 +513,7 @@ public final class Bundle implements NestableData<Bundle> {
         Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
-        return new Bundle(id, type, data, tmp, meta, temp);
+        return new Bundle(id, type, data, creationData, tmp, meta, temp);
     }
 
     /**
@@ -484,7 +528,7 @@ public final class Bundle implements NestableData<Bundle> {
         Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
         tmp.put(relation, other);
-        return new Bundle(id, type, data, tmp, meta, temp);
+        return new Bundle(id, type, data, creationData, tmp, meta, temp);
     }
 
     /**
@@ -507,7 +551,7 @@ public final class Bundle implements NestableData<Bundle> {
     public Bundle removeRelation(String relation, Bundle item) {
         Multimap<String, Bundle> tmp = ArrayListMultimap.create(relations);
         tmp.remove(relation, item);
-        return new Bundle(id, type, data, tmp, meta, temp);
+        return new Bundle(id, type, data, creationData, tmp, meta, temp);
     }
 
     /**
@@ -792,7 +836,7 @@ public final class Bundle implements NestableData<Bundle> {
                 }
             }
         }
-        return new Bundle(id, type, data, tmp, meta, temp);
+        return new Bundle(id, type, data, creationData, tmp, meta, temp);
     }
 
     /**
@@ -811,7 +855,7 @@ public final class Bundle implements NestableData<Bundle> {
         for (Map.Entry<String, Bundle> entry : relations.entries()) {
             idRels.put(entry.getKey(), entry.getValue().generateIds(nextScopes));
         }
-        return new Bundle(newId, type, data, idRels, meta, isTemp);
+        return new Bundle(newId, type, data, creationData, idRels, meta, isTemp);
     }
 
     @Override

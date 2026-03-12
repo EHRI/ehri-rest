@@ -55,7 +55,6 @@ public class Ontology {
     public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";
     public static final String IS_ACCESSIBLE_TO = "access";
     public static final String IDENTIFIER_KEY = "identifier";
-    public static final String PERSISTENT_IDENTIFIER_KEY = "_pid";
     public static final String OTHER_IDENTIFIERS = "otherIdentifiers";
     public static final String SOURCEFILE_KEY = "sourceFileId";
     public static final String NAME_KEY = "name";
