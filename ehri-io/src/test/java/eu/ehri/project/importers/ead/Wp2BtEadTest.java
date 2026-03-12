@@ -66,6 +66,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                .withDataValue(Ontology.PID_KEY, "wp2")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");

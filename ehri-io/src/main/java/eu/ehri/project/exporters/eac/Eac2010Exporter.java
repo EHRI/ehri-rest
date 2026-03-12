@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -199,6 +200,9 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
     private void addIdentitySection(XMLStreamWriter sw, HistoricalAgent agent, Description desc) {
         tag(sw, "identity", () -> {
             tag(sw, "entityId", agent.getIdentifier());
+            tag(sw, "entityId",
+                    String.format("%s%s", config.getString("io.pids.prefix"), Objects.toString(agent.getPid(), "")),
+                    attrs("localType", "ARK"));
             tag(sw, "entityType", desc.<String>getProperty(Isaar.typeOfEntity));
             tag(sw, "nameEntry", () -> {
                 tag(sw, "part", desc.getName());

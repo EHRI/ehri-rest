@@ -22,9 +22,10 @@ package eu.ehri.project.importers.managers;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.base.SaxXmlHandler;
@@ -55,7 +56,6 @@ public class SaxImportManager extends AbstractImportManager {
 
     private final Class<? extends SaxXmlHandler> handlerClass;
     private final ImportOptions options;
-    private final List<ImportCallback> extraCallbacks;
 
     private SaxImportManager(FramedGraph<?> graph,
                              PermissionScope scope,
@@ -63,10 +63,10 @@ public class SaxImportManager extends AbstractImportManager {
                              Class<? extends ItemImporter<?, ?>> importerClass,
                              Class<? extends SaxXmlHandler> handlerClass,
                              ImportOptions options,
-                             List<ImportCallback> callbacks) {
-        super(graph, scope, actioner, importerClass, options);
+                             List<PreImportCallback> preCallbacks,
+                             List<PostImportCallback> callbacks) {
+        super(graph, scope, actioner, importerClass, options, preCallbacks, callbacks);
         this.handlerClass = handlerClass;
-        this.extraCallbacks = Lists.newArrayList(callbacks);
         this.options = options;
         logger.debug("importer used: {}", importerClass);
         logger.debug("handler used: {}", handlerClass);
@@ -77,7 +77,7 @@ public class SaxImportManager extends AbstractImportManager {
                              Actioner actioner,
                              Class<? extends ItemImporter<?, ?>> importerClass,
                              Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
-        this(graph, scope, actioner, importerClass, handlerClass, options, Lists.newArrayList());
+        this(graph, scope, actioner, importerClass, handlerClass, options, Lists.newArrayList(), Lists.newArrayList());
     }
 
     /**
@@ -98,8 +98,9 @@ public class SaxImportManager extends AbstractImportManager {
                                           Class<? extends ItemImporter<?, ?>> importerClass,
                                           Class<? extends SaxXmlHandler> handlerClass,
                                           ImportOptions options,
-                                          List<ImportCallback> callbacks) {
-        return new SaxImportManager(graph, scope, actioner, importerClass, handlerClass, options, callbacks);
+                                          List<PreImportCallback> preCallbacks,
+                                          List<PostImportCallback> callbacks) {
+        return new SaxImportManager(graph, scope, actioner, importerClass, handlerClass, options, preCallbacks, callbacks);
     }
 
     /**
@@ -130,11 +131,8 @@ public class SaxImportManager extends AbstractImportManager {
                     .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
                     .newInstance(framedGraph, scopeFinder, actioner, options, log);
 
-            for (ImportCallback callback : extraCallbacks) {
-                importer.addCallback(callback);
-            }
-
-            importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
+            registerCallbacks(importer);
+            importer.addPostCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
             SaxXmlHandler handler = handlerClass.getConstructor(ItemImporter.class, ImportOptions.class)
@@ -172,18 +170,25 @@ public class SaxImportManager extends AbstractImportManager {
     }
 
     public SaxImportManager withScope(PermissionScope scope) {
-        return create(framedGraph, scope, actioner, importerClass, handlerClass, options, extraCallbacks);
+        return create(framedGraph, scope, actioner, importerClass, handlerClass, options, preCallbacks, extraCallbacks);
     }
 
-    public SaxImportManager withCallback(ImportCallback callback) {
-        List<ImportCallback> newCbs = Lists.newArrayList(extraCallbacks);
+    public SaxImportManager withPreCallback(PreImportCallback callback) {
+        List<PreImportCallback> newCbs = Lists.newArrayList(preCallbacks);
         newCbs.add(callback);
         return create(framedGraph, permissionScope, actioner,
-                importerClass, handlerClass, options, newCbs);
+                importerClass, handlerClass, options, newCbs, extraCallbacks);
+    }
+
+    public SaxImportManager withCallback(PostImportCallback callback) {
+        List<PostImportCallback> newCbs = Lists.newArrayList(extraCallbacks);
+        newCbs.add(callback);
+        return create(framedGraph, permissionScope, actioner,
+                importerClass, handlerClass, options, preCallbacks, newCbs);
     }
 
     public SaxImportManager withUpdates(boolean updates) {
         return create(framedGraph, permissionScope, actioner, importerClass, handlerClass,
-                options.withUpdates(updates), extraCallbacks);
+                options.withUpdates(updates),preCallbacks, extraCallbacks);
     }
 }

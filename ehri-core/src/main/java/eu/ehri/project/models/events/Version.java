@@ -30,6 +30,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Indexed;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
@@ -58,6 +59,15 @@ public interface Version extends Accessible {
     @Mandatory
     @Property(Ontology.VERSION_ENTITY_ID)
     String getEntityId();
+
+    /**
+     * Fetch the PID of the entity that this version pertains to.
+     *
+     * @return a PID string
+     */
+    @Indexed
+    @Property(Ontology.VERSION_ENTITY_PID)
+    String getEntityPid();
 
     /**
      * Fetch a serialized snapshot of the item's data in JSON format.

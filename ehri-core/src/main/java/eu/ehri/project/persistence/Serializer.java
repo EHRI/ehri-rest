@@ -510,14 +510,20 @@ public final class Serializer {
 
     /**
      * Fetch a map of metadata sourced from vertex properties.
-     * This is anything that begins with an underscore (but now
+     * This is anything that begins with an underscore (but not
      * two underscores)
      */
     private Map<String, Object> getVertexMeta(Vertex item, Class<?> cls) {
         Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
-            if (!key.startsWith("__") && key.startsWith("_")) {
-                data.put(key.substring(1), item.getProperty(key));
+            if (!(key.startsWith(EntityType.ID_KEY) || key.startsWith(EntityType.TYPE_KEY))
+                    && key.startsWith("_")) {
+                // Strip the underscores.
+                int count = 0;
+                while (count < key.length() && key.charAt(count) == '_') {
+                    count++;
+                }
+                data.put(key.substring(count), item.getProperty(key));
             }
         }
         Map<String, Method> metaMethods = ClassUtils.getMetaMethods(cls);

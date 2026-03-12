@@ -132,6 +132,7 @@
   type: Repository
   data:
     identifier: r1
+    __pid: r1-1234
     name: Repository 1
   relationships:
     hasCountry: nl
@@ -167,6 +168,7 @@
   type: Repository
   data:
     identifier: r2
+    __pid: r2-1234
     name: King's College London
   relationships:
     hasCountry: gb
@@ -192,6 +194,7 @@
   type: Repository
   data:
     identifier: r3
+    __pid: r3-1234
     name: DANS
   relationships:
     hasCountry: nl
@@ -215,6 +218,7 @@
   type: Repository
   data:
     identifier: r4
+    __pid: r4-1234
     name: CEGES SOMA
   relationships:
     hasCountry: be
@@ -243,6 +247,7 @@
   type: DocumentaryUnit
   data:
     identifier: c1
+    __pid: c1-12345678
     otherIdentifiers:
       - c1-alt
   relationships:
@@ -299,6 +304,7 @@
   type: DocumentaryUnit
   data:
     identifier: c2
+    __pid: c2-12345678
   relationships:
     describes:
       - id: cd2
@@ -326,6 +332,7 @@
   type: DocumentaryUnit
   data:
     identifier: c3
+    __pid: c3-12345678
   relationships:
     describes:
       - id: cd3
@@ -361,6 +368,7 @@
   type: DocumentaryUnit
   data:
     identifier: c4
+    __pid: c4-12345678
   relationships:
     describes:
       - id: cd4
@@ -402,6 +410,7 @@
   type: DocumentaryUnit
   data:
     identifier: m19
+    __pid: m19-12345678
   relationships:
     describes:
       - id: nl-r1-m19.eng
@@ -428,6 +437,7 @@
   type: AuthoritativeSet
   data:
     identifier: auths
+    __pid: auths-12345678
     name: Authorities
 
 --- # Authorities
@@ -701,12 +711,14 @@
   type: CvocVocabulary
   data:
     identifier: cvoc1
+    __pid: cvoc1-12345678
     name: Vocabulary 1
 
 - id: cvoc2
   type: CvocVocabulary
   data:
     identifier: cvoc2
+    __pid: cvoc2-12345678
     name: Vocabulary 2
 
 --- # Concepts
@@ -751,6 +763,7 @@
   type: VirtualUnit
   data:
     identifier: vc1
+    __pid: vc1-12345678
   relationships:
     hasAuthor: linda
     describes:
@@ -766,6 +779,7 @@
   type: VirtualUnit
   data:
     identifier: vu1
+    __pid: vu1-12345678
   relationships:
     isPartOf: vc1
     includesUnit: c1
@@ -774,6 +788,7 @@
   type: VirtualUnit
   data:
     identifier: vu2
+    __pid: vu2-12345678
   relationships:
     isPartOf: vu1
     includesUnit: c4
@@ -782,3 +797,4 @@
   type: VirtualUnit
   data:
     identifier: vu3
+    __pid: vu3-12345678

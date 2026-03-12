@@ -44,8 +44,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-/**
- */
+
 public class PersonalitiesV2Test extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesV2Test.class);
@@ -136,6 +135,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
     public void newPersonalitiesWithReferredNodes() throws Exception {
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "FAST_keywords")
+                .withDataValue(Ontology.PID_KEY, "fast-1234")
                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382");

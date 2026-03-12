@@ -17,26 +17,15 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models.annotations;
+package eu.ehri.project.importers;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.persistence.Mutation;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
 /**
- * 
- * <pre>
- *   public class MyEntity {
- *      &064;Mandatory
- *      &064;Property("identifier")
- *      public String getIdentifier();
- *   }
- * </pre>
- * 
- * Indicates that a property or adjacency is mandatory.
+ * Implementing classes do things after an item was imported and created
+ * a mutation ('created', 'updated', 'unchanged').
  */
-public @interface Mandatory {
+public interface PostImportCallback {
+    void itemImported(Mutation<? extends Accessible> mutation);
 }

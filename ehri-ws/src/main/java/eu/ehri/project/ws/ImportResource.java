@@ -27,12 +27,15 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
@@ -56,6 +59,7 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.AbstractResource;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -304,7 +308,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -414,10 +418,12 @@ public class ImportResource extends AbstractResource {
                     propertyFile,
                     version
             );
-            SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
+            SaxImportManager importManager = SaxImportManager
+                    .create(graph, scope, user, importer, handler, options)
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator));
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
-            EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager);
+            EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager, idGenerator);
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
 
@@ -473,7 +479,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, EagImporter.class.getName()),
                     getHandlerCls(handlerClass, EagHandler.class.getName()),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -595,7 +601,7 @@ public class ImportResource extends AbstractResource {
                     getCurrentActioner(),
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {

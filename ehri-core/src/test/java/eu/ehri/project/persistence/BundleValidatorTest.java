@@ -58,6 +58,7 @@ public class BundleValidatorTest extends AbstractFixtureTest {
                 "describes[-1]", Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                         .setId("someid_01") // Uh-oh!
                         .addData(ImmutableMap.of(
+                                Ontology.PID_KEY, "someid-01",
                                 Ontology.IDENTIFIER_KEY, "ok",
                                 Ontology.NAME_KEY, "Description with duplicate identifier",
                                 Ontology.LANGUAGE_OF_DESCRIPTION, "eng"

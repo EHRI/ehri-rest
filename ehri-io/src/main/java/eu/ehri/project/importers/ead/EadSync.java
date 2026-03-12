@@ -2,6 +2,7 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.GraphManager;
@@ -20,6 +21,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
@@ -46,13 +48,15 @@ public class EadSync {
     private final SaxImportManager importManager;
     private final GraphManager manager;
     private final Serializer depSerializer;
+    private final RandomIdGenerator idGenerator;
 
     private EadSync(
             FramedGraph<?> graph,
             Api api,
             PermissionScope scope,
             Actioner actioner,
-            SaxImportManager importManager) {
+            SaxImportManager importManager,
+            RandomIdGenerator idGenerator) {
         this.graph = graph;
         this.api = api;
         this.scope = scope;
@@ -60,6 +64,7 @@ public class EadSync {
         this.importManager = importManager;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.depSerializer = api.serializer().withDependentOnly(true);
+        this.idGenerator = idGenerator;
     }
 
     public static EadSync create(
@@ -67,8 +72,9 @@ public class EadSync {
             Api api,
             PermissionScope scope,
             Actioner actioner,
-            SaxImportManager importManager) {
-        return new EadSync(graph, api, scope, actioner, importManager);
+            SaxImportManager importManager,
+            RandomIdGenerator idGenerator) {
+        return new EadSync(graph, api, scope, actioner, importManager, idGenerator);
     }
 
     /**
@@ -85,6 +91,7 @@ public class EadSync {
      * Signal that something has gone wrong with the sync operation.
      */
     public static class EadSyncError extends Exception {
+        private static final long serialVersionUID = -2639850065428684371L;
         EadSyncError(String message, Throwable underlying) {
             super(message, underlying);
         }
@@ -141,7 +148,7 @@ public class EadSync {
             DocumentaryUnit doc = m.getNode().as(DocumentaryUnit.class);
             newGraphToLocal.put(doc.getId(), doc.getIdentifier());
         });
-        // Actually run the ingest...
+        // Actually run the ingest operation...
         ImportLog log = op.runIngest(manager);
 
         // Find moved items... this gets us a map of old graph ID to new graph ID
@@ -169,6 +176,14 @@ public class EadSync {
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
     }
 
+    private void transferPersistentIdentifiers(DocumentaryUnit from, DocumentaryUnit to) {
+        Vertex fromV = from.asVertex();
+        Vertex toV = to.asVertex();
+        String fromPid = from.getPersistentIdentifier();
+        fromV.setProperty(Ontology.PID_KEY, idGenerator.generateId());
+        toV.setProperty(Ontology.PID_KEY, fromPid);
+    }
+
     private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) {
         if (!movedGraphIds.isEmpty()) {
             try {
@@ -181,12 +196,13 @@ public class EadSync {
                 for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
                     DocumentaryUnit from = api.get(entry.getKey(), DocumentaryUnit.class);
                     DocumentaryUnit to = api.get(entry.getValue(), DocumentaryUnit.class);
-                    boolean ugc = transferUserGeneratedContent(from, to);
-                    boolean acc = transferAccessors(from, to);
-                    if (ugc || acc) {
-                        ctx.addSubjects(to);
-                        modified++;
-                    }
+
+                    transferPersistentIdentifiers(from, to);
+                    transferUserGeneratedContent(from, to);
+                    transferAccessors(from, to);
+
+                    ctx.addSubjects(to);
+                    modified++;
                 }
 
                 if (modified > 0) {
@@ -200,9 +216,8 @@ public class EadSync {
         }
     }
 
-    private boolean transferUserGeneratedContent(DocumentaryUnit from, DocumentaryUnit to)
+    private void transferUserGeneratedContent(DocumentaryUnit from, DocumentaryUnit to)
             throws SerializationError, ItemNotFound {
-        int moved = 0;
         List<Link> links = Lists.newArrayList(from.getLinks());
         for (Link link : links) {
             if (link.getLinkBodies().iterator().hasNext()) {
@@ -211,7 +226,6 @@ public class EadSync {
             }
             logger.debug("Moving link from {} to {}...", from.getId(), to.getId());
             to.addLink(link);
-            moved++;
         }
         List<Annotation> annotations = Lists.newArrayList(from.getAnnotations());
         for (Annotation annotation : annotations) {
@@ -223,25 +237,20 @@ public class EadSync {
                     altPart.addAnnotationPart(annotation);
                 });
             }
-            moved++;
         }
         List<VirtualUnit> inVc = Lists.newArrayList(from.getVirtualParents());
         for (VirtualUnit vc : inVc) {
             logger.debug("Moving VC membership from {} to {}", from.getId(), to.getId());
             vc.addIncludedUnit(to);
-            moved++;
         }
-        return moved > 0;
     }
 
-    private boolean transferAccessors(DocumentaryUnit from, DocumentaryUnit to) {
+    private void transferAccessors(DocumentaryUnit from, DocumentaryUnit to) {
         ArrayList<Accessor> accessors = Lists.newArrayList(from.getAccessors());
         if (!accessors.isEmpty()) {
             api.aclManager().setAccessors(to, accessors);
             logger.debug("Copying access control from {} to {}", from.getId(), to.getId());
-            return true;
         }
-        return false;
     }
 
     private Optional<Annotatable> findPart(Annotatable orig, DocumentaryUnit newParent)

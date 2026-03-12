@@ -58,6 +58,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                .withDataValue(Ontology.PID_KEY, "wp2")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");

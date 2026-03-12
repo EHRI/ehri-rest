@@ -32,12 +32,14 @@ public class VersionManager {
      * If an item was deleted, obtain the last version before it
      * was removed.
      *
-     * @param id the item's ID
+     * @param id     the item's ID
+     * @param usePid use the item's PID instead of its ID
      * @return a version frame
      */
-    public Optional<Version> versionAtDeletion(String id) {
+    public Optional<Version> versionAtDeletion(String id, boolean usePid) {
+        String key = usePid ? Ontology.VERSION_ENTITY_PID : Ontology.VERSION_ENTITY_ID;
         try (CloseableIterable<Version> versions = manager
-                .getEntities(Ontology.VERSION_ENTITY_ID, id, EntityClass.VERSION, Version.class)) {
+                .getEntities(key, id, EntityClass.VERSION, Version.class)) {
             for (Version v : versions) {
                 SystemEvent event = v.getTriggeringEvent();
                 if (event != null && EventTypes.deletion.equals(event.getEventType())) {
@@ -46,6 +48,10 @@ public class VersionManager {
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<Version> versionAtDeletion(String id) {
+        return versionAtDeletion(id, false);
     }
 
     /**

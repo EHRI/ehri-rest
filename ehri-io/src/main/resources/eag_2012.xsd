@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     EAG 2012 Schema
-    Version: 0.3
-    Date: 20140625
-    Editor: APEx project (www.apex-project.eu)
+    Version: 0.6
+    Date: 20201019
+    Editor: Archives Portal Europe Foundation, Working Group on Standards
 -->
 <!--
     Change log:
 
+    20201019
+    0.6     - added the value "cubicmetre" as an option for @unit with <num> as sub-element of <extent>
+            - changed the latest possible date from "2099" to "9999"
+
+    20200818
+    0.5     - added new element <rightsDeclaration> as optional and repeatable sub-element of <control>; uses the same sub-elements as <conventionDeclaration>, but does not allow <citation> to be repeated
+            - made <useDates> optional as sub-element of <nonpreform>
+            - added @href to <restaccess>
+            - added new element <image> as optional and repeatable sub-element of <repositories> and of <repository>; uses attributes @href (required), @linkTitle and @localType
+
+    20190619
+    0.4     - made <street> optional as sub-element of <location>
+
+    20140625
     0.3     - added new elements <actingMaintenanceForGroup>, <actingMaintenance>, <placeEntry>
             - restricted @localType for <nameEntry> to values "authorized", "alternative", "preferred", "abbreviation", "other"
             - added elements <useDates>, <authorizedForm>, <aternativeForm> to element <nameEntry>
@@ -44,6 +58,10 @@
     <xs:attributeGroup name="href">
         <xs:attribute name="href" type="xs:anyURI"/>
     </xs:attributeGroup>
+    
+    <xs:attributeGroup name="linkTitle">
+        <xs:attribute name="linkTitle" type="xs:token"/>
+    </xs:attributeGroup>
 
     <!-- ###############
        CONTROL
@@ -60,6 +78,8 @@
             <xs:element name="languageDeclarations" type="languageDeclarations" minOccurs="0"/>
             <xs:element name="conventionDeclaration" type="conventionDeclaration" minOccurs="0"
                 maxOccurs="unbounded"/>
+            <xs:element name="rightsDeclaration" type="rightsDeclaration" minOccurs="0"
+                maxOccurs="unbounded"/>
             <xs:element name="localControl" type="localControl" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="localTypeDeclaration" type="localTypeDeclaration" minOccurs="0"
                 maxOccurs="unbounded"/>
@@ -71,7 +91,7 @@
     <xs:simpleType name="recordIdType">
         <xs:restriction base="xs:token">
             <xs:pattern
-                value="((AF|AX|AL|DZ|AS|AD|AO|AI|AQ|AG|AR|AM|AW|AU|AT|AZ|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BA|BW|BV|BR|IO|BN|BG|BF|BI|KH|CM|CA|CV|KY|CF|TD|CL|CN|CX|CC|CO|KM|CG|CD|CK|CR|CI|HR|CU|CY|CZ|DK|DJ|DM|DO|EC|EG|SV|GQ|ER|EE|ET|FK|FO|FJ|FI|FR|GF|PF|TF|GA|GM|GE|DE|GH|GI|GR|GL|GD|GP|GU|GT|GN|GW|GY|HT|HM|VA|HN|HK|HU|IS|IN|ID|IR|IQ|IE|IL|IT|JM|JP|JO|KZ|KE|KI|KP|KR|KW|KG|LA|LV|LB|LS|LR|LY|LI|LT|LU|MO|MK|MG|MW|MY|MV|ML|MT|MH|MQ|MR|MU|YT|MX|FM|MD|MC|MN|MS|MA|MZ|MM|NA|NR|NP|NL|AN|NC|NZ|NI|NE|NG|NU|NF|MP|NO|OM|PK|PW|PS|PA|PG|PY|PE|PH|PN|PL|PT|PR|QA|RE|RO|RU|RW|SH|KN|LC|PM|VC|WS|SM|ST|SA|SN|CS|SC|SL|SG|SK|SI|SB|SO|ZA|GS|ES|LK|SD|SR|SJ|SZ|SE|CH|SY|TW|TJ|TZ|TH|TL|TG|TK|TO|TT|TN|TR|TM|TC|TV|UG|UA|AE|GB|US|UM|UY|UZ|VU|VE|VN|VG|VI|WF|EH|YE|ZM|ZW|RS|ME|EU)|([a-zA-Z]{1})|([a-zA-Z]{3,4}))(-[a-zA-Z0-9:/\-]{1,11})"
+                value="((AF|AX|AL|DZ|AS|AD|AO|AI|AQ|AG|AR|AM|AW|AU|AT|AZ|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BA|BW|BV|BR|IO|BN|BG|BF|BI|KH|CM|CA|CV|KY|CF|TD|CL|CN|CX|CC|CO|KM|CG|CD|CK|CR|CI|HR|CU|CY|CZ|DK|DJ|DM|DO|EC|EG|SV|GQ|ER|EE|ET|FK|FO|FJ|FI|FR|GF|PF|TF|GA|GM|GE|DE|GH|GI|GR|GL|GD|GP|GU|GT|GN|GW|GY|HT|HM|VA|HN|HK|HU|IS|IN|ID|IR|IQ|IE|IL|IT|JM|JP|JO|KZ|KE|KI|KP|KR|KW|KG|LA|LV|LB|LS|LR|LY|LI|LT|LU|MO|MK|MG|MW|MY|MV|ML|MT|MH|MQ|MR|MU|YT|MX|FM|MD|MC|MN|MS|MA|MZ|MM|NA|NR|NP|NL|AN|NC|NZ|NI|NE|NG|NU|NF|MP|NO|OM|PK|PW|PS|PA|PG|PY|PE|PH|PN|PL|PT|PR|QA|RE|RO|RU|RW|SH|KN|LC|PM|VC|WS|SM|ST|SA|SN|CS|SC|SL|SG|SK|SI|SB|SO|ZA|GS|ES|LK|SD|SR|SJ|SZ|SE|CH|SY|TW|TJ|TZ|TH|TL|TG|TK|TO|TT|TN|TR|TM|TC|TV|UG|UA|AE|GB|US|UM|UY|UZ|VU|VE|VN|VG|VI|WF|EH|YE|ZM|ZW|RS|ME|EU|EUR|IM|XX)|([a-zA-Z]{1})|([a-zA-Z]{3,4}))(-[a-zA-Z0-9:/\-]{1,11})"
             />
         </xs:restriction>
     </xs:simpleType>
@@ -169,22 +189,22 @@
         <xs:union>
             <xs:simpleType>
                 <xs:restriction base="xs:date">
-                    <xs:maxInclusive value="2099-12-31"/>
+                    <xs:maxInclusive value="9999-12-31"/>
                 </xs:restriction>
             </xs:simpleType>
             <xs:simpleType>
                 <xs:restriction base="xs:gYear">
-                    <xs:maxInclusive value="2099"/>
+                    <xs:maxInclusive value="9999"/>
                 </xs:restriction>
             </xs:simpleType>
             <xs:simpleType>
                 <xs:restriction base="xs:gYearMonth">
-                    <xs:maxInclusive value="2099-12"/>
+                    <xs:maxInclusive value="9999-12"/>
                 </xs:restriction>
             </xs:simpleType>
             <xs:simpleType>
                 <xs:restriction base="xs:dateTime">
-                    <xs:maxInclusive value="2099-12-31T23:59:59"/>
+                    <xs:maxInclusive value="9999-12-31T23:59:59"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:union>
@@ -270,6 +290,16 @@
         <xs:attributeGroup ref="sourceAttribute"/>
     </xs:complexType>
 
+    <xs:complexType name="rightsDeclaration">
+        <xs:sequence>
+            <xs:element name="abbreviation" type="abbreviation" minOccurs="0"/>
+            <xs:element name="citation" type="citation"/>
+            <xs:element name="descriptiveNote" type="descriptiveNote" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute ref="xml:lang"/>
+        <xs:attributeGroup ref="localType"/>
+    </xs:complexType>
+
     <xs:complexType name="localControl">
         <xs:sequence>
             <xs:element name="term" type="term" minOccurs="0" maxOccurs="unbounded"/>
@@ -338,17 +368,17 @@
         <xs:union>
             <xs:simpleType>
                 <xs:restriction base="xs:date">
-                    <xs:maxInclusive value="2099-12-31"/>
+                    <xs:maxInclusive value="9999-12-31"/>
                 </xs:restriction>
             </xs:simpleType>
             <xs:simpleType>
                 <xs:restriction base="xs:gYear">
-                    <xs:maxInclusive value="2099"/>
+                    <xs:maxInclusive value="9999"/>
                 </xs:restriction>
             </xs:simpleType>
             <xs:simpleType>
                 <xs:restriction base="xs:gYearMonth">
-                    <xs:maxInclusive value="2099-12"/>
+                    <xs:maxInclusive value="9999-12"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:union>
@@ -487,7 +517,7 @@
 
     <xs:complexType name="nonpreform" mixed="true">
         <xs:sequence>
-            <xs:element name="useDates" type="useDates"/>
+            <xs:element name="useDates" type="useDates" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute ref="xml:lang"/>
         <xs:attributeGroup ref="sourceAttribute"/>
@@ -555,6 +585,7 @@
     <xs:complexType name="repositories">
         <xs:sequence>
             <xs:element name="repository" type="repository" maxOccurs="unbounded"/>
+            <xs:element name="image" type="image" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -581,9 +612,16 @@
             <xs:element name="accessibility" type="accessibility" maxOccurs="unbounded"/>
             <xs:element name="services" type="services" minOccurs="0"/>
             <xs:element name="descriptiveNote" type="descriptiveNote" minOccurs="0"/>
+            <xs:element name="image" type="image" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="image">
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        <xs:attributeGroup ref="linkTitle"/>
+        <xs:attributeGroup ref="localType"/>
+    </xs:complexType>
+    
     <xs:complexType name="repositoryName" mixed="true">
         <xs:attribute ref="xml:lang"/>
         <xs:attributeGroup ref="sourceAttribute"/>
@@ -628,7 +666,7 @@
             <xs:element name="secondem" type="secondem" minOccurs="0"/>
             <xs:element name="municipalityPostalcode" type="municipalityPostalcode"/>
             <xs:element name="localentity" type="localentity" minOccurs="0"/>
-            <xs:element name="street" type="street"/>
+            <xs:element name="street" type="street" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="localType" use="required">
             <xs:simpleType>
@@ -757,6 +795,7 @@
                 <xs:restriction base="xs:token">
                     <xs:enumeration value="squaremetre"/>
                     <xs:enumeration value="linearmetre"/>
+                    <xs:enumeration value="cubicmetre"/>
                     <xs:enumeration value="site"/>
                     <xs:enumeration value="book"/>
                     <xs:enumeration value="title"/>
@@ -874,6 +913,7 @@
 
     </xs:complexType>
     <xs:complexType name="opening" mixed="true">
+        <xs:attributeGroup ref="href"/>
         <xs:attribute ref="xml:lang"/>
         <xs:attributeGroup ref="sourceAttribute"/>
     </xs:complexType>
@@ -905,6 +945,7 @@
 
     <xs:complexType name="restaccess" mixed="true">
         <xs:attribute ref="xml:lang"/>
+        <xs:attributeGroup ref="href"/>
         <xs:attributeGroup ref="sourceAttribute"/>
     </xs:complexType>
 

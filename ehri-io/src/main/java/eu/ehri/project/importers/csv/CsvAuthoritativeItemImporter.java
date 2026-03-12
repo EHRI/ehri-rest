@@ -67,14 +67,15 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         final String localId = descBundle.getDataValue(Ontology.IDENTIFIER_KEY);
+        final PermissionScope permissionScope = scopeFinder.apply(localId);
         final BundleManager bundleManager = getBundleManager(localId);
         Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<AuthoritativeItem> mutation = bundleManager.createOrUpdate(unit, AuthoritativeItem.class);
+        Bundle processed = handlePreCallbacks(permissionScope.idPath(), unit);
+        Mutation<AuthoritativeItem> mutation = bundleManager.createOrUpdate(processed, AuthoritativeItem.class);
         AuthoritativeItem frame = mutation.getNode();
 
-        final PermissionScope permissionScope = scopeFinder.apply(localId);
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);

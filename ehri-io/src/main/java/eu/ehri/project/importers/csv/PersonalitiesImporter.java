@@ -73,10 +73,11 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
 
         final String localId = getLocalIdentifier(unit);
         BundleManager bundleManager = getBundleManager(localId);
-        Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(unit, HistoricalAgent.class);
+        final PermissionScope permissionScope = scopeFinder.apply(localId);
+        Bundle processed = handlePreCallbacks(permissionScope.idPath(), unit);
+        Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(processed, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
-        final PermissionScope permissionScope = scopeFinder.apply(localId);
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);

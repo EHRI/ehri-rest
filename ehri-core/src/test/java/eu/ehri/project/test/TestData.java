@@ -39,6 +39,7 @@ public class TestData {
         return ImmutableMap.of(
                 Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT,
                 Bundle.DATA_KEY, ImmutableMap.of(
+                        Ontology.PID_KEY, "1234",
                         Ontology.NAME_KEY, TEST_COLLECTION_NAME,
                         Ontology.IDENTIFIER_KEY, "someid-01"
                 ),
@@ -74,6 +75,7 @@ public class TestData {
                 Bundle.TYPE_KEY, Entities.REPOSITORY,
                 Bundle.DATA_KEY, ImmutableMap.of(
                         Ontology.NAME_KEY, "Test Repo 1",
+                        Ontology.PID_KEY, "test-repo-1234",
                         Ontology.IDENTIFIER_KEY, "test-repo-1"
                 ),
                 Bundle.REL_KEY, ImmutableMap.of(

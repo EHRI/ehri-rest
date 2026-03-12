@@ -21,11 +21,8 @@ package eu.ehri.project.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.collect.*;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
@@ -44,7 +41,14 @@ import static org.junit.Assert.*;
 
 public class BundleTest {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
     private Bundle bundle;
+
+    static {
+        final SimpleModule bundleModule = new SimpleModule();
+        bundleModule.addDeserializer(Bundle.class, new BundleDeserializer());
+        mapper.registerModule(bundleModule);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -62,7 +66,7 @@ public class BundleTest {
     }
 
     @Test
-    public void testCreationWithNullValues() throws Exception {
+    public void testCreationWithNullValues() {
         Map<String, Object> data = Maps.newHashMap();
         data.put("identifier", null);
         Bundle b2 = Bundle.of(EntityClass.DOCUMENTARY_UNIT, data);
@@ -304,6 +308,19 @@ public class BundleTest {
     }
 
     @Test
+    public void testInitialisationProperties() throws Exception {
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar");
+        Bundle bundle2 = newDesc.withDataValue("__hello", "world");
+        Map<String, Object> cdata = bundle2.getData();
+        assertTrue(cdata.containsKey("__hello"));
+        assertEquals("world", cdata.get("__hello"));
+
+        Map<String, Object> udata = bundle2.getDataForUpdate();
+        assertFalse(udata.containsKey("__hello"));
+    }
+
+    @Test
     public void testWithMetaData() throws Exception {
         Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
@@ -312,6 +329,19 @@ public class BundleTest {
         Map<String, Object> meta = bundle2.getMetaData();
         assertTrue(meta.containsKey("key"));
         assertEquals("val", meta.get("key"));
+    }
+
+    @Test
+    public void testEqualityWithInitData() throws Exception {
+        Bundle b1 = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
+                .withDataValue(Ontology.PID_KEY, "1234");
+
+        Bundle b2 = b1.withDataValue(Ontology.PID_KEY, "5678");
+        assertEquals(b1, b2);
+
+        Bundle b3 = b2.withMetaDataValue("_meta1", "1");
+        assertEquals(b3, b2);
     }
 
     @Test
@@ -341,7 +371,7 @@ public class BundleTest {
     @Test
     public void testGetUniquePropertyKeys() throws Exception {
         Collection<String> uniquePropertyKeys = bundle.getUniquePropertyKeys();
-        assertEquals(Sets.<String>newHashSet(), uniquePropertyKeys);
+        assertEquals(Sets.newHashSet(Ontology.PID_KEY), uniquePropertyKeys);
     }
 
     @Test(expected = ClassCastException.class)
@@ -355,12 +385,13 @@ public class BundleTest {
     public void testGetDataResultIsImmutable() throws Exception {
         Map<String, Object> data = bundle.getData();
         assertNull(bundle.getDataValue("test"));
+        //noinspection DataFlowIssue
         data.put("test", "value");
     }
 
     @Test
     public void testImmutability() throws Exception {
-        Map<String,Object> m = Maps.newHashMap();
+        Map<String, Object> m = Maps.newHashMap();
         m.put("test", "value");
         Bundle b = bundle.withData(m);
         assertNull(b.getDataValue("test2"));
@@ -370,7 +401,7 @@ public class BundleTest {
 
     @Test
     public void testNullValueHandling() throws Exception {
-        Map<String,Object> m = Maps.newHashMap();
+        Map<String, Object> m = Maps.newHashMap();
         m.put("test", "value");
         m.put("null", null);
         assertTrue(m.containsKey("null"));
@@ -396,11 +427,11 @@ public class BundleTest {
     @Test
     public void testMap() throws Exception {
         Bundle n = bundle.map(d -> {
-           Map<String,Object> nd = Maps.newHashMap();
-           for (Map.Entry<String,Object> e : d.getData().entrySet()) {
-               nd.put(e.getKey() + "!", e.getValue());
-           }
-           return d.withData(nd);
+            Map<String, Object> nd = Maps.newHashMap();
+            for (Map.Entry<String, Object> e : d.getData().entrySet()) {
+                nd.put(e.getKey() + "!", e.getValue());
+            }
+            return d.withData(nd);
         });
         assertEquals("foobar", DataUtils.get(n, "identifier!"));
         assertEquals("Foobar", DataUtils.get(n, "describes[0]/name!"));
@@ -428,12 +459,43 @@ public class BundleTest {
     }
 
     @Test
+    public void testJsonification() throws Exception {
+        JsonNode jsonNode1 = mapper.valueToTree(bundle);
+        JsonNode jsonNode2 = mapper.valueToTree(bundle.toData());
+        assertEquals(jsonNode1, jsonNode2);
+    }
+
+    @Test
+    public void testFromJson() throws Exception {
+        JsonNode jsonNode1 = mapper.valueToTree(bundle.withMetaDataValue("pid", "foo"));
+        assertEquals("foo", jsonNode1.path("meta").path("pid").asText());
+
+        String json = jsonNode1.toString();
+        Bundle bundle2 = mapper.readValue(json, Bundle.class);
+        assertEquals("foo", bundle2.getMetaData().get("pid"));
+    }
+
+    @Test
     public void testDiff() throws Exception {
-        String diff = bundle.diff(bundle.withDataValue("foo", "bar"));
-        ObjectMapper mapper = new ObjectMapper();
+        String diff = bundle.diff(bundle.withDataValue("foo", "bar")
+                .withRelation("test", Bundle.of(EntityClass.ACCESS_POINT)));
         JsonNode node = mapper.readValue(diff, JsonNode.class);
         assertEquals("add", node.path(0).path("op").textValue());
         assertEquals("/data/foo", node.path(0).path("path").textValue());
         assertEquals("bar", node.path(0).path("value").textValue());
+        assertEquals("/relationships/test", node.path(1).path("path").textValue());
+    }
+
+    @Test
+    public void testDiffWithInitialisationProperties() throws Exception {
+        String diff = bundle.diff(bundle.withDataValue("__foo", "bar"), true);
+        JsonNode node = mapper.readValue(diff, JsonNode.class);
+        assertEquals("add", node.path(0).path("op").textValue());
+        assertEquals("/data/__foo", node.path(0).path("path").textValue());
+        assertEquals("bar", node.path(0).path("value").textValue());
+
+        String diff2 = bundle.diff(bundle.withDataValue("__foo", "bar"));
+        JsonNode node2 = mapper.readValue(diff2, JsonNode.class);
+        assertTrue(node2.path(0).path("op").isEmpty());
     }
 }

@@ -39,7 +39,6 @@ import java.util.ResourceBundle;
 import static eu.ehri.project.test.XmlTestHelpers.*;
 
 
-@Ignore
 public class Ead3ExporterTest extends XmlExporterTest {
 
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
@@ -75,6 +74,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "Resource (call) |||.Ident (num) |||", "eng");
         // System.out.println(xml);
         Document doc = parseDocument(xml);
+        String pidPrefix = config.getString("io.pids.prefix");
         assertXPath(doc, readResourceFileAsString("export-boilerplate.txt"),
                 "//ead/control/maintenancehistory/maintenanceevent[1]/eventdescription/text()");
         assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
@@ -96,6 +96,8 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",
                 "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
+        assertXPath(doc, pidPrefix + "pid-folder-3",
+                "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid[2]/text()");
         assertXPath(doc, "Processing information note no label |||\n\n" +
                         "Processing information note content |||",
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
@@ -181,6 +183,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
         SaxImportManager.create(graph, repository, adminUser,
                 EadImporter.class, EadHandler.class, ImportOptions.properties("ead3.properties"))
+                .withPreCallback(getPidGeneratorCallback())
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);

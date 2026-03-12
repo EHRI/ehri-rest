@@ -19,10 +19,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class BatchOperationsTest extends AbstractImporterTest {
 
@@ -35,6 +32,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
 
         ImportLog log = new BatchOperations(graph)
                 .setScope(scope)
+                .withPreCallbacks(getPidGeneratorCallback())
                 .batchImport(payloadStream, adminUser.as(Actioner.class), Optional.of(logMsg));
         assertTrue(log.hasDoneWork());
         assertEquals(1, log.getCreated());

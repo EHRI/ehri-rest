@@ -117,7 +117,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * Perform graph initialization (creating the event log structure and
      * default nodes) prior to importing fixtures.
      *
-     * @param initialize Whether or not to initialize the graph: default
+     * @param initialize Whether to initialize the graph: default
      *                   {@value YamlFixtureLoader#DEFAULT_INIT}
      */
     public YamlFixtureLoader setInitializing(boolean initialize) {
@@ -218,11 +218,11 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    private void importNode(Map<Vertex, Multimap<String, String>> links,
-            Map<String, Object> node) throws DeserializationError, ValidationError {
-        EntityClass isa = EntityClass.withName((String) node
-                .get(Bundle.TYPE_KEY));
-
+    private void importNode(
+            Map<Vertex, Multimap<String, String>> links,
+            Map<String, Object> node
+    ) throws DeserializationError, ValidationError {
+        EntityClass isa = EntityClass.withName((String) node.get(Bundle.TYPE_KEY));
         String id = (String) node.get(Bundle.ID_KEY);
 
         @SuppressWarnings("unchecked")

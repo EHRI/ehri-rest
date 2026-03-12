@@ -2,21 +2,27 @@ package eu.ehri.project.core.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.models.EntityClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests for Neo4jGraphManager-specific functionality.
@@ -58,6 +64,39 @@ public class Neo4jGraphManagerTest {
         assertEquals(2, updatedLabels.size());
         assertThat(updatedLabels, hasItem(Neo4jGraphManager.BASE_LABEL));
         assertThat(updatedLabels, hasItem(EntityClass.REPOSITORY.toString()));
+    }
+
+    @Test
+    public void testCreationProperties() throws Exception {
+        Vertex vertex = createTestVertex("n1", EntityClass.REPOSITORY);
+        vertex.setProperty("__pid", "1234");
+
+        assertEquals("1234", vertex.getProperty("__pid"));
+    }
+
+    @Test
+    public void testPidUniqueAcrossEntityTypes() throws Exception {
+        // Schema constraints (including the per-type @Unique constraint on
+        // PID_KEY) are only created when the manager is initialized - this
+        // does not happen automatically in this test's setUp().
+        try (Transaction schemaTx = graph.getBaseGraph().getRawGraph().beginTx()) {
+            Neo4jGraphManager.createIndicesAndConstraints(graph.getBaseGraph().getRawGraph());
+            schemaTx.success();
+        }
+
+        Map<String, Object> data1 = Maps.newHashMap();
+        data1.put(Ontology.PID_KEY, "same-pid");
+        manager.createVertex("unit1", EntityClass.DOCUMENTARY_UNIT, data1);
+
+        Map<String, Object> data2 = Maps.newHashMap();
+        data2.put(Ontology.PID_KEY, "same-pid");
+        try {
+            manager.createVertex("repo1", EntityClass.REPOSITORY, data2);
+            fail("Creating an entity of a different type with a duplicate PID should not be allowed");
+        } catch (IntegrityError e) {
+            // Expected: PID uniqueness must be enforced across all entity
+            // types, not just within a single type's label.
+        }
     }
 
     private Neo4j2Vertex createTestVertex(String id, EntityClass type) throws Exception {

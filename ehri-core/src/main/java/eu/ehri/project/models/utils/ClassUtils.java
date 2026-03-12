@@ -27,13 +27,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Indexed;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.annotations.Unique;
+import eu.ehri.project.models.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +46,10 @@ public class ClassUtils {
     public static final String FETCH_METHOD_PREFIX = "get";
 
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
+    private static final List<String> reservedKeys = Lists.newArrayList(
+            EntityType.ID_KEY,
+            EntityType.TYPE_KEY
+    );
 
     private static final Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
     private static final Map<Class<?>,Map<String,Method>> metaMethodCache = Maps.newHashMap();
@@ -139,7 +137,7 @@ public class ClassUtils {
      */
     public static Collection<String> getMandatoryPropertyKeys(Class<?> cls) {
         if (!mandatoryPropertyKeysCache.containsKey(cls)) {
-            mandatoryPropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Mandatory.class, false));
+            mandatoryPropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Mandatory.class, true));
         }
         return mandatoryPropertyKeysCache.get(cls);
     }
@@ -270,9 +268,11 @@ public class ClassUtils {
             T unique = method.getAnnotation(annotationClass);
             if (unique != null) {
                 Property prop = method.getAnnotation(Property.class);
-                if (prop != null && (includeMeta || !prop.value().startsWith("__"))) {
-                    out.add(prop.value());
-                }
+                if (prop == null) continue;
+                if (reservedKeys.contains(prop.value())) continue;
+                if (!includeMeta && prop.value().startsWith("_")) continue;
+
+                out.add(prop.value());
             }
 
         }

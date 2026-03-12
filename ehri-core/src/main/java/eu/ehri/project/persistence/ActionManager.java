@@ -210,6 +210,7 @@ public final class ActionManager {
             Bundle versionBundle = Bundle.Builder.withClass(EntityClass.VERSION)
                     .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
                     .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
+                    .addDataValue(Ontology.VERSION_ENTITY_PID, frame.getProperty(Ontology.PID_KEY))
                     .addDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson())
                     .build();
             toVersion.add(new ImmutablePair<>(frame, versionBundle));

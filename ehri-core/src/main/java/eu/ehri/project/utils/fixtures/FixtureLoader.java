@@ -27,7 +27,7 @@ import java.io.InputStream;
 public interface FixtureLoader {
 
     /**
-     * Toggle whether or not initialization occurs before
+     * Toggle whether initialization occurs before
      * loading (default: true)
      *
      * @param toggle Enable/disable initialization
@@ -44,7 +44,7 @@ public interface FixtureLoader {
      * Load a given InputStream as test data. The stream
      * will be closed automatically.
      *
-     * @param inputStream An imput stream of fixture data
+     * @param inputStream An input stream of fixture data
      */
     void loadTestData(InputStream inputStream);
 

@@ -48,6 +48,7 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
 
     private static final String ITEM1 = "c1";
     private static final String ITEM2 = "c4";
+    private static final String ITEM1_PID = ITEM1 + "-12345678";
     private static final String BAD_ITEM = "cd1";
     private static final String PRIVILEGED_USER_NAME = "mike";
     private static final String LIMITED_USER_NAME = "reto";
@@ -72,6 +73,31 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
                 .post(ClientResponse.class);
         assertStatus(OK, response);
         testResponse(response, ITEM1);
+    }
+
+    @Test
+    public void getGenericEntitiesByPid() throws IOException {
+        URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment(ENDPOINT)
+                .queryParam("pid", ITEM1_PID).build();
+
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class), JsonNode.class);
+        JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
+        assertEquals(ITEM1, idValue.textValue());
+
+        // Test POST
+        String payload = String.format("[{\"pid\": \"%s\"}]", ITEM1_PID);
+        uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment(ENDPOINT).build();
+
+        response = jsonCallAs(getAdminUserProfileId(), uri)
+                .entity(payload)
+                .post(ClientResponse.class);
+        rootNode = jsonMapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        idValue = rootNode.path(0).path(Bundle.ID_KEY);
+        assertEquals(ITEM1, idValue.textValue());
     }
 
     @Test
@@ -111,6 +137,18 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     public void getSingleGenericEntity() throws IOException {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, ITEM1)).get(ClientResponse.class);
+        assertStatus(OK, response);
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        JsonNode idValue = rootNode.path(Bundle.ID_KEY);
+        assertFalse(idValue.isMissingNode());
+        assertEquals(ITEM1, idValue.textValue());
+    }
+
+    @Test
+    public void getSingleGenericEntityByPid() throws IOException {
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(ENDPOINT, "pid:" + ITEM1_PID)).get(ClientResponse.class);
         assertStatus(OK, response);
         JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);

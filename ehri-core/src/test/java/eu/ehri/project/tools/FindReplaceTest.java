@@ -2,7 +2,9 @@ package eu.ehri.project.tools;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
@@ -88,6 +90,17 @@ public class FindReplaceTest extends AbstractFixtureTest {
         List<List<String>> todo = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.ADDRESS,
                 "name", "Description",
+                "Test", adminUser, "This is a test");
+        assertEquals(0, todo.size());
+    }
+
+    @Test
+    public void testFindAndReplacePidIsNotPossible() throws Exception {
+        Repository r1 = manager.getEntity("r1", Repository.class);
+        FindReplace findReplace = new FindReplace(graph, true, 100);
+        List<List<String>> todo = findReplace.findAndReplace(
+                EntityClass.REPOSITORY, EntityClass.REPOSITORY,
+                Ontology.PID_KEY, r1.getPid(),
                 "Test", adminUser, "This is a test");
         assertEquals(0, todo.size());
     }

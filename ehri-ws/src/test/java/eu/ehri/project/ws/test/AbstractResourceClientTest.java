@@ -37,6 +37,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDeserializer;
+import eu.ehri.project.ws.GenericResource;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.ws.providers.*;
 
@@ -141,7 +142,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
      * Get a list of items at some url, as the given user.
      */
     protected List<Bundle> getItemList(URI uri, String userId,
-            MultivaluedMap<String, String> params) throws Exception {
+                                       MultivaluedMap<String, String> params) throws Exception {
         return decodeList(getJson(uri, userId, params));
     }
 
@@ -153,9 +154,9 @@ public class AbstractResourceClientTest extends RunningServerTest {
      * Get a list of items at some relativeUrl, as the given user.
      */
     protected List<List<Bundle>> getItemListOfLists(URI uri, String userId,
-            MultivaluedMap<String, String> params) throws Exception {
+                                                    MultivaluedMap<String, String> params) throws Exception {
         TypeReference<List<List<Bundle>>> typeRef = new TypeReference<List<List<Bundle>>>() {
-                };
+        };
         return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
 
@@ -180,11 +181,27 @@ public class AbstractResourceClientTest extends RunningServerTest {
     }
 
     /**
+     * Get an item as a bundle object.
+     *
+     * @param pid    the item's persistent identifier
+     * @param userId the user ID
+     * @return a bundle
+     */
+    protected Bundle getEntityByPid(String pid, String userId) throws Exception {
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        params.putSingle(GenericResource.PID_PARAM, pid);
+        final String json = getJson(
+                ehriUriBuilder(GenericResource.ENDPOINT).build(), userId, params);
+        List<Bundle> bundles = decodeList(json);
+        return bundles.isEmpty() ? null : bundles.get(0);
+    }
+
+    /**
      * Function for fetching a list of entities with the given EntityType,
      * and some additional parameters.
      */
     protected List<Bundle> getEntityList(URI uri,
-            String userId, MultivaluedMap<String, String> params) throws Exception {
+                                         String userId, MultivaluedMap<String, String> params) throws Exception {
         return getItemList(uri, userId, params);
     }
 
