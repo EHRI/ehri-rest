@@ -31,6 +31,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -38,6 +40,7 @@ import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
+import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,15 +60,19 @@ public class CsvImportManager extends AbstractImportManager {
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
     private CsvImportManager(FramedGraph<?> framedGraph,
-                             PermissionScope permissionScope, Actioner actioner,
-                             Class<? extends ItemImporter<?, ?>> importerClass, ImportOptions options) {
-        super(framedGraph, permissionScope, actioner, importerClass, options);
+                             PermissionScope permissionScope,
+                             Actioner actioner,
+                             Class<? extends ItemImporter<?, ?>> importerClass,
+                             ImportOptions options,
+                             List<PreImportCallback> preCallbacks,
+                             List<PostImportCallback> callbacks) {
+        super(framedGraph, permissionScope, actioner, importerClass, options, preCallbacks, callbacks);
     }
 
     public static CsvImportManager create(FramedGraph<?> framedGraph,
                                           PermissionScope permissionScope, Actioner actioner,
                                           Class<? extends ItemImporter<?, ?>> importerClass, ImportOptions options) {
-        return new CsvImportManager(framedGraph, permissionScope, actioner, importerClass, options);
+        return new CsvImportManager(framedGraph, permissionScope, actioner, importerClass, options, Lists.newArrayList(), Lists.newArrayList());
     }
 
     /**
@@ -84,7 +92,8 @@ public class CsvImportManager extends AbstractImportManager {
                     .newInstance(framedGraph, scopeFinder, actioner, options, log);
             logger.trace("importer of class {}", importer.getClass());
 
-            importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
+            registerCallbacks(importer);
+            importer.addPostCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
             CsvSchema schema = CsvSchema.emptySchema()
@@ -133,5 +142,19 @@ public class CsvImportManager extends AbstractImportManager {
                  ClassCastException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public CsvImportManager withPreCallback(PreImportCallback callback) {
+        List<PreImportCallback> newCbs = com.google.common.collect.Lists.newArrayList(preCallbacks);
+        newCbs.add(callback);
+        return new CsvImportManager(framedGraph, permissionScope, actioner,
+                importerClass, options, newCbs, extraCallbacks);
+    }
+
+    public CsvImportManager withCallback(PostImportCallback callback) {
+        List<PostImportCallback> newCbs = com.google.common.collect.Lists.newArrayList(extraCallbacks);
+        newCbs.add(callback);
+        return new CsvImportManager(framedGraph, permissionScope, actioner,
+                importerClass, options, preCallbacks, newCbs);
     }
 }

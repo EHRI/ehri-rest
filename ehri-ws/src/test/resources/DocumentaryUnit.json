@@ -2,7 +2,8 @@
   "type": "DocumentaryUnit",
   "data": {
     "name": "a collection",
-    "identifier": "some-id"
+    "identifier": "some-id",
+    "pid": "some-perm-id"
   },
   "relationships": {
     "describes": [

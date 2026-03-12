@@ -109,8 +109,9 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
 
         BundleManager bundleManager = getBundleManager(localScope, idPath);
 
-        Mutation<DocumentaryUnit> mutation =
-                bundleManager.createOrUpdate(mergeDescriptions(localScope, unit, description, idPath), DocumentaryUnit.class);
+        final Bundle merged = mergeDescriptions(localScope, unit, description, idPath);
+        Bundle processed = handlePreCallbacks(merged);
+        Mutation<DocumentaryUnit> mutation = bundleManager.createOrUpdate(processed, DocumentaryUnit.class);
         logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 

@@ -243,6 +243,7 @@
   type: DocumentaryUnit
   data:
     identifier: c1
+    _pid: c1-12345678
     otherIdentifiers:
       - c1-alt
   relationships:
@@ -299,6 +300,7 @@
   type: DocumentaryUnit
   data:
     identifier: c2
+    _pid: c2-12345678
   relationships:
     describes:
       - id: cd2
@@ -326,6 +328,7 @@
   type: DocumentaryUnit
   data:
     identifier: c3
+    _pid: c3-12345678
   relationships:
     describes:
       - id: cd3
@@ -361,6 +364,7 @@
   type: DocumentaryUnit
   data:
     identifier: c4
+    _pid: c4-12345678
   relationships:
     describes:
       - id: cd4
@@ -402,6 +406,7 @@
   type: DocumentaryUnit
   data:
     identifier: m19
+    _pid: m19-12345678
   relationships:
     describes:
       - id: nl-r1-m19.eng
@@ -751,6 +756,7 @@
   type: VirtualUnit
   data:
     identifier: vc1
+    _pid: vc1-12345678
   relationships:
     hasAuthor: linda
     describes:
@@ -766,6 +772,7 @@
   type: VirtualUnit
   data:
     identifier: vu1
+    _pid: vu1-12345678
   relationships:
     isPartOf: vc1
     includesUnit: c1
@@ -774,6 +781,7 @@
   type: VirtualUnit
   data:
     identifier: vu2
+    _pid: vu2-12345678
   relationships:
     isPartOf: vu1
     includesUnit: c4
@@ -782,3 +790,4 @@
   type: VirtualUnit
   data:
     identifier: vu3
+    _pid: vu3-12345678

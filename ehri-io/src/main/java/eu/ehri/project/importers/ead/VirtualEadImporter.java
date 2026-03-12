@@ -88,7 +88,8 @@ public class VirtualEadImporter extends EadImporter {
             Bundle description = getDescription(itemData);
 
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
-            Mutation<VirtualUnit> mutation = bundleManager.createOrUpdate(unit, VirtualUnit.class);
+            Bundle processed = handlePreCallbacks(unit);
+            Mutation<VirtualUnit> mutation = bundleManager.createOrUpdate(processed, VirtualUnit.class);
             VirtualUnit frame = mutation.getNode();
             logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
             // Set the repository/item relationship

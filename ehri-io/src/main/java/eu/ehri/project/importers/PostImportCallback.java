@@ -26,6 +26,6 @@ import eu.ehri.project.persistence.Mutation;
  * Implementing classes do things after an item was imported and created
  * a mutation ('created', 'updated', 'unchanged').
  */
-public interface ImportCallback {
+public interface PostImportCallback {
     void itemImported(Mutation<? extends Accessible> mutation);
 }

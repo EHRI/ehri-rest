@@ -488,7 +488,7 @@ public final class Serializer {
 
     /**
      * Fetch a map of metadata sourced from vertex properties.
-     * This is anything that begins with an underscore (but now
+     * This is anything that begins with an underscore (but not
      * two underscores)
      */
     private Map<String, Object> getVertexMeta(Vertex item, Class<?> cls) {

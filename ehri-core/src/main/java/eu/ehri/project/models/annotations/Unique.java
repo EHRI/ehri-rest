@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * <pre>
  *   public class MyEntity {
  *      &064;Unique
- *      &064;Property("indentifier")
+ *      &064;Property("identifier")
  *      public String getIdentifier();
  *   }
  * </pre>

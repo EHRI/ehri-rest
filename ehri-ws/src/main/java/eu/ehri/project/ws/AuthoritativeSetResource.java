@@ -25,7 +25,7 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
-import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.HistoricalAgent;
@@ -180,7 +180,7 @@ public class AuthoritativeSetResource extends
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             AuthoritativeSet set = api().get(id, cls);
-            ImportCallback cb = mutation -> {
+            PostImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.HISTORICAL_AGENT.equals(accessible.getType())) {
                     throw new RuntimeException("Bundle is not an historical agent: " + accessible.getId());

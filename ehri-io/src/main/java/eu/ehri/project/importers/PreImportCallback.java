@@ -17,11 +17,14 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models.base;
+package eu.ehri.project.importers;
+
+import eu.ehri.project.persistence.Bundle;
 
 /**
- * An abstract entity representing either a documentary (physical) unit
- * or a virtual unit.
+ * Implementing classes do things after an item was imported and created
+ * a mutation ('created', 'updated', 'unchanged').
  */
-public interface AbstractUnit extends Described, ItemHolder, Watchable, Versioned, Annotatable, PersistentIdentifiable {
+public interface PreImportCallback {
+    Bundle preImport(Bundle data);
 }

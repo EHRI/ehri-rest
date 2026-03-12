@@ -9,7 +9,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -44,7 +44,7 @@ public class BatchOperations {
     private final PermissionScope scope;
     private final boolean version;
     private final boolean tolerant;
-    private final List<ImportCallback> callbacks;
+    private final List<PostImportCallback> callbacks;
 
     /**
      * Constructor.
@@ -57,7 +57,7 @@ public class BatchOperations {
      * @param callbacks a set of import callbacks to run on item import
      */
     public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant,
-                           List<ImportCallback> callbacks) {
+                           List<PostImportCallback> callbacks) {
         this.graph = graph;
         this.scope = Optional.ofNullable(scopeOpt).orElse(SystemScope.getInstance());
         this.version = version;
@@ -118,8 +118,8 @@ public class BatchOperations {
      * @param callbacks one or more ImportCallback instances
      * @return a new batch operation manager
      */
-    public BatchOperations withCallbacks(ImportCallback... callbacks) {
-        List<ImportCallback> newCallbacks = Lists.newArrayList(callbacks);
+    public BatchOperations withCallbacks(PostImportCallback... callbacks) {
+        List<PostImportCallback> newCallbacks = Lists.newArrayList(callbacks);
         newCallbacks.addAll(this.callbacks);
         return new BatchOperations(graph, scope, version, tolerant, newCallbacks);
     }
@@ -162,7 +162,7 @@ public class BatchOperations {
                         default:
                             log.addUnchanged(STREAM_SOURCE_KEY, id);
                     }
-                    for (ImportCallback callback : callbacks) {
+                    for (PostImportCallback callback : callbacks) {
                         callback.itemImported(mutation);
                     }
                 } catch (ValidationError e) {

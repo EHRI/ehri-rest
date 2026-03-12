@@ -19,9 +19,17 @@
 
 package eu.ehri.project.models.base;
 
+import com.tinkerpop.frames.Property;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.annotations.Mandatory;
+
 /**
- * An abstract entity representing either a documentary (physical) unit
- * or a virtual unit.
+ * Base interface for entities that have a persistent identifier property (other than the
+ * internally assigned node ID).
  */
-public interface AbstractUnit extends Described, ItemHolder, Watchable, Versioned, Annotatable, PersistentIdentifiable {
+public interface PersistentIdentifiable extends Identifiable {
+
+    @Mandatory
+    @Property(Ontology.PERSISTENT_IDENTIFIER_KEY)
+    String getPersistentIdentifier();
 }

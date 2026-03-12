@@ -61,7 +61,8 @@ public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         final String localId = getLocalIdentifier(unit);
         BundleManager bundleManager = getBundleManager(localId);
-        Mutation<Concept> mutation = bundleManager.createOrUpdate(unit, Concept.class);
+        Bundle processed = handlePreCallbacks(unit);
+        Mutation<Concept> mutation = bundleManager.createOrUpdate(processed, Concept.class);
         Concept frame = mutation.getNode();
 
         final PermissionScope permissionScope = scopeFinder.apply(localId);

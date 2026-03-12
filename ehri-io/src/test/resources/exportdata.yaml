@@ -171,6 +171,7 @@
   type: DocumentaryUnit
   data:
     identifier: !!str 1
+    _pid: !!str 1
   relationships:
     describes:
       - id: nl-000001-1.eng
@@ -254,6 +255,7 @@
   type: DocumentaryUnit
   data:
     identifier: a
+    _pid: a
   relationships:
     describes:
       - id: nl-000001-1-a.eng
@@ -280,6 +282,7 @@
   type: DocumentaryUnit
   data:
     identifier: i
+    _pid: i
   relationships:
     describes:
       - id: nl-000001-1-a-i.eng

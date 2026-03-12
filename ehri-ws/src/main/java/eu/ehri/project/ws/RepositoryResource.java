@@ -28,7 +28,7 @@ import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.xml.XmlExporter;
-import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -196,7 +196,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             Repository repository = api().get(id, cls);
-            ImportCallback cb = mutation -> {
+            PostImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.DOCUMENTARY_UNIT.equals(accessible.getType())) {
                     throw new RuntimeException("Bundle is not a documentary unit: " + accessible.getId());

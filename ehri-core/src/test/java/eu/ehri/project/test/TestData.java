@@ -40,7 +40,8 @@ public class TestData {
                 Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT,
                 Bundle.DATA_KEY, ImmutableMap.of(
                         Ontology.NAME_KEY, TEST_COLLECTION_NAME,
-                        Ontology.IDENTIFIER_KEY, "someid-01"
+                        Ontology.IDENTIFIER_KEY, "someid-01",
+                        Ontology.PERSISTENT_IDENTIFIER_KEY, "someid-012345678"
                 ),
                 Bundle.REL_KEY, ImmutableMap.of(
                         Ontology.DESCRIPTION_FOR_ENTITY, ImmutableList.of(

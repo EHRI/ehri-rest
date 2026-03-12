@@ -26,10 +26,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.ErrorCallback;
-import eu.ehri.project.importers.ImportCallback;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.*;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -48,8 +45,28 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     protected final GraphManager manager;
     protected final ImportOptions options;
     protected final ImportLog log;
-    private final List<ImportCallback> callbacks = Lists.newArrayList();
+    private final List<PreImportCallback> preCallbacks = Lists.newArrayList();
+    private final List<PostImportCallback> postCallbacks = Lists.newArrayList();
     private final List<ErrorCallback> errorCallbacks = Lists.newArrayList();
+
+    /**
+     * Call all registered PreImportCallbacks for the given mutation.
+     *
+     * @param data the item data bundle
+     * @return data as processed by the set of registered callbacks
+     */
+    protected Bundle handlePreCallbacks(Bundle data) {
+        return handlePreCallbacks(data, preCallbacks);
+    }
+
+    private Bundle handlePreCallbacks(Bundle data, List<PreImportCallback> todo) {
+        if (todo.isEmpty()) {
+            return data;
+        } else {
+            PreImportCallback callback = todo.get(0);
+            return handlePreCallbacks(callback.preImport(data), todo.subList(1, todo.size()));
+        }
+    }
 
     /**
      * Call all registered ImportCallbacks for the given mutation.
@@ -57,7 +74,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
      * @param mutation the Mutation to handle callbacks for item events
      */
     protected void handleCallbacks(Mutation<? extends Accessible> mutation) {
-        for (ImportCallback callback : callbacks) {
+        for (PostImportCallback callback : postCallbacks) {
             callback.itemImported(mutation);
         }
     }
@@ -94,8 +111,13 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     }
 
     @Override
-    public void addCallback(ImportCallback callback) {
-        callbacks.add(callback);
+    public void addPreCallback(PreImportCallback callback) {
+        preCallbacks.add(callback);
+    }
+
+    @Override
+    public void addPostCallback(PostImportCallback callback) {
+        postCallbacks.add(callback);
     }
 
     @Override

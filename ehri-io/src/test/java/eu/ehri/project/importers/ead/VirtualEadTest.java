@@ -124,14 +124,16 @@ public class VirtualEadTest extends AbstractImporterTest {
         Bundle repo2Bundle = Bundle.of(EntityClass.REPOSITORY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO2);
         Bundle documentaryUnit1Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
-                .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1);
+                .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1)
+                .withDataValue(Ontology.PERSISTENT_IDENTIFIER_KEY, "pid-" + UNIT1);
         Bundle documentDescription1Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1 + "desc")
                 .withDataValue(Ontology.NAME_KEY, UNIT1 + "title")
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
 
         Bundle documentaryUnit2Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
-                .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2);
+                .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2)
+                .withDataValue(Ontology.PERSISTENT_IDENTIFIER_KEY, "pid-" + UNIT2);
         Bundle documentDescription2Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2 + "desc")
                 .withDataValue(Ontology.NAME_KEY, UNIT2 + "title")

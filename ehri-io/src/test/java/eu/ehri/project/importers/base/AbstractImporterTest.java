@@ -26,9 +26,11 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
@@ -63,18 +65,32 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     protected final String TEST_REPO = "r1";
 
     /**
+     * For testing, use a PID generator that just copies the ID.
+     */
+    protected final PreImportCallback pidGeneratorCallback = (b) -> {
+        if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
+            return b.withDataValue(Ontology.PERSISTENT_IDENTIFIER_KEY, "pid-" + b.getDataValue(Ontology.IDENTIFIER_KEY));
+        } else {
+            return b;
+        }
+    };
+
+    /**
      * Convenience method for creating a Sax import manager.
      */
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
-        return SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, options);
+        SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, options);
+        return importer.withPreCallback(pidGeneratorCallback);
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
-        return SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, ImportOptions.basic());
+        SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, ImportOptions.basic());
+        return importer.withPreCallback(pidGeneratorCallback);
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {
-        return saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
+        SaxImportManager importer = saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
+        return importer.withPreCallback(pidGeneratorCallback);
     }
 
     /**
@@ -149,7 +165,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
             out.print("[" + relatedBy.getIdentifier() + "]");
         }
 
-        out.println("");// end of concept
+        out.println();// end of concept
 
         indent += ".   ";// the '.' improves readability, but the whole printing could be improved
         for (Concept nc : c.getNarrowerConcepts()) {
@@ -166,7 +182,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
             for (String key : propertyKeys) {
                 out.printf("%s%-20s : %s%n", pad, key, d.getProperty(key));
             }
-            out.println("");
+            out.println();
         }
         for (DocumentaryUnit child : unit.getChildren()) {
             printProps(out, child, pad + "    ");
@@ -177,7 +193,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * Get a Vertex from the FramedGraph using its unit ID.
      *
      * @param graph      the graph to search
-     * @param identifier the Vertex's 'human readable' identifier
+     * @param identifier the Vertex's 'human-readable' identifier
      * @return the first Vertex with the given identifier
      * @throws NoSuchElementException when there are no vertices with this identifier
      */
