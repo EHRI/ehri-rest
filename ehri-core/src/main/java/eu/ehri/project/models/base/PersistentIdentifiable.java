@@ -17,15 +17,22 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.models.base;
 
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.persistence.Mutation;
+import com.tinkerpop.frames.Property;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.Unique;
+import org.neo4j.cypher.internal.v3_4.functions.Id;
 
 /**
- * Implementing classes do things after an item was imported and created
- * a mutation ('created', 'updated', 'unchanged').
+ * Base interface for entities that have a persistent identifier property (other than the
+ * internally assigned node ID).
  */
-public interface ImportCallback {
-    void itemImported(Mutation<? extends Accessible> mutation);
+public interface PersistentIdentifiable extends Accessible, Identifiable {
+
+    @Unique
+    @Mandatory
+    @Property(Ontology.PID_KEY)
+    String getPid();
 }

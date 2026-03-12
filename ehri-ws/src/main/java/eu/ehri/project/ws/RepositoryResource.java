@@ -28,8 +28,9 @@ import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.xml.XmlExporter;
-import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -147,7 +148,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @return The new unit
      * @throws ItemNotFound         if the parent does not exist
      * @throws PermissionDenied     if the user cannot perform the action
-     * @throws DeserializationError if the input data is not well formed
+     * @throws DeserializationError if the input data is not well-formed
      * @throws ValidationError      if data constraints are not met
      */
     @POST
@@ -162,7 +163,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Repository repository = api().get(id, cls);
-            Response response = createItem(bundle, accessors,
+            Response response = createItem(setPid(bundle), accessors,
                     repository::addTopLevelDocumentaryUnit,
                     api().withScope(repository), DocumentaryUnit.class);
             tx.success();
@@ -196,7 +197,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             Repository repository = api().get(id, cls);
-            ImportCallback cb = mutation -> {
+            PostImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.DOCUMENTARY_UNIT.equals(accessible.getType())) {
                     throw new RuntimeException("Bundle is not a documentary unit: " + accessible.getId());
@@ -204,8 +205,14 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 accessible.setPermissionScope(repository);
                 repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
             };
-            ImportLog log = new BatchOperations(graph, repository, true, tolerant,
-                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            ImportLog log = new BatchOperations(
+                    graph,
+                    repository,
+                    true,
+                    tolerant,
+                    Lists.newArrayList(PreImportCallback.generatePid(idGenerator)),
+                    Lists.newArrayList(cb)
+            ).batchImport(data, user, getLogMessage());
             if (commit) {
                 logger.debug("Committing batch ingest transaction...");
                 tx.success();

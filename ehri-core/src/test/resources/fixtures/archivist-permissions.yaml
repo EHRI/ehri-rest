@@ -19,6 +19,7 @@
   type: Repository
   data:
     identifier: repo
+    __pid: repo-1234
     name: Repository
   relationships:
     hasCountry: gb

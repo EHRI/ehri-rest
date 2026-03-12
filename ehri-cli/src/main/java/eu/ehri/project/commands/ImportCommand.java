@@ -22,16 +22,19 @@ package eu.ehri.project.commands;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -50,6 +53,8 @@ import java.util.Map;
 public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends SaxXmlHandler> handler;
     private final Class<? extends ItemImporter<?, ?>> importer;
+
+    private static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
 
     public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter<?, ?>> importer) {
         this.handler = handler;
@@ -114,7 +119,7 @@ public abstract class ImportCommand extends BaseCommand {
 
     @Override
     public int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws Exception {
+                               CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
@@ -159,10 +164,11 @@ public abstract class ImportCommand extends BaseCommand {
                     .withLang(lang);
 
             ImportLog log = SaxImportManager.create(graph, scope, user,
-                    importer,
-                    handler,
-                    options,
-                    Lists.newArrayList())
+                            importer,
+                            handler,
+                            options
+                    )
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator))
                     .importFiles(filePaths, logMessage);
             System.out.println(log);
 

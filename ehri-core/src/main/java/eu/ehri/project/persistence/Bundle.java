@@ -19,14 +19,8 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.*;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -39,13 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -89,6 +77,14 @@ public final class Bundle implements NestableData<Bundle> {
      * prefix and are ignored Bundle equality calculations.
      */
     static final String MANAGED_PREFIX = "_";
+
+    /**
+     * Properties that are only set at creation time start with
+     * a double prefix, e.g. PIDs. These are also excluded from
+     * equality comparison since they're not considered intrinsic
+     * to the structure of the Bundle.
+     */
+    static final String INITIALISATION_PREFIX = "__";
 
     public static class Builder {
         private String id;
@@ -144,7 +140,7 @@ public final class Bundle implements NestableData<Bundle> {
             } else {
                 Object current = data.get(key);
                 if (current instanceof List) {
-                    ((List<Object>)current).add(value);
+                    ((List<Object>) current).add(value);
                     data.put(key, current);
                 } else {
                     data.put(key, Lists.newArrayList(current, value));
@@ -179,10 +175,10 @@ public final class Bundle implements NestableData<Bundle> {
      * @param temp      A marker to indicate the ID has been generated
      */
     private Bundle(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
+                   Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
-        this.data = filterData(data);
+        this.data = normaliseData(data);
         this.meta = ImmutableMap.copyOf(meta);
         this.relations = ImmutableListMultimap.copyOf(relations);
         this.temp = temp;
@@ -198,7 +194,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations) {
+                            Multimap<String, Bundle> relations) {
         return of(id, type, data, relations, Maps.newHashMap());
     }
 
@@ -212,8 +208,12 @@ public final class Bundle implements NestableData<Bundle> {
      * @param meta      An initial map of metadata
      * @return a new bundle
      */
-    public static Bundle of(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations, Map<String, Object> meta) {
+    public static Bundle of(
+            String id,
+            EntityClass type,
+            Map<String, Object> data,
+            Multimap<String, Bundle> relations,
+            Map<String, Object> meta) {
         return new Bundle(id, type, data, relations, meta, false);
     }
 
@@ -226,7 +226,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations) {
+                            Multimap<String, Bundle> relations) {
         return of(null, type, data, relations);
     }
 
@@ -350,6 +350,15 @@ public final class Bundle implements NestableData<Bundle> {
      */
     public Map<String, Object> getData() {
         return ImmutableMap.copyOf(Maps.filterValues(data, Objects::nonNull));
+    }
+
+    /**
+     * Get the bundle data that's used for updating the vertex.
+     *
+     * @return The data map without initialisation values.
+     */
+    public Map<String, Object> getDataForUpdate() {
+        return ImmutableMap.copyOf(Maps.filterKeys(getData(), s -> !s.startsWith(INITIALISATION_PREFIX)));
     }
 
     /**
@@ -545,7 +554,7 @@ public final class Bundle implements NestableData<Bundle> {
                 Set<Bundle> updated = Sets.newHashSet();
                 for (final Bundle otherRel : otherRelations) {
                     Optional<Bundle> toUpdate = relations.stream().filter(
-                            bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()))
+                                    bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()))
                             .findFirst();
                     if (toUpdate.isPresent()) {
                         Bundle up = toUpdate.get();
@@ -653,16 +662,6 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Return a list of names for mandatory properties, as represented in the
-     * graph.
-     *
-     * @return A list of property keys for the bundle's type
-     */
-    public Collection<String> getPropertyKeys() {
-        return ClassUtils.getPropertyKeys(type.getJavaClass());
-    }
-
-    /**
      * Return a list of property keys which must be unique.
      *
      * @return A list of unique property keys for the bundle's type
@@ -687,6 +686,7 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @return A raw data object
      */
+    @JsonValue
     public Map<String, Object> toData() {
         return DataConverter.bundleToData(this);
     }
@@ -737,7 +737,14 @@ public final class Bundle implements NestableData<Bundle> {
 
     @Override
     public String toString() {
-        return "<" + getType() + ": '" + (id == null ? "?" : id) + "'> (" + getData() + " + Rels: " + relations + ")";
+        return String.format(
+                "<%s: '%s'> (%s %s %s)",
+                getType(),
+                (id == null ? '?' : id),
+                getData(),
+                relations,
+                getMetaData()
+        );
     }
 
     /**
@@ -842,9 +849,26 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a JSON-Patch, as a string
      */
     public String diff(Bundle target) {
+        return diff(target, false);
+    }
+
+    /**
+     * Return a JSON-Patch representation of the difference between
+     * this bundle and another. Metadata is ignored.
+     *
+     * @param target                          the target bundle
+     * @param includeInitialisationProperties whether to compare
+     *                                        creation-time metadata
+     *                                        properties. By default, only
+     *                                        static properties are included.
+     * @return a JSON-Patch, as a string
+     */
+    public String diff(Bundle target, boolean includeInitialisationProperties) {
+        Bundle first = includeInitialisationProperties ? this : this.withData(this.getDataForUpdate());
+        Bundle second = includeInitialisationProperties ? target : target.withData(target.getDataForUpdate());
         return DataConverter.diffBundles(
-                withMetaData(Collections.emptyMap()),
-                target.withMetaData(Collections.emptyMap()));
+                first.withMetaData(Collections.emptyMap()),
+                second.withMetaData(Collections.emptyMap()));
     }
 
     // Helpers...
@@ -852,7 +876,7 @@ public final class Bundle implements NestableData<Bundle> {
     /**
      * Return a copy of the given data map with enums converted to string values.
      */
-    private Map<String, Object> filterData(Map<String, Object> data) {
+    private Map<String, Object> normaliseData(Map<String, Object> data) {
         Map<String, Object> filtered = Maps.newHashMap();
         for (Map.Entry<? extends String, Object> entry : data.entrySet()) {
             Object value = entry.getValue();

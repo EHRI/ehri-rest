@@ -177,7 +177,7 @@ public class DocumentaryUnitResource
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final DocumentaryUnit parent = api().get(id, cls);
-            Response resource = createItem(bundle, accessors,
+            Response resource = createItem(setPid(bundle), accessors,
                     parent::addChild,
                     api().withScope(parent), cls);
             tx.success();

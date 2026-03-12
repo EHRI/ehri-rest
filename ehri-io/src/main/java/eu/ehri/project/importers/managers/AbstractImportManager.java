@@ -25,13 +25,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.DynamicPermissionScopeFinder;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ImportOptions;
-import eu.ehri.project.importers.StaticPermissionScopeFinder;
+import eu.ehri.project.importers.*;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
@@ -71,6 +69,8 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final Actioner actioner;
     protected final ImportOptions options;
     protected final ImportResourceFetcher resourceFetcher;
+    protected final List<PostImportCallback> extraCallbacks;
+    protected final List<PreImportCallback> preCallbacks;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -93,7 +93,9 @@ public abstract class AbstractImportManager implements ImportManager {
             PermissionScope scope,
             Actioner actioner,
             Class<? extends ItemImporter<?, ?>> importerClass,
-            ImportOptions options) {
+            ImportOptions options,
+            List<PreImportCallback> preCallbacks,
+            List<PostImportCallback> callbacks) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
@@ -107,6 +109,8 @@ public abstract class AbstractImportManager implements ImportManager {
         } else {
             this.scopeFinder = new StaticPermissionScopeFinder(scope);
         }
+        this.preCallbacks = Lists.newArrayList(preCallbacks);
+        this.extraCallbacks = Lists.newArrayList(callbacks);
     }
 
     /**
@@ -355,5 +359,15 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private String formatErrorLocation() {
         return String.format("File: %s, XML document: %d", currentFile, currentPosition);
+    }
+
+    protected void registerCallbacks(ItemImporter<?, ?> importer) {
+        for (PreImportCallback callback : preCallbacks) {
+            importer.addPreCallback(callback);
+        }
+
+        for (PostImportCallback callback : extraCallbacks) {
+            importer.addPostCallback(callback);
+        }
     }
 }

@@ -92,8 +92,14 @@ public class BatchResource extends AbstractResource {
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            ImportLog importLog = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
-                    .batchUpdate(inputStream, user, getLogMessage(log));
+            ImportLog importLog = new BatchOperations(
+                    graph,
+                    parent,
+                    version,
+                    tolerant,
+                    Collections.emptyList(),
+                    Collections.emptyList()
+            ).batchUpdate(inputStream, user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch update transaction...");
                 tx.success();
@@ -131,8 +137,14 @@ public class BatchResource extends AbstractResource {
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            int done = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
-                    .batchDelete(ids.column(0), user, getLogMessage(log));
+            int done = new BatchOperations(
+                    graph,
+                    parent,
+                    version,
+                    tolerant,
+                    Collections.emptyList(),
+                    Collections.emptyList()
+            ).batchDelete(ids.column(0), user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch delete transaction...");
                 tx.success();

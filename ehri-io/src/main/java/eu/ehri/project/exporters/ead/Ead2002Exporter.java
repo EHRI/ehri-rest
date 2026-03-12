@@ -1,15 +1,13 @@
 package eu.ehri.project.exporters.ead;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.api.Api;
-import eu.ehri.project.api.QueryApi;
-import eu.ehri.project.definitions.*;
+import eu.ehri.project.definitions.ContactInfo;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
@@ -28,9 +26,8 @@ import javax.xml.stream.XMLStreamWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import static eu.ehri.project.exporters.ead.EadExporter.textFieldAttrs;
-import static eu.ehri.project.exporters.ead.EadExporter.getLevelAttrs;
-import static eu.ehri.project.exporters.ead.EadExporter.getEventDescription;
+
+import static eu.ehri.project.exporters.ead.EadExporter.*;
 
 public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
@@ -217,6 +214,9 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     private void addDataSection(XMLStreamWriter sw, DocumentaryUnit subUnit, Description desc, String langCode, Optional<Repository> repoOpt) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
+            tag(sw, "unitid",
+                    String.format("%s%s", config.getString("io.pids.prefix"), subUnit.getPid()),
+                    attrs("label", config.getString("io.pids.label"), "type", "ark"));
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
             addDatePeriods(sw, desc);
             addOrigination(sw, desc, langCode);

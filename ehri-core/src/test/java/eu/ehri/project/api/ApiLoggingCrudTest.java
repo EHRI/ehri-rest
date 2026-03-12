@@ -22,6 +22,8 @@ package eu.ehri.project.api;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
@@ -86,9 +88,29 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
         assertEquals(before, old);
         Optional<Version> r1v = loggingApi(adminUser).versionManager().versionAtDeletion("r2");
         assertTrue(r1v.isPresent());
+        Optional<Version> r1v2 = loggingApi(adminUser).versionManager().versionAtDeletion("r2-1234", true);
+        assertTrue(r1v2.isPresent());
         List<Version> r1vl = Lists.newArrayList(loggingApi(adminUser).versionManager()
                 .versionsAtDeletion(EntityClass.REPOSITORY, null, null));
         assertEquals(1, r1vl.size());
+    }
+
+    @Test
+    public void testDeleteWithTimestampOnItemNotFound() throws Exception {
+        String id = "c4";
+        loggingApi(adminUser).delete(id);
+        try {
+            loggingApi(adminUser).get(id, DocumentaryUnit.class);
+            fail("Should have thrown " + ItemNotFound.class.getSimpleName());
+        } catch (ItemNotFound e) {
+            assertTrue(e.getDeletedAt().isPresent());
+        }
+        try {
+            loggingApi(adminUser).getByPid(id + "-12345678", DocumentaryUnit.class);
+            fail("Should have thrown " + ItemNotFound.class.getSimpleName());
+        } catch (ItemNotFound e) {
+            assertTrue(e.getDeletedAt().isPresent());
+        }
     }
 
     @Test

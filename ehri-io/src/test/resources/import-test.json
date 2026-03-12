@@ -2,7 +2,8 @@
   {
     "type": "DocumentaryUnit",
     "data": {
-      "identifier": "test"
+      "identifier": "test",
+      "pid": "test"
     },
     "relationships": {
       "describes": [

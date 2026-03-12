@@ -21,10 +21,10 @@ package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.PermissionsResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.PermissionsResource;
 import org.junit.Before;
 import org.junit.Test;
 

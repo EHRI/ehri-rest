@@ -52,7 +52,8 @@ public class Eag2012ExporterTest extends XmlExporterTest {
         Country nl = manager.getEntity("nl", Country.class);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml")) {
             SaxImportManager importManager = SaxImportManager.create(graph, nl, adminUser,
-                    EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
+                    EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"))
+                    .withPreCallback(getPidGeneratorCallback());
             importManager.importInputStream(ios, "Text EAG import/export");
             Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
             testExport(repo, "eng");
@@ -65,6 +66,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
         Document doc = parseDocument(testExport(test, "eng"));
         assertXPath(doc, "NL-000001", "//eag/control/recordId");
         assertXPath(doc, "nl-000001", "//eag/control/otherRecordId");
+        assertXPath(doc, config.getString("io.pids.prefix") + "00001234", "//eag/control/otherRecordId[2]");
         assertXPath(doc, "2013-09-09",
                 "//eag/control/maintenanceHistory/maintenanceEvent/eventDateTime");
         assertXPath(doc, "Institution Example", "//eag/archguide/identity/autform");

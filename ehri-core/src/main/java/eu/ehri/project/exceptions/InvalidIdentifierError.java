@@ -17,26 +17,14 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models.annotations;
+package eu.ehri.project.exceptions;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
 /**
- * 
- * <pre>
- *   public class MyEntity {
- *      &064;Mandatory
- *      &064;Property("identifier")
- *      public String getIdentifier();
- *   }
- * </pre>
- * 
- * Indicates that a property or adjacency is mandatory.
+ * Checked error similar to {@link IllegalArgumentException}
  */
-public @interface Mandatory {
+public class InvalidIdentifierError extends Exception {
+
+    public InvalidIdentifierError(String message) {
+        super(message);
+    }
 }

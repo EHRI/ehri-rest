@@ -5,6 +5,7 @@
   type: Repository
   data:
     identifier: !!str 000001
+    __pid: !!str 00001234
     name: Institution Example
   relationships:
     hasCountry: nl
@@ -171,6 +172,7 @@
   type: DocumentaryUnit
   data:
     identifier: !!str 1
+    __pid: !!str 1
   relationships:
     describes:
       - id: nl-000001-1.eng
@@ -254,6 +256,7 @@
   type: DocumentaryUnit
   data:
     identifier: a
+    __pid: a
   relationships:
     describes:
       - id: nl-000001-1-a.eng
@@ -280,6 +283,7 @@
   type: DocumentaryUnit
   data:
     identifier: i
+    __pid: i
   relationships:
     describes:
       - id: nl-000001-1-a-i.eng

@@ -81,6 +81,17 @@ public interface Api {
     <E extends Accessible> E get(String id, Class<E> cls) throws ItemNotFound;
 
     /**
+     * Fetch an item by PID, as a user. This only provides access control.
+     *
+     * @param pid the item persistent ID
+     * @param cls the item's class
+     * @param <E> the type of entity
+     * @return the given framed vertex
+     * @throws ItemNotFound if the item does not exist
+     */
+    <E extends Accessible> E getByPid(String pid, Class<E> cls) throws ItemNotFound, InvalidIdentifierError;
+
+    /**
      * Update an object bundle, also updating dependent items.
      *
      * @param bundle the item's data bundle
@@ -456,7 +467,7 @@ public interface Api {
         /**
          * Set members of a given group, removing existing members not in this set.
          *
-         * @param group the group
+         * @param group         the group
          * @param usersOrGroups the users or groups to add
          * @throws PermissionDenied if the grant action is not available to the user
          */
