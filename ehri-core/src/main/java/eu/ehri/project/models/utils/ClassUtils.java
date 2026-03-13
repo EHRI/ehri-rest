@@ -27,14 +27,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Indexed;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.annotations.Unique;
-import org.neo4j.cypher.internal.v3_4.functions.E;
+import eu.ehri.project.models.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

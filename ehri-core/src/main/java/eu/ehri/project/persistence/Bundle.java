@@ -19,14 +19,7 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -34,19 +27,12 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
-import org.neo4j.cypher.internal.compiler.v2_3.planner.logical.plans.OuterHashJoin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -704,16 +690,6 @@ public final class Bundle implements NestableData<Bundle> {
     public Class<?> getBundleJavaClass() {
         return type.getJavaClass();
     }
-
-//    /**
-//     * Return a list of names for mandatory properties, as represented in the
-//     * graph.
-//     *
-//     * @return A list of property keys for the bundle's type
-//     */
-//    public Collection<String> getPropertyKeys() {
-//        return ClassUtils.getPropertyKeys(type.getJavaClass());
-//    }
 
     /**
      * Return a list of property keys which must be unique.
