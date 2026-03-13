@@ -68,9 +68,7 @@ public class ClassUtilsTest {
     public void testGetPropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet(
                 Ontology.IDENTIFIER_KEY,
-                EntityType.PID_KEY,
-                EntityType.ID_KEY,
-                EntityType.TYPE_KEY
+                EntityType.PID_KEY
         );
         assertEquals(keys, ClassUtils.getPropertyKeys(DocumentaryUnit.class));
     }

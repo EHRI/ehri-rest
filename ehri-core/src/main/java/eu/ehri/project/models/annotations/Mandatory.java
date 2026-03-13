@@ -40,4 +40,5 @@ import java.lang.annotation.Target;
  */
 public @interface Mandatory {
 
+    boolean creationOnly() default false;
 }

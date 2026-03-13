@@ -705,15 +705,15 @@ public final class Bundle implements NestableData<Bundle> {
         return type.getJavaClass();
     }
 
-    /**
-     * Return a list of names for mandatory properties, as represented in the
-     * graph.
-     *
-     * @return A list of property keys for the bundle's type
-     */
-    public Collection<String> getPropertyKeys() {
-        return ClassUtils.getPropertyKeys(type.getJavaClass());
-    }
+//    /**
+//     * Return a list of names for mandatory properties, as represented in the
+//     * graph.
+//     *
+//     * @return A list of property keys for the bundle's type
+//     */
+//    public Collection<String> getPropertyKeys() {
+//        return ClassUtils.getPropertyKeys(type.getJavaClass());
+//    }
 
     /**
      * Return a list of property keys which must be unique.
