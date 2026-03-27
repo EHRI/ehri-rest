@@ -43,6 +43,7 @@ import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.MutationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +131,10 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
         Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
-        linkResolver.solveUndeterminedRelationships(frame);
+        int solved = linkResolver.solveUndeterminedRelationships(frame);
+        if (solved > 0 && mutation.getState() == MutationState.UNCHANGED) {
+            mutation = Mutation.updated(mutation.getNode());
+        }
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())

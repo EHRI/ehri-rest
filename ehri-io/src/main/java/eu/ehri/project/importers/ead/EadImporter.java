@@ -114,6 +114,13 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 
+        // If we're created some links on an otherwise unchanged item,
+        // indicate this...
+        int solved = linkResolver.solveUndeterminedRelationships(frame);
+        if (solved > 0 && mutation.getState() == MutationState.UNCHANGED) {
+            mutation = Mutation.updated(mutation.getNode());
+        }
+
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(localScope);
@@ -129,9 +136,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
         }
-
         handleCallbacks(mutation);
-        linkResolver.solveUndeterminedRelationships(frame);
 
         return frame;
     }
