@@ -204,7 +204,7 @@ query test {
     }
 
     r4: Repository(id: "r4") {
-        links {
+        links(linkType: copy) {
             targets {
                 id
             }
@@ -255,5 +255,17 @@ query test {
             id
         }
         linkType
+    }
+
+    allLinks: links {
+        items {
+            id
+        }
+    }
+
+    allCopyLinks: links(linkType: copy) {
+        items {
+            id
+        }
     }
 }
