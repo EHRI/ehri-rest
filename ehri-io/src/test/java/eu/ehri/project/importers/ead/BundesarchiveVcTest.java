@@ -63,13 +63,13 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)
         // - 1 more DocumentDescription
-        // - 1 more DatePeriod
+        // - 0 more DatePeriods
         // - 1 more UnknownProperties
         // - 3 more Relationships
         // - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 5 more MaintenanceEvents (4 revised, 1 created)
-        int newCount = origCount + 15;
+        int newCount = origCount + 14;
 
         assertEquals(newCount, getNodeCount(graph));
         graph.frame(getVertexByIdentifier(graph, ARCHDESC), DocumentaryUnit.class);
