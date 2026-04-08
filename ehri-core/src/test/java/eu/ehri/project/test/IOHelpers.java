@@ -54,7 +54,10 @@ public class IOHelpers {
              TarArchiveOutputStream tos = new TarArchiveOutputStream(fos)) {
             for (String resource : resources) {
                 URL url = Resources.getResource(resource);
-                tos.putArchiveEntry(new TarArchiveEntry(new File(url.toURI())));
+                File resourceFile = new File(url.toURI());
+                TarArchiveEntry entry = new TarArchiveEntry(resource);
+                entry.setSize(resourceFile.length());
+                tos.putArchiveEntry(entry);
                 Resources.copy(url, tos);
                 tos.closeArchiveEntry();
             }
