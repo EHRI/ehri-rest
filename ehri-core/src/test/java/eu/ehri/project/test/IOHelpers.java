@@ -52,12 +52,10 @@ public class IOHelpers {
             throws URISyntaxException, IOException {
         try (OutputStream fos = Files.newOutputStream(file.toPath());
              TarArchiveOutputStream tos = new TarArchiveOutputStream(fos)) {
+            tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
             for (String resource : resources) {
                 URL url = Resources.getResource(resource);
-                File resourceFile = new File(url.toURI());
-                TarArchiveEntry entry = new TarArchiveEntry(resource);
-                entry.setSize(resourceFile.length());
-                tos.putArchiveEntry(entry);
+                tos.putArchiveEntry(new TarArchiveEntry(new File(url.toURI())));
                 Resources.copy(url, tos);
                 tos.closeArchiveEntry();
             }
