@@ -3,7 +3,7 @@
   "data": {
     "name": "a collection",
     "identifier": "some-id",
-    "pid": "some-perm-id"
+    "__pid": "some-perm-id"
   },
   "relationships": {
     "describes": [

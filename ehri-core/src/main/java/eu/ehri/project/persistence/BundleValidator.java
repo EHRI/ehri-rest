@@ -224,6 +224,10 @@ public final class BundleValidator {
      * @param op the validation operation type
      */
     private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name, ValidationType op) {
+        // FIXME: hacking around validation errors with initialisation properties!
+        if (name.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
+            return;
+        }
         Map<String, Object> bundleData = op == ValidationType.create
                 ? bundle.getData()
                 : bundle.getDataForUpdate();

@@ -249,7 +249,8 @@ public class BundleManagerTest extends ModelTestBase {
     @Test
     public void testCreationWithUnicodeIdentifier() throws Exception {
         Bundle b1 = Bundle.fromData(TestData.getTestDocBundle())
-                .withDataValue(Ontology.IDENTIFIER_KEY, "foo /?&% ארכיו bar");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foo /?&% ארכיו bar")
+                .withDataValue(Ontology.PID_KEY, "1234");
         DocumentaryUnit doc = new BundleManager(graph).create(b1, DocumentaryUnit.class);
         assertEquals("foo_ארכיו_bar", doc.getId());
     }

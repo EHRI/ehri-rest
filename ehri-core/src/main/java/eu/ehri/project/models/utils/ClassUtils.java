@@ -137,7 +137,7 @@ public class ClassUtils {
      */
     public static Collection<String> getMandatoryPropertyKeys(Class<?> cls) {
         if (!mandatoryPropertyKeysCache.containsKey(cls)) {
-            mandatoryPropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Mandatory.class, false));
+            mandatoryPropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Mandatory.class, true));
         }
         return mandatoryPropertyKeysCache.get(cls);
     }

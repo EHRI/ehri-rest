@@ -75,7 +75,8 @@ public class ClassUtilsTest {
     @Test
     public void testGetMandatoryPropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet(
-                Ontology.IDENTIFIER_KEY
+                Ontology.IDENTIFIER_KEY,
+                Ontology.PID_KEY
         );
         assertEquals(keys, ClassUtils.getMandatoryPropertyKeys(DocumentaryUnit.class));
     }

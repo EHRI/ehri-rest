@@ -39,6 +39,7 @@ public class TestData {
         return ImmutableMap.of(
                 Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT,
                 Bundle.DATA_KEY, ImmutableMap.of(
+                        Ontology.PID_KEY, "1234",
                         Ontology.NAME_KEY, TEST_COLLECTION_NAME,
                         Ontology.IDENTIFIER_KEY, "someid-01"
                 ),

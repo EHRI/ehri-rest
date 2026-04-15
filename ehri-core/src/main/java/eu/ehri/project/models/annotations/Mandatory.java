@@ -39,6 +39,4 @@ import java.lang.annotation.Target;
  * Indicates that a property or adjacency is mandatory.
  */
 public @interface Mandatory {
-
-    boolean creationOnly() default false;
 }

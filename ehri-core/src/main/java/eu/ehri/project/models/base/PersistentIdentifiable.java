@@ -29,7 +29,7 @@ import eu.ehri.project.models.annotations.Mandatory;
  */
 public interface PersistentIdentifiable extends Identifiable {
 
-    @Mandatory(creationOnly = true)
+    @Mandatory
     @Property(Ontology.PID_KEY)
     String getPersistentIdentifier();
 }
