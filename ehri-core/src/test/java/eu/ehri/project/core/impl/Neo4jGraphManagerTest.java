@@ -2,6 +2,7 @@ package eu.ehri.project.core.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import eu.ehri.project.core.GraphManager;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests for Neo4jGraphManager-specific functionality.
@@ -58,6 +60,14 @@ public class Neo4jGraphManagerTest {
         assertEquals(2, updatedLabels.size());
         assertThat(updatedLabels, hasItem(Neo4jGraphManager.BASE_LABEL));
         assertThat(updatedLabels, hasItem(EntityClass.REPOSITORY.toString()));
+    }
+
+    @Test
+    public void testCreationProperties() throws Exception {
+        Vertex vertex = createTestVertex("n1", EntityClass.REPOSITORY);
+        vertex.setProperty("__pid", "1234");
+
+        assertEquals("1234", vertex.getProperty("__pid"));
     }
 
     private Neo4j2Vertex createTestVertex(String id, EntityClass type) throws Exception {

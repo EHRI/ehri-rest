@@ -19,6 +19,8 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -92,6 +94,30 @@ public class BundleManagerTest extends ModelTestBase {
 
         assertEquals(toList(c1.getDescriptions()),
                 toList(c1redux.getNode().getDescriptions()));
+    }
+
+    @Test
+    public void testSavingWithCreationData() throws Exception {
+        Bundle bundle = Bundle.of("t1",
+                EntityClass.DOCUMENTARY_UNIT,
+                ImmutableMap.of("identifier", "t1"),
+                ImmutableMap.of("__pid", "1234"),
+                ImmutableMultimap.of(),
+                ImmutableMap.of()
+        );
+        BundleManager bundleManager = new BundleManager(graph);
+        DocumentaryUnit t1 = bundleManager.create(bundle, DocumentaryUnit.class);
+        assertEquals("1234", t1.getProperty("__pid"));
+
+        // Changing the pid should not be possible
+        Bundle bundle2 = bundle.withCreationDataValue("__pid", "5678");
+        Mutation<DocumentaryUnit> op = bundleManager.createOrUpdate(bundle2, DocumentaryUnit.class);
+        assertEquals(MutationState.UNCHANGED, op.getState());
+        assertEquals("1234", op.getNode().getPersistentIdentifier());
+
+        Bundle out = serializer.entityToBundle(op.getNode());
+        assertEquals(bundle, out);
+        System.out.println(out);
     }
 
     @Test

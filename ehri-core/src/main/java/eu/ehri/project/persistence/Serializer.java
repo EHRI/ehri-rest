@@ -52,6 +52,7 @@ public final class Serializer {
     private static final int DEFAULT_CACHE_SIZE = 100;
 
     private static class LruCache<A, B> extends LinkedHashMap<A, B> {
+        private static final long serialVersionUID = -5094946431180768722L;
         private final int maxEntries;
 
         public LruCache(int maxEntries) {
