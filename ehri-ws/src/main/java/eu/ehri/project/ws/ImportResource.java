@@ -28,6 +28,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
@@ -54,7 +55,6 @@ import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -133,7 +133,7 @@ public class ImportResource extends AbstractResource {
     }
 
     private static final PreImportCallback genPID =
-            (b) -> b.withCreationDataValue(EntityType.PID_KEY, generatePid());
+            (b) -> b.withDataValue(Ontology.PID_KEY, generatePid());
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);

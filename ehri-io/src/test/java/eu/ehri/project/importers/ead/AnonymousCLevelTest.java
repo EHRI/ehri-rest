@@ -19,11 +19,11 @@
 
 package eu.ehri.project.importers.ead;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
-import eu.ehri.project.models.annotations.EntityType;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -40,7 +40,7 @@ public class AnonymousCLevelTest extends AbstractImporterTest {
         String ead = "anonymous-c-levels.xml";
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(ead)) {
             saxImportManager(EadImporter.class, EadHandler.class)
-                    .withPreCallback(b -> b.withDataValue(EntityType.PID_KEY, "pid" + b.getId()))
+                    .withPreCallback(b -> b.withDataValue(Ontology.PID_KEY, "pid" + b.getId()))
                     .importInputStream(ios, "Test");
             fail("Import with " + ead + " should have thrown a validation error");
         } catch (ImportValidationError ex) {

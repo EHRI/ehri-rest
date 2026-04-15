@@ -31,7 +31,6 @@ import java.lang.annotation.Target;
 public @interface EntityType {
     String TYPE_KEY = "__type";
     String ID_KEY = "__id";
-    String PID_KEY = "__pid";
 
     EntityClass value();
 }

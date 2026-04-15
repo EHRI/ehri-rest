@@ -304,13 +304,16 @@ public class BundleTest {
     }
 
     @Test
-    public void testWithCreationData() throws Exception {
+    public void testUpdateData() throws Exception {
         Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar");
-        Bundle bundle2 = newDesc.withCreationDataValue("__hello", "world");
-        Map<String, Object> cdata = bundle2.getCreationData();
+        Bundle bundle2 = newDesc.withDataValue("__hello", "world");
+        Map<String, Object> cdata = bundle2.getData();
         assertTrue(cdata.containsKey("__hello"));
         assertEquals("world", cdata.get("__hello"));
+
+        Map<String, Object> udata = bundle2.getDataForUpdate();
+        assertFalse(udata.containsKey("__hello"));
     }
 
     @Test
@@ -322,6 +325,19 @@ public class BundleTest {
         Map<String, Object> meta = bundle2.getMetaData();
         assertTrue(meta.containsKey("key"));
         assertEquals("val", meta.get("key"));
+    }
+
+    @Test
+    public void testEqualityWithInitData() throws Exception {
+        Bundle b1 = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
+                .withDataValue(Ontology.PID_KEY, "1234");
+
+        Bundle b2 = b1.withDataValue(Ontology.PID_KEY, "5678");
+        assertEquals(b1, b2);
+
+        Bundle b3 = b2.withMetaDataValue("_meta1", "1");
+        assertEquals(b3, b2);
     }
 
     @Test
@@ -365,6 +381,7 @@ public class BundleTest {
     public void testGetDataResultIsImmutable() throws Exception {
         Map<String, Object> data = bundle.getData();
         assertNull(bundle.getDataValue("test"));
+        //noinspection DataFlowIssue
         data.put("test", "value");
     }
 

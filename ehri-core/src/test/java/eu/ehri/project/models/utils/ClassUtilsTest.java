@@ -27,7 +27,6 @@ import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import org.junit.Test;
 
 import java.util.Map;
@@ -68,7 +67,7 @@ public class ClassUtilsTest {
     public void testGetPropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet(
                 Ontology.IDENTIFIER_KEY,
-                EntityType.PID_KEY
+                Ontology.PID_KEY
         );
         assertEquals(keys, ClassUtils.getPropertyKeys(DocumentaryUnit.class));
     }

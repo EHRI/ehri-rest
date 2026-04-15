@@ -21,9 +21,9 @@ package eu.ehri.project.models.base;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -100,7 +100,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
 
         Bundle docBundle = Bundle
                 .fromData(TestData.getTestDocBundle())
-                .withCreationDataValue(EntityType.PID_KEY, "some-pid-01");
+                .withDataValue(Ontology.PID_KEY, "some-pid-01");
         Repository repo = manager.getEntity("r1", Repository.class);
         BundleManager dao = new BundleManager(graph, repo.idPath());
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);

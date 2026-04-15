@@ -100,8 +100,7 @@ public class BundleManagerTest extends ModelTestBase {
     public void testSavingWithCreationData() throws Exception {
         Bundle bundle = Bundle.of("t1",
                 EntityClass.DOCUMENTARY_UNIT,
-                ImmutableMap.of("identifier", "t1"),
-                ImmutableMap.of("__pid", "1234"),
+                ImmutableMap.of("identifier", "t1", "__pid", "1234"),
                 ImmutableMultimap.of(),
                 ImmutableMap.of()
         );
@@ -110,7 +109,7 @@ public class BundleManagerTest extends ModelTestBase {
         assertEquals("1234", t1.getProperty("__pid"));
 
         // Changing the pid should not be possible
-        Bundle bundle2 = bundle.withCreationDataValue("__pid", "5678");
+        Bundle bundle2 = bundle.withDataValue("__pid", "5678");
         Mutation<DocumentaryUnit> op = bundleManager.createOrUpdate(bundle2, DocumentaryUnit.class);
         assertEquals(MutationState.UNCHANGED, op.getState());
         assertEquals("1234", op.getNode().getPersistentIdentifier());

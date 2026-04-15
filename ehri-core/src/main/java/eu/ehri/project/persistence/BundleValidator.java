@@ -225,8 +225,8 @@ public final class BundleValidator {
      */
     private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name, ValidationType op) {
         Map<String, Object> bundleData = op == ValidationType.create
-                ? bundle.getAllCreationData()
-                : bundle.getData();
+                ? bundle.getData()
+                : bundle.getDataForUpdate();
         if (!bundleData.containsKey(name)) {
             builder.addError(name, Messages.getString("BundleValidator.missingField"));
         } else {

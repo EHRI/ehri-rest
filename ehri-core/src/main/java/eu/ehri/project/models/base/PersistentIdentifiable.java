@@ -20,7 +20,7 @@
 package eu.ehri.project.models.base;
 
 import com.tinkerpop.frames.Property;
-import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Mandatory;
 
 /**
@@ -30,6 +30,6 @@ import eu.ehri.project.models.annotations.Mandatory;
 public interface PersistentIdentifiable extends Identifiable {
 
     @Mandatory(creationOnly = true)
-    @Property(EntityType.PID_KEY)
+    @Property(Ontology.PID_KEY)
     String getPersistentIdentifier();
 }
