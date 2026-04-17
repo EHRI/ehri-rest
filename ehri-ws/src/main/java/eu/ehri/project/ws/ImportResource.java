@@ -58,6 +58,8 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.AbstractResource;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -114,26 +116,10 @@ public class ImportResource extends AbstractResource {
     public static final String FIELD_SEP_PARAM = "field-separator";
     public static final String ARRAY_SEP_PARAM = "array-separator";
 
-    private static String generatePid() {
-        // Generate a unique 8-character identifier from an alphabet:
-        String alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
-        int length = 8;
+    private final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
 
-        SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            // Pick a random index from 0 to alphabet.length() - 1
-            int index = random.nextInt(alphabet.length());
-
-            // Add the character at that index to our string
-            sb.append(alphabet.charAt(index));
-        }
-        return sb.toString();
-    }
-
-    private static final PreImportCallback genPID =
-            (b) -> b.withDataValue(Ontology.PID_KEY, generatePid());
+    private final PreImportCallback genPID =
+            (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);

@@ -26,12 +26,15 @@ import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
@@ -70,6 +73,8 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     protected final AclManager aclManager;
     protected final ActionManager actionManager;
     protected final Class<E> cls;
+
+    protected final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
 
     /**
      * Functor used to post-process items.
@@ -389,5 +394,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             accessors.add(current);
         }
         return accessors;
+    }
+
+    protected Bundle setPid(Bundle bundle) {
+        return bundle.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
     }
 }

@@ -3,7 +3,6 @@
   "data": {
     "name": "a virtual documentary unit",
     "identifier": "some-id-supplied-by-frontend",
-    "__pid": "pid-some-random-id",
     "description": "Some info here"
   },
   "relationships": {

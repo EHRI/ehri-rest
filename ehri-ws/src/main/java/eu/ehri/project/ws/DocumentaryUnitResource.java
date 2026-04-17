@@ -29,6 +29,8 @@ import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.utils.Table;
@@ -177,7 +179,7 @@ public class DocumentaryUnitResource
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final DocumentaryUnit parent = api().get(id, cls);
-            Response resource = createItem(bundle, accessors,
+            Response resource = createItem(setPid(bundle), accessors,
                     parent::addChild,
                     api().withScope(parent), cls);
             tx.success();

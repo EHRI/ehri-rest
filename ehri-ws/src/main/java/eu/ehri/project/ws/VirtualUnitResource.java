@@ -26,12 +26,15 @@ import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.ws.base.*;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -49,6 +52,8 @@ import java.util.List;
 public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
+
+    private final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
@@ -165,7 +170,7 @@ public final class VirtualUnitResource extends
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);
 
-            Response item = createItem(bundle, accessors, virtualUnit -> {
+            Response item = createItem(bundle.withDataValue(Ontology.PID_KEY, idGenerator.generateId()), accessors, virtualUnit -> {
                 virtualUnit.setAuthor(currentUser);
                 for (DocumentaryUnit include : includedUnits) {
                     virtualUnit.addIncludedUnit(include);
@@ -220,7 +225,7 @@ public final class VirtualUnitResource extends
             // NB: Unlike most other items created in another context, virtual
             // units do not inherit the permission scope of their 'parent',
             // because they make have many parents.
-            Response item = createItem(bundle, accessors, virtualUnit -> {
+            Response item = createItem(setPid(bundle), accessors, virtualUnit -> {
                 parent.addChild(virtualUnit);
                 for (DocumentaryUnit included : includedUnits) {
                     virtualUnit.addIncludedUnit(included);
