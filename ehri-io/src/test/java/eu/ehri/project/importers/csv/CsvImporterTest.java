@@ -56,7 +56,7 @@ public class CsvImporterTest extends AbstractImporterTest {
                             ImportOptions.basic()
                                     .withFieldSeparator(',')
                                     .withArraySeparator("||"))
-                    .withPreCallback(pidGeneratorCallback)
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, logMessage);
             System.out.println(importLog);
             // After...

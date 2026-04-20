@@ -26,12 +26,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.impl.ApiImpl;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.dc.DublinCore11Exporter;
 import eu.ehri.project.exporters.dc.DublinCoreExporter;
@@ -43,6 +45,7 @@ import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
+import org.apache.jena.atlas.iterator.Iter;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -52,6 +55,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -63,6 +68,10 @@ import java.util.function.Function;
 public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "entities";
+
+    public static final String ID_PARAM = "id";
+    public static final String GID_PARAM = "gid";
+    public static final String PID_PARAM = "pid";
 
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
@@ -81,7 +90,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(@QueryParam("id") List<String> ids, @QueryParam("gid") List<Long> gids) {
+    public Response list(
+            @QueryParam(ID_PARAM) List<String> ids,
+            @QueryParam(GID_PARAM) List<Long> gids,
+            @QueryParam(PID_PARAM) List<String> pids
+    ) {
         try (Tx tx = beginTx()) {
             // Check auth...
             checkUser();
@@ -93,7 +106,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
                 Iterable<Vertex> byGid = Iterables.transform(gids, graph::getVertex);
                 Iterable<Vertex> byId = manager.getVertices(ids);
-                Iterable<Vertex> all = Iterables.concat(byGid, byId);
+                Iterable<Vertex> byPid = manager.getVertices(Ontology.PID_KEY, pids);
+                Iterable<Vertex> all = Iterables.concat(byGid, byId, byPid);
                 return Iterables.transform(all, filter::apply);
             });
             tx.success();
@@ -119,7 +133,42 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listFromJson(String json) throws DeserializationError, IOException {
         IdSet set = parseGraphIds(json);
-        return this.list(set.ids, set.gids);
+        List<String> pids = set.kvs.getOrDefault("pid", Lists.newArrayList());
+        return this.list(set.ids, set.gids, pids);
+    }
+
+    /**
+     * Fetch an item of any type by PID.
+     *
+     * @param pid the item's persistent ID.
+     * @return A serialized representation.
+     * @throws ItemNotFound if the item does not exist
+     * @throws AccessDenied if the user cannot access the item
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("pid:{pid:[^/]+}")
+    public Response getByPid(@PathParam("pid") String pid) throws ItemNotFound, AccessDenied {
+        try (final Tx tx = beginTx()) {
+            Optional<Vertex> itemOpt = manager.getVertex(Ontology.PID_KEY, pid);
+
+            if (itemOpt.isPresent()) {
+                Vertex item = itemOpt.get();
+                // If the item doesn't exist or isn't a content type throw 404
+                Accessor currentUser = getRequesterUserProfile();
+                if (!aclManager.getContentTypeFilterFunction().compute(item)) {
+                    throw new ItemNotFound(pid);
+                } else if (!AclManager.getAclFilterFunction(currentUser).compute(item)) {
+                    throw new AccessDenied(currentUser.getId(), pid);
+                }
+
+                Response response = single(graph.frame(item, Accessible.class));
+                tx.success();
+                return response;
+            } else {
+                throw new ItemNotFound(pid);
+            }
+        }
     }
 
     /**
@@ -519,10 +568,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     private static class IdSet {
         final List<String> ids;
         final List<Long> gids;
+        final Map<String, List<String>> kvs;
 
-        IdSet(List<String> ids, List<Long> gids) {
+        IdSet(List<String> ids, List<Long> gids, Map<String, List<String>> kvs) {
             this.ids = ids;
             this.gids = gids;
+            this.kvs = kvs;
         }
     }
 
@@ -533,6 +584,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             List<Object> jsonValues = jsonMapper.readValue(json, typeRef);
             List<String> ids = Lists.newArrayList();
             List<Long> gids = Lists.newArrayList();
+            Map<String, List<String>> kvs = Maps.newHashMap();
 
             for (Object js : jsonValues) {
                 if (js instanceof Integer) {
@@ -541,9 +593,21 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                     gids.add((Long) js);
                 } else if (js instanceof String) {
                     ids.add((String) js);
+                } else if (js instanceof Map) {
+                    for (Map.Entry<?,?> entry : ((Map<?, ?>) js).entrySet()) {
+                        Object key = entry.getKey();
+                        Object value = entry.getValue();
+                        if (key instanceof String && value instanceof String) {
+                            if (kvs.containsKey((String) key)) {
+                                kvs.get((String) key).add((String) value);
+                            } else {
+                                kvs.put((String) key, Lists.newArrayList((String)value));
+                            }
+                        }
+                    }
                 }
             }
-            return new IdSet(ids, gids);
+            return new IdSet(ids, gids, kvs);
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
         }

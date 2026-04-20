@@ -429,7 +429,7 @@ public class ImportResource extends AbstractResource {
                     .withPreCallback(genPID);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
-            EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager);
+            EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager, idGenerator);
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
 

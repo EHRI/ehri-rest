@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -11,6 +13,7 @@ import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +31,7 @@ public class EadSyncTest extends AbstractImporterTest {
 
     private Repository repo;
     private SaxImportManager importManager;
+    private final ArkIdGenerator arkIdGenerator = new ArkIdGenerator(10);
 
     @Before
     public void setUp() throws Exception {
@@ -39,6 +43,23 @@ public class EadSyncTest extends AbstractImporterTest {
                     .withUpdates(true);
             importManager.importInputStream(ios, "Initial setup");
         }
+    }
+
+    /**
+     * When doing a sync we create objects that are identical to the old ones, but
+     * re-positioned in the archival hierarchy. This means we need to change the PID
+     * generation logic, because otherwise there will be a clash.
+     */
+    @Override
+    protected PreImportCallback getPidGeneratorCallback() {
+        return (b) -> {
+            if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
+                return b.withDataValue(Ontology.PID_KEY, String.format("pid-%s-%s",
+                        b.getDataValue(Ontology.IDENTIFIER_KEY), arkIdGenerator.generateId()));
+            } else {
+                return b;
+            }
+        };
     }
 
     @Test
@@ -133,7 +154,7 @@ public class EadSyncTest extends AbstractImporterTest {
     }
 
     private SyncLog runSync(PermissionScope scope, Set<String> excludes, String logMessage, String ead) throws Exception {
-        EadSync sync = EadSync.create(graph, api(adminUser), scope, adminUser, importManager);
+        EadSync sync = EadSync.create(graph, api(adminUser), scope, adminUser, importManager, arkIdGenerator);
         try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead)) {
             return sync.sync(m -> {
                 try {

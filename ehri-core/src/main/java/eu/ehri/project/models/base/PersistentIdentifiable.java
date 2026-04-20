@@ -22,6 +22,7 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.Unique;
 
 /**
  * Base interface for entities that have a persistent identifier property (other than the
@@ -29,6 +30,7 @@ import eu.ehri.project.models.annotations.Mandatory;
  */
 public interface PersistentIdentifiable extends Identifiable {
 
+    @Unique
     @Mandatory
     @Property(Ontology.PID_KEY)
     String getPersistentIdentifier();

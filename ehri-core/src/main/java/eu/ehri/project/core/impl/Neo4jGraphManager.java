@@ -39,9 +39,9 @@ import org.neo4j.graphdb.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -72,19 +72,24 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     public Vertex getVertex(String id) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
+        return getVertex(EntityType.ID_KEY, id)
+                .orElseThrow(() -> new ItemNotFound(id));
+    }
+
+    @Override
+    public Optional<Vertex> getVertex(String key, Object value) {
+        Preconditions.checkNotNull(key, "attempt to fetch vertex with a null property key");
         try (CloseableIterable<Vertex> q = graph.getBaseGraph()
-                .getVerticesByLabelKeyValue(BASE_LABEL, EntityType.ID_KEY, id)) {
-            return q.iterator().next();
+                .getVerticesByLabelKeyValue(BASE_LABEL, key, value)) {
+            return Optional.of(q.iterator().next());
         } catch (NoSuchElementException e) {
-            throw new ItemNotFound(id);
+            return Optional.empty();
         }
     }
 
     @Override
-    public CloseableIterable<Vertex> getVertices(String key, Object value,
-                                                 EntityClass type) {
-        return graph.getBaseGraph().getVerticesByLabelKeyValue(type.getName(),
-                key, value);
+    public CloseableIterable<Vertex> getVertices(String key, Object value, EntityClass type) {
+        return graph.getBaseGraph().getVerticesByLabelKeyValue(type.getName(), key, value);
     }
 
     @Override
@@ -150,22 +155,25 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
         // Create an index on each mandatory or indexed property and
         // a unique constraint on unique properties.
         for (EntityClass cls : EntityClass.values()) {
-            Set<String> propertyKeys = Sets.newHashSet();
-            propertyKeys.addAll(ClassUtils.getIndexedPropertyKeys(cls.getJavaClass()));
-            propertyKeys.addAll(ClassUtils.getMandatoryPropertyKeys(cls.getJavaClass()));
-            for (String prop : propertyKeys) {
-                logger.trace("Creating index on property: {} -> {}", cls.getName(), prop);
-                schema.indexFor(Label.label(cls.getName()))
-                        .on(prop)
-                        .create();
-            }
-
-            Collection<String> uniquePropertyKeys = ClassUtils.getUniquePropertyKeys(cls.getJavaClass());
+            Set<String> uniquePropertyKeys = Sets.newHashSet();
+            uniquePropertyKeys.addAll(ClassUtils.getUniquePropertyKeys(cls.getJavaClass()));
             for (String unique : uniquePropertyKeys) {
                 logger.trace("Creating constraint on unique property: {} -> {}",
                         cls.getName(), unique);
                 schema.constraintFor(Label.label(cls.getName()))
                         .assertPropertyIsUnique(unique)
+                        .create();
+            }
+
+            Set<String> propertyKeys = Sets.newHashSet();
+            propertyKeys.addAll(ClassUtils.getIndexedPropertyKeys(cls.getJavaClass()));
+            propertyKeys.addAll(ClassUtils.getMandatoryPropertyKeys(cls.getJavaClass()));
+            // We can't add another index on a property that already has a unique constraint.
+            propertyKeys.removeIf(uniquePropertyKeys::contains);
+            for (String prop : propertyKeys) {
+                logger.trace("Creating index on property: {} -> {}", cls.getName(), prop);
+                schema.indexFor(Label.label(cls.getName()))
+                        .on(prop)
                         .create();
             }
         }

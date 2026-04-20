@@ -169,7 +169,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             SaxImportManager.create(graph, repository, adminUser,
                             EadImporter.class, EadHandler.class, ImportOptions.basic())
-                    .withPreCallback(pidGeneratorCallback)
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, "Testing import/export");
             DocumentaryUnit fonds = graph.frame(
                     getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);

@@ -199,6 +199,11 @@ public final class BundleValidator {
      */
     private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
+            if (key.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
+                // Keys beginning with __ prefix are only mandatory on creation.
+                // FIXME: find a nicer way to express this.
+                continue;
+            }
             checkField(bundle, builder, key, op);
         }
         Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
@@ -224,10 +229,6 @@ public final class BundleValidator {
      * @param op the validation operation type
      */
     private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name, ValidationType op) {
-        // FIXME: hacking around validation errors with initialisation properties!
-        if (name.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
-            return;
-        }
         Map<String, Object> bundleData = op == ValidationType.create
                 ? bundle.getData()
                 : bundle.getDataForUpdate();

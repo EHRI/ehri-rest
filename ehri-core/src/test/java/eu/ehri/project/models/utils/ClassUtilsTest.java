@@ -83,7 +83,7 @@ public class ClassUtilsTest {
 
     @Test
     public void testGetUniquePropertyKeys() throws Exception {
-        Set<String> keys = Sets.newHashSet();
+        Set<String> keys = Sets.newHashSet(Ontology.PID_KEY);
         assertEquals(keys, ClassUtils.getUniquePropertyKeys(DocumentaryUnit.class));
     }
 

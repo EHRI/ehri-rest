@@ -39,6 +39,7 @@ import eu.ehri.project.models.base.Entity;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -146,6 +147,16 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
+    public Optional<Vertex> getVertex(String key, Object value) {
+        Preconditions.checkNotNull(key, "attempt to fetch vertex with a null property key");
+        try {
+            return Optional.of(graph.getVertices(key, value).iterator().next());
+        } catch (NoSuchElementException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
         return new WrappingCloseableIterable<>(
                 graph.getVertices(EntityType.TYPE_KEY, type.getName()));
@@ -160,6 +171,13 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
                 return null;
             }
         });
+        return new WrappingCloseableIterable<>(verts);
+    }
+
+    @Override
+    public CloseableIterable<Vertex> getVertices(String key, Iterable<?> values) {
+        Iterable<Vertex> verts = Iterables
+                .transform(values, value -> getVertex(key, value).orElse(null));
         return new WrappingCloseableIterable<>(verts);
     }
 

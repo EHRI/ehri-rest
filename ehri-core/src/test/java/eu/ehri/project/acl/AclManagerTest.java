@@ -396,10 +396,12 @@ public class AclManagerTest extends GraphTestBase {
                         .withDataValue(Ontology.IDENTIFIER_KEY, "head-doc"), DocumentaryUnit.class);
         DocumentaryUnit userdoc1 = repoApi.withAccessor(user1).create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-1"), DocumentaryUnit.class);
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-1")
+                        .withDataValue(Ontology.PID_KEY, "pid-1"), DocumentaryUnit.class);
         DocumentaryUnit userdoc2 = repoApi.withAccessor(user2).create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-2"), DocumentaryUnit.class);
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-2")
+                        .withDataValue(Ontology.PID_KEY, "pid-2"), DocumentaryUnit.class);
 
         // Ensure Head Archivist can update/delete user1's doc
         assertTrue(acl.hasPermission(userdoc1, UPDATE, headArchivists));

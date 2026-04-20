@@ -67,30 +67,32 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     /**
      * For testing, use a PID generator that just copies the ID.
      */
-    protected final PreImportCallback pidGeneratorCallback = (b) -> {
-        if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
-            return b.withDataValue(Ontology.PID_KEY, "pid-" + b.getDataValue(Ontology.IDENTIFIER_KEY));
-        } else {
-            return b;
-        }
-    };
+    protected PreImportCallback getPidGeneratorCallback() {
+        return (b) -> {
+            if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
+                return b.withDataValue(Ontology.PID_KEY, "pid-" + b.getDataValue(Ontology.IDENTIFIER_KEY));
+            } else {
+                return b;
+            }
+        };
+    }
 
     /**
      * Convenience method for creating a Sax import manager.
      */
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
         SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, options);
-        return importer.withPreCallback(pidGeneratorCallback);
+        return importer.withPreCallback(getPidGeneratorCallback());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, ImportOptions.basic());
-        return importer.withPreCallback(pidGeneratorCallback);
+        return importer.withPreCallback(getPidGeneratorCallback());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {
         SaxImportManager importer = saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
-        return importer.withPreCallback(pidGeneratorCallback);
+        return importer.withPreCallback(getPidGeneratorCallback());
     }
 
     /**

@@ -367,7 +367,7 @@ public class BundleTest {
     @Test
     public void testGetUniquePropertyKeys() throws Exception {
         Collection<String> uniquePropertyKeys = bundle.getUniquePropertyKeys();
-        assertEquals(Sets.<String>newHashSet(), uniquePropertyKeys);
+        assertEquals(Sets.newHashSet(Ontology.PID_KEY), uniquePropertyKeys);
     }
 
     @Test(expected = ClassCastException.class)

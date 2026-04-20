@@ -276,7 +276,8 @@ public class EventsApiTest extends AbstractFixtureTest {
 
     private DocumentaryUnit createItemWithIdentifier(String id, UserProfile userProfile) throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
-                .withDataValue(Ontology.IDENTIFIER_KEY, id);
+                .withDataValue(Ontology.IDENTIFIER_KEY, id)
+                .withDataValue(Ontology.PID_KEY, "pid-" + id);
         return loggingApi(userProfile).create(bundle, DocumentaryUnit.class);
     }
 

@@ -31,6 +31,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.cypher.internal.compiler.v2_3.On;
 
 import java.util.Map;
 
@@ -96,7 +97,8 @@ public class PermissionsTest extends AbstractFixtureTest {
         // We should be able to create another item with c1 as the scope,
         // and inherit the perms from r1
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
-                .withDataValue(Ontology.IDENTIFIER_KEY, "some-other-id");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "some-other-id")
+                .withDataValue(Ontology.PID_KEY, "random");
         DocumentaryUnit c2 = api(user).withScope(c1).create(bundle, DocumentaryUnit.class);
         assertNotNull(c2);
     }
@@ -112,7 +114,8 @@ public class PermissionsTest extends AbstractFixtureTest {
         // We should be able to create another item with c1 as the r1,
         // and inherit the perms from r1
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
-                .withDataValue(Ontology.IDENTIFIER_KEY, "some-id");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "some-id")
+                .withDataValue(Ontology.PID_KEY, "random");
         DocumentaryUnit c2 = api(user).withScope(r1).create(bundle, DocumentaryUnit.class);
         assertNotNull(c2);
     }
