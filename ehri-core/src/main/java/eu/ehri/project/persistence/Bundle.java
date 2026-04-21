@@ -139,7 +139,7 @@ public final class Bundle implements NestableData<Bundle> {
             } else {
                 Object current = data.get(key);
                 if (current instanceof List) {
-                    ((List<Object>)current).add(value);
+                    ((List<Object>) current).add(value);
                     data.put(key, current);
                 } else {
                     data.put(key, Lists.newArrayList(current, value));
@@ -174,7 +174,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @param temp      A marker to indicate the ID has been generated
      */
     private Bundle(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
+                   Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
         this.data = normaliseData(data);
@@ -193,7 +193,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations) {
+                            Multimap<String, Bundle> relations) {
         return of(id, type, data, relations, Maps.newHashMap());
     }
 
@@ -208,7 +208,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations, Map<String, Object> meta) {
+                            Multimap<String, Bundle> relations, Map<String, Object> meta) {
         return new Bundle(id, type, data, relations, meta, false);
     }
 
@@ -221,7 +221,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a new bundle
      */
     public static Bundle of(EntityClass type, Map<String, Object> data,
-            Multimap<String, Bundle> relations) {
+                            Multimap<String, Bundle> relations) {
         return of(null, type, data, relations);
     }
 
@@ -348,8 +348,9 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Get the bundle data that's used for
-     * @return
+     * Get the bundle data that's used for updating the vertex.
+     *
+     * @return The data map without initialisation values.
      */
     public Map<String, Object> getDataForUpdate() {
         return ImmutableMap.copyOf(Maps.filterKeys(data, s -> !s.startsWith(INITIALISATION_PREFIX)));
@@ -548,7 +549,7 @@ public final class Bundle implements NestableData<Bundle> {
                 Set<Bundle> updated = Sets.newHashSet();
                 for (final Bundle otherRel : otherRelations) {
                     Optional<Bundle> toUpdate = relations.stream().filter(
-                            bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()))
+                                    bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()))
                             .findFirst();
                     if (toUpdate.isPresent()) {
                         Bundle up = toUpdate.get();
@@ -870,20 +871,6 @@ public final class Bundle implements NestableData<Bundle> {
             }
         }
         return filtered;
-    }
-
-    /**
-     * Return a set of data consisting only of initialisation properties,
-     * e.g. those which are set only when a Bundle is first materialised.
-     */
-    private Map<String, Object> initialisationData(Map<String, Object> in) {
-        Map<String, Object> init = Maps.newHashMap();
-        for (Map.Entry<? extends String, Object> entry : in.entrySet()) {
-            if (!entry.getKey().startsWith(INITIALISATION_PREFIX)) {
-                init.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return init;
     }
 
     /**

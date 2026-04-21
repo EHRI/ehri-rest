@@ -117,6 +117,10 @@ public final class BundleManager {
      */
     public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls) throws ValidationError {
         Bundle bundleWithIds = validator.validateForUpdate(bundle);
+        if (!manager.exists(bundleWithIds.getId())) {
+            // FIXME: this is repeating half of the validation!
+            validator.validateForCreate(bundle);
+        }
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
         return new Mutation<>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
                 vertexMutation.getPrior());

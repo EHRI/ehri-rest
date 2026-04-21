@@ -21,11 +21,7 @@ package eu.ehri.project.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
@@ -62,7 +58,7 @@ public class BundleTest {
     }
 
     @Test
-    public void testCreationWithNullValues() throws Exception {
+    public void testCreationWithNullValues() {
         Map<String, Object> data = Maps.newHashMap();
         data.put("identifier", null);
         Bundle b2 = Bundle.of(EntityClass.DOCUMENTARY_UNIT, data);
@@ -304,7 +300,7 @@ public class BundleTest {
     }
 
     @Test
-    public void testUpdateData() throws Exception {
+    public void testInitialisationProperties() throws Exception {
         Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar");
         Bundle bundle2 = newDesc.withDataValue("__hello", "world");
@@ -387,7 +383,7 @@ public class BundleTest {
 
     @Test
     public void testImmutability() throws Exception {
-        Map<String,Object> m = Maps.newHashMap();
+        Map<String, Object> m = Maps.newHashMap();
         m.put("test", "value");
         Bundle b = bundle.withData(m);
         assertNull(b.getDataValue("test2"));
@@ -397,7 +393,7 @@ public class BundleTest {
 
     @Test
     public void testNullValueHandling() throws Exception {
-        Map<String,Object> m = Maps.newHashMap();
+        Map<String, Object> m = Maps.newHashMap();
         m.put("test", "value");
         m.put("null", null);
         assertTrue(m.containsKey("null"));
@@ -423,11 +419,11 @@ public class BundleTest {
     @Test
     public void testMap() throws Exception {
         Bundle n = bundle.map(d -> {
-           Map<String,Object> nd = Maps.newHashMap();
-           for (Map.Entry<String,Object> e : d.getData().entrySet()) {
-               nd.put(e.getKey() + "!", e.getValue());
-           }
-           return d.withData(nd);
+            Map<String, Object> nd = Maps.newHashMap();
+            for (Map.Entry<String, Object> e : d.getData().entrySet()) {
+                nd.put(e.getKey() + "!", e.getValue());
+            }
+            return d.withData(nd);
         });
         assertEquals("foobar", DataUtils.get(n, "identifier!"));
         assertEquals("Foobar", DataUtils.get(n, "describes[0]/name!"));

@@ -40,15 +40,104 @@ public final class BundleValidator {
     private final GraphManager manager;
     private final List<String> scopes;
 
-    private enum ValidationType {
-        create,
-        update
-    }
-
     public BundleValidator(GraphManager manager, Collection<String> scopes) {
         this.manager = manager;
         this.scopes = Lists.newArrayList(Optional.ofNullable(scopes)
                 .orElse(Lists.newArrayList()));
+    }
+
+    private static void combineErrorSets(
+            Bundle bundle,
+            ErrorSet.Builder builder,
+            Map.Entry<String, Bundle> entry,
+            ErrorSet errorSet, Bundle child, Set<String> ids
+    ) {
+        if (errorSet.isEmpty() && child.getId() != null) {
+            if (ids.contains(child.getId())) {
+                ListMultimap<String, String> errs = child.getType().getIdGen()
+                        .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
+                for (Map.Entry<String, String> err : errs.entries()) {
+                    errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
+                }
+            } else {
+                ids.add(child.getId());
+            }
+        }
+        builder.addRelation(entry.getKey(), errorSet);
+    }
+
+    private static void checkDuplicateIds(Bundle bundle, ErrorSet.Builder builder) {
+        final Set<String> ids = Sets.newHashSet();
+        bundle.dependentsOnly().forEach(b -> {
+            if (ids.contains(b.getId())) {
+                builder.addError(Bundle.ID_KEY, MessageFormat.format(
+                        Messages.getString("BundleValidator.duplicateId"), b.getId()));
+            }
+            ids.add(b.getId());
+        });
+    }
+
+    /**
+     * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
+     */
+    private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
+        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
+            if (key.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
+                // Keys beginning with __ prefix are only mandatory on creation.
+                continue;
+            }
+            checkMandatoryField(bundle, builder, key, op);
+        }
+        Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
+        for (Map.Entry<String, Set<String>> entry : enumPropertyKeys.entrySet()) {
+            checkValueInRange(bundle, builder, entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void checkValueInRange(Bundle bundle, ErrorSet.Builder builder, String key, Collection<String> values) {
+        Object dataValue = bundle.getDataValue(key);
+        if (dataValue != null) {
+            if (!values.contains(dataValue.toString())) {
+                builder.addError(key,
+                        MessageFormat.format(Messages.getString("BundleValidator.invalidFieldValue"), values, dataValue));
+            }
+        }
+    }
+
+    /**
+     * Check the data holds a given field and that the field is not empty.
+     *
+     * @param  propertyName The field name
+     * @param op the validation operation type
+     */
+    private static void checkMandatoryField(Bundle bundle, ErrorSet.Builder builder, String propertyName, ValidationType op) {
+        Map<String, Object> bundleData = op == ValidationType.create
+                ? bundle.getData()
+                : bundle.getDataForUpdate();
+        if (!bundleData.containsKey(propertyName)) {
+            builder.addError(propertyName, Messages.getString("BundleValidator.missingField"));
+        } else {
+            Object value = bundleData.get(propertyName);
+            if (value == null) {
+                builder.addError(propertyName, Messages.getString("BundleValidator.emptyField"));
+            } else if (value instanceof String) {
+                if (((String) value).trim().isEmpty()) {
+                    builder.addError(propertyName, Messages.getString("BundleValidator.emptyField"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Check that the entity type annotation is present in the bundle's class.
+     */
+    private static void checkEntityType(Bundle bundle, ErrorSet.Builder builder) {
+        EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
+        if (annotation == null) {
+            builder.addError(Bundle.TYPE_KEY,
+                    MessageFormat.format(Messages.getString("BundleValidator.missingTypeAnnotation"),
+                    bundle.getBundleJavaClass().getName()));
+        }
     }
 
     /**
@@ -157,21 +246,6 @@ public final class BundleValidator {
         }
     }
 
-    private static void combineErrorSets(Bundle bundle, ErrorSet.Builder builder, Map.Entry<String, Bundle> entry, ErrorSet errorSet, Bundle child, Set<String> ids) {
-        if (errorSet.isEmpty() && child.getId() != null) {
-            if (ids.contains(child.getId())) {
-                ListMultimap<String, String> errs = child.getType().getIdGen()
-                        .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
-                for (Map.Entry<String, String> err : errs.entries()) {
-                    errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
-                }
-            } else {
-                ids.add(child.getId());
-            }
-        }
-        builder.addRelation(entry.getKey(), errorSet);
-    }
-
     private void checkChildren(Bundle bundle, ErrorSet.Builder builder, ValidationType type) {
         final Set<String> ids = Sets.newHashSet();
         for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
@@ -180,81 +254,6 @@ public final class BundleValidator {
                         ? validateTreeForCreate(child)
                         : validateTreeForUpdate(child);
             combineErrorSets(bundle, builder, entry, errorSet, child, ids);
-        }
-    }
-
-    private static void checkDuplicateIds(Bundle bundle, ErrorSet.Builder builder) {
-        final Set<String> ids = Sets.newHashSet();
-        bundle.dependentsOnly().forEach(b -> {
-            if (ids.contains(b.getId())) {
-                builder.addError(Bundle.ID_KEY, MessageFormat.format(
-                        Messages.getString("BundleValidator.duplicateId"), b.getId()));
-            }
-            ids.add(b.getId());
-        });
-    }
-
-    /**
-     * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
-     */
-    private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
-        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
-            if (key.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
-                // Keys beginning with __ prefix are only mandatory on creation.
-                // FIXME: find a nicer way to express this.
-                continue;
-            }
-            checkField(bundle, builder, key, op);
-        }
-        Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
-        for (Map.Entry<String, Set<String>> entry : enumPropertyKeys.entrySet()) {
-            checkValueInRange(bundle, builder, entry.getKey(), entry.getValue());
-        }
-    }
-
-    private static void checkValueInRange(Bundle bundle, ErrorSet.Builder builder, String key, Collection<String> values) {
-        Object dataValue = bundle.getDataValue(key);
-        if (dataValue != null) {
-            if (!values.contains(dataValue.toString())) {
-                builder.addError(key,
-                        MessageFormat.format(Messages.getString("BundleValidator.invalidFieldValue"), values, dataValue));
-            }
-        }
-    }
-
-    /**
-     * Check the data holds a given field and that the field is not empty.
-     *
-     * @param name The field name
-     * @param op the validation operation type
-     */
-    private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name, ValidationType op) {
-        Map<String, Object> bundleData = op == ValidationType.create
-                ? bundle.getData()
-                : bundle.getDataForUpdate();
-        if (!bundleData.containsKey(name)) {
-            builder.addError(name, Messages.getString("BundleValidator.missingField"));
-        } else {
-            Object value = bundleData.get(name);
-            if (value == null) {
-                builder.addError(name, Messages.getString("BundleValidator.emptyField"));
-            } else if (value instanceof String) {
-                if (((String) value).trim().isEmpty()) {
-                    builder.addError(name, Messages.getString("BundleValidator.emptyField"));
-                }
-            }
-        }
-    }
-
-    /**
-     * Check that the entity type annotation is present in the bundle's class.
-     */
-    private static void checkEntityType(Bundle bundle, ErrorSet.Builder builder) {
-        EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
-        if (annotation == null) {
-            builder.addError(Bundle.TYPE_KEY,
-                    MessageFormat.format(Messages.getString("BundleValidator.missingTypeAnnotation"),
-                    bundle.getBundleJavaClass().getName()));
         }
     }
 
@@ -313,5 +312,10 @@ public final class BundleValidator {
                 }
             }
         }
+    }
+
+    private enum ValidationType {
+        create,
+        update
     }
 }
