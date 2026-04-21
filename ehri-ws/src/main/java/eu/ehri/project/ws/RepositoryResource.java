@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.Ead3Exporter;
@@ -30,6 +31,7 @@ import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -55,6 +57,9 @@ import java.util.function.Supplier;
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.REPOSITORY)
 public class RepositoryResource extends AbstractAccessibleResource<Repository>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
+
+    private final PreImportCallback genPID =
+            (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 
     public RepositoryResource(@Context GraphDatabaseService database) {
         super(database, Repository.class);
@@ -204,8 +209,14 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 accessible.setPermissionScope(repository);
                 repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
             };
-            ImportLog log = new BatchOperations(graph, repository, true, tolerant,
-                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            ImportLog log = new BatchOperations(
+                    graph,
+                    repository,
+                    true,
+                    tolerant,
+                    Lists.newArrayList(genPID),
+                    Lists.newArrayList(cb)
+            ).batchImport(data, user, getLogMessage());
             if (commit) {
                 logger.debug("Committing batch ingest transaction...");
                 tx.success();

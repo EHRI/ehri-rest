@@ -39,7 +39,6 @@ import java.util.ResourceBundle;
 import static eu.ehri.project.test.XmlTestHelpers.*;
 
 
-@Ignore
 public class Ead3ExporterTest extends XmlExporterTest {
 
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
@@ -181,6 +180,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
         SaxImportManager.create(graph, repository, adminUser,
                 EadImporter.class, EadHandler.class, ImportOptions.properties("ead3.properties"))
+                .withPreCallback(getPidGeneratorCallback())
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);

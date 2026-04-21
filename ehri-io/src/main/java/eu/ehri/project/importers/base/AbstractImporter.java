@@ -56,16 +56,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
      * @return data as processed by the set of registered callbacks
      */
     protected Bundle handlePreCallbacks(Bundle data) {
-        return handlePreCallbacks(data, preCallbacks);
-    }
-
-    private Bundle handlePreCallbacks(Bundle data, List<PreImportCallback> todo) {
-        if (todo.isEmpty()) {
-            return data;
-        } else {
-            PreImportCallback callback = todo.get(0);
-            return handlePreCallbacks(callback.preImport(data), todo.subList(1, todo.size()));
-        }
+        return PreImportCallback.handlePreCallbacks(data, preCallbacks);
     }
 
     /**

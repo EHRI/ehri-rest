@@ -98,7 +98,7 @@ public class AuthoritativeSetResource extends
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = beginTx()) {
-            Response response = createItem(bundle, accessors);
+            Response response = createItem(setPid(bundle), accessors);
             tx.success();
             return response;
         }
@@ -188,8 +188,14 @@ public class AuthoritativeSetResource extends
                 accessible.setPermissionScope(set);
                 set.addItem(accessible.as(HistoricalAgent.class));
             };
-            ImportLog log = new BatchOperations(graph, set, version, tolerant,
-                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            ImportLog log = new BatchOperations(
+                    graph,
+                    set,
+                    version,
+                    tolerant,
+                    Lists.newArrayList(),
+                    Lists.newArrayList(cb)
+            ).batchImport(data, user, getLogMessage());
             if (commit) {
                 logger.debug("Committing batch ingest transaction...");
                 tx.success();

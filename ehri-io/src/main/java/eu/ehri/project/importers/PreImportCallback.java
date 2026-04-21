@@ -21,10 +21,27 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.persistence.Bundle;
 
+import java.util.List;
+
 /**
  * Implementing classes do things after an item was imported and created
  * a mutation ('created', 'updated', 'unchanged').
  */
 public interface PreImportCallback {
     Bundle preImport(Bundle data);
+
+    /**
+     * Generate a new bundle by running it through a set of callbacks.
+     * @param data the Bundle instance
+     * @param todo a list of PreImportCallbacks
+     * @return a new Bundle
+     */
+    static Bundle handlePreCallbacks(Bundle data, List<PreImportCallback> todo) {
+        if (todo.isEmpty()) {
+            return data;
+        } else {
+            PreImportCallback callback = todo.get(0);
+            return handlePreCallbacks(callback.preImport(data), todo.subList(1, todo.size()));
+        }
+    }
 }

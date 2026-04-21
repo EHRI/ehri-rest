@@ -8,18 +8,18 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +44,7 @@ public class BatchOperations {
     private final PermissionScope scope;
     private final boolean version;
     private final boolean tolerant;
+    private final List<PreImportCallback> preCallbacks;
     private final List<PostImportCallback> callbacks;
 
     /**
@@ -57,11 +58,13 @@ public class BatchOperations {
      * @param callbacks a set of import callbacks to run on item import
      */
     public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant,
+                           List<PreImportCallback> preCallbacks,
                            List<PostImportCallback> callbacks) {
         this.graph = graph;
         this.scope = Optional.ofNullable(scopeOpt).orElse(SystemScope.getInstance());
         this.version = version;
         this.tolerant = tolerant;
+        this.preCallbacks = preCallbacks;
         this.callbacks = callbacks;
 
         this.manager = GraphManagerFactory.getInstance(graph);
@@ -77,7 +80,7 @@ public class BatchOperations {
      * @param graph the graph object
      */
     public BatchOperations(FramedGraph<?> graph) {
-        this(graph, SystemScope.getInstance(), true, false, Collections.emptyList());
+        this(graph, SystemScope.getInstance(), true, false, Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -88,7 +91,7 @@ public class BatchOperations {
      * @return a new batch operation manager
      */
     public BatchOperations setTolerant(boolean tolerant) {
-        return new BatchOperations(graph, scope, version, tolerant, callbacks);
+        return new BatchOperations(graph, scope, version, tolerant, preCallbacks, callbacks);
     }
 
     /**
@@ -98,7 +101,7 @@ public class BatchOperations {
      * @return a new batch operation manager
      */
     public BatchOperations setVersioning(boolean versioning) {
-        return new BatchOperations(graph, scope, versioning, tolerant, callbacks);
+        return new BatchOperations(graph, scope, versioning, tolerant, preCallbacks, callbacks);
     }
 
     /**
@@ -108,7 +111,20 @@ public class BatchOperations {
      * @return a new batch operation manager
      */
     public BatchOperations setScope(PermissionScope scope) {
-        return new BatchOperations(graph, scope, version, tolerant, callbacks);
+        return new BatchOperations(graph, scope, version, tolerant, preCallbacks, callbacks);
+    }
+
+    /**
+     * Add pre-import callbacks to the importer. Note: order of execution
+     * is undefined.
+     *
+     * @param preCallbacks one or more ImportCallback instances
+     * @return a new batch operation manager
+     */
+    public BatchOperations withPreCallbacks(PreImportCallback... preCallbacks) {
+        List<PreImportCallback> newCallbacks = Lists.newArrayList(preCallbacks);
+        newCallbacks.addAll(this.preCallbacks);
+        return new BatchOperations(graph, scope, version, tolerant, newCallbacks, callbacks);
     }
 
     /**
@@ -121,7 +137,7 @@ public class BatchOperations {
     public BatchOperations withCallbacks(PostImportCallback... callbacks) {
         List<PostImportCallback> newCallbacks = Lists.newArrayList(callbacks);
         newCallbacks.addAll(this.callbacks);
-        return new BatchOperations(graph, scope, version, tolerant, newCallbacks);
+        return new BatchOperations(graph, scope, version, tolerant, preCallbacks, newCallbacks);
     }
 
     /**
@@ -142,8 +158,9 @@ public class BatchOperations {
                 EventTypes.modification, logMessage);
         ImportLog log = new ImportLog(logMessage.orElse(null));
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
-            for (Bundle bundle : bundleIter) {
+            for (Bundle rawBundle : bundleIter) {
                 try {
+                    Bundle bundle = PreImportCallback.handlePreCallbacks(rawBundle, preCallbacks);
                     Mutation<Accessible> mutation = dao.createOrUpdate(bundle, Accessible.class);
                     String id = mutation.getNode().getId();
                     switch (mutation.getState()) {
@@ -169,8 +186,8 @@ public class BatchOperations {
                     if (!tolerant) {
                         throw e;
                     } else {
-                        log.addError(bundle.getId(), e.getMessage());
-                        logger.warn(String.format("Validation error patching: %s", bundle.getId()), e);
+                        log.addError(rawBundle.getId(), e.getMessage());
+                        logger.warn(String.format("Validation error patching: %s", rawBundle.getId()), e);
                     }
                 }
             }
@@ -198,8 +215,9 @@ public class BatchOperations {
                 EventTypes.modification, logMessage);
         ImportLog log = new ImportLog(logMessage.orElse(null));
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
-            for (Bundle bundle : bundleIter) {
+            for (Bundle rawBundle : bundleIter) {
                 try {
+                    Bundle bundle = PreImportCallback.handlePreCallbacks(rawBundle, preCallbacks);
                     Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
                     Bundle oldBundle = serializer.entityToBundle(entity);
                     Bundle newBundle = oldBundle.mergeDataWith(bundle);
@@ -222,8 +240,8 @@ public class BatchOperations {
                     if (!tolerant) {
                         throw e;
                     } else {
-                        log.addError(bundle.getId(), e.getMessage());
-                        logger.warn("Validation error patching {}: {}", bundle.getId(), e);
+                        log.addError(rawBundle.getId(), e.getMessage());
+                        logger.warn("Validation error patching {}: {}", rawBundle.getId(), e.getMessage());
                     }
                 }
             }

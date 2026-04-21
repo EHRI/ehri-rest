@@ -21,15 +21,20 @@ package eu.ehri.project.ws;
 
 import com.google.common.base.Charsets;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.AbstractResource;
+import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +97,14 @@ public class BatchResource extends AbstractResource {
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            ImportLog importLog = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
-                    .batchUpdate(inputStream, user, getLogMessage(log));
+            ImportLog importLog = new BatchOperations(
+                    graph,
+                    parent,
+                    version,
+                    tolerant,
+                    Collections.emptyList(),
+                    Collections.emptyList()
+            ).batchUpdate(inputStream, user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch update transaction...");
                 tx.success();
@@ -131,8 +142,14 @@ public class BatchResource extends AbstractResource {
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            int done = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
-                    .batchDelete(ids.column(0), user, getLogMessage(log));
+            int done = new BatchOperations(
+                    graph,
+                    parent,
+                    version,
+                    tolerant,
+                    Collections.emptyList(),
+                    Collections.emptyList()
+            ).batchDelete(ids.column(0), user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch delete transaction...");
                 tx.success();

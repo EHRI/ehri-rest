@@ -25,13 +25,17 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -50,6 +54,10 @@ import java.util.Map;
 public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends SaxXmlHandler> handler;
     private final Class<? extends ItemImporter<?, ?>> importer;
+
+    private final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
+    private final PreImportCallback genPID =
+            (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 
     public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter<?, ?>> importer) {
         this.handler = handler;
@@ -163,6 +171,7 @@ public abstract class ImportCommand extends BaseCommand {
                             handler,
                             options
                     )
+                    .withPreCallback(genPID)
                     .importFiles(filePaths, logMessage);
             System.out.println(log);
 

@@ -73,8 +73,9 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         Repository repo = manager.getEntity("r1", Repository.class);
         String xml = testImportExport(repo, "comprehensive-ead.xml",
                 "Resource (call) |||.Ident (num) |||", "eng");
-//        System.out.println(xml);
+        // System.out.println(xml);
         Document doc = parseDocument(xml);
+        String pidPrefix = config.getString("io.export.pids.prefix");
         if (config.getBoolean("io.export.ead.includeRevisions")) {
             assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
                     "//ead/eadheader/revisiondesc/change/item/text()");
@@ -95,7 +96,9 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Series I |||",
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",
-                "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
+                "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid[1]/text()");
+        assertXPath(doc, pidPrefix + "pid-folder-3",
+                "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid[2]/text()");
         assertXPath(doc, "Processing information note no label |||\n\n" +
                         "Processing information note content |||",
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");

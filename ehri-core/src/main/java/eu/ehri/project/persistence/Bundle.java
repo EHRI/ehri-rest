@@ -353,7 +353,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return The data map without initialisation values.
      */
     public Map<String, Object> getDataForUpdate() {
-        return ImmutableMap.copyOf(Maps.filterKeys(data, s -> !s.startsWith(INITIALISATION_PREFIX)));
+        return ImmutableMap.copyOf(Maps.filterKeys(getData(), s -> !s.startsWith(INITIALISATION_PREFIX)));
     }
 
     /**
