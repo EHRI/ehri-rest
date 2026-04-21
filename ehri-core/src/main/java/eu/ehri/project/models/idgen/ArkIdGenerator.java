@@ -30,14 +30,29 @@ public class ArkIdGenerator implements RandomIdGenerator {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final int length;
+    private final String shoulder;
 
-    public ArkIdGenerator(int length) {
+    public ArkIdGenerator(int length, String shoulder) {
+        this.shoulder = shoulder;
         this.length = length;
+    }
+
+    public static ArkIdGenerator create(int length, String shoulder) {
+        return new ArkIdGenerator(length, shoulder);
+    }
+
+    public static ArkIdGenerator create(int length) {
+        return create(length, "");
+    }
+
+    public static ArkIdGenerator create() {
+        return create(0);
     }
 
     @Override
     public String generateId() {
         StringBuilder sb = new StringBuilder(length);
+        sb.append(shoulder);
         sb.append(HEAD_ALPHABET.charAt(RANDOM.nextInt(HEAD_ALPHABET.length())));
 
         for (int i = 1; i < length; i++) {

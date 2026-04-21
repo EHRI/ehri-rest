@@ -55,7 +55,7 @@ public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends SaxXmlHandler> handler;
     private final Class<? extends ItemImporter<?, ?>> importer;
 
-    private final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
+    private final RandomIdGenerator idGenerator = ArkIdGenerator.create(10);
     private final PreImportCallback genPID =
             (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 

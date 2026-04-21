@@ -18,14 +18,22 @@ package eu.ehri.project.models.idgen;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ArkIdGeneratorTest {
 
     @Test
-    public void testGenerateId() {
-        RandomIdGenerator gen = new ArkIdGenerator(10);
+    public void testGenerateIdLength() {
+        RandomIdGenerator gen = ArkIdGenerator.create(10);
         String id = gen.generateId();
-        System.out.println(id);
+        assertEquals(10, id.length());
+    }
+
+    @Test
+    public void testGenerateIdShoulder() {
+        RandomIdGenerator gen = ArkIdGenerator.create(10, "x5");
+        String id = gen.generateId();
+        assertEquals(12, id.length());
+        assertEquals("x5", id.substring(0, 2));
     }
 }

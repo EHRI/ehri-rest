@@ -31,7 +31,7 @@ public class EadSyncTest extends AbstractImporterTest {
 
     private Repository repo;
     private SaxImportManager importManager;
-    private final ArkIdGenerator arkIdGenerator = new ArkIdGenerator(10);
+    private final ArkIdGenerator arkIdGenerator = ArkIdGenerator.create(10);
 
     @Before
     public void setUp() throws Exception {

@@ -116,7 +116,7 @@ public class ImportResource extends AbstractResource {
     public static final String FIELD_SEP_PARAM = "field-separator";
     public static final String ARRAY_SEP_PARAM = "array-separator";
 
-    private final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
+    private final RandomIdGenerator idGenerator = ArkIdGenerator.create(10);
 
     private final PreImportCallback genPID =
             (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());

@@ -53,7 +53,7 @@ public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
-    private final RandomIdGenerator idGenerator = new ArkIdGenerator(10);
+    private final RandomIdGenerator idGenerator = ArkIdGenerator.create(10);
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
