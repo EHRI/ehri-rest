@@ -217,8 +217,8 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unitid",
-                    String.format("%s%s", config.getString("io.export.pids.prefix"), subUnit.getPersistentIdentifier()),
-                    attrs("label", config.getString("io.export.pids.label"), "type", "ark"));
+                    String.format("%s%s", config.getString("io.pids.prefix"), subUnit.getPersistentIdentifier()),
+                    attrs("label", config.getString("io.pids.label"), "type", "ark"));
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
             addDatePeriods(sw, desc);
             addOrigination(sw, desc, langCode);

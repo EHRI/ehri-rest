@@ -14,18 +14,18 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models.idgen;
+package eu.ehri.project;
 
-import org.junit.Test;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 
-import static org.junit.Assert.assertEquals;
+public class IdGeneratorProvider {
+    private static final Config config = ConfigFactory.load();
+    private static final int length = config.getInt("io.pids.length");
 
-public class ArkIdGeneratorTest {
-
-    @Test
-    public void testGenerateIdLength() {
-        RandomIdGenerator gen = ArkIdGenerator.create(10);
-        String id = gen.generateId();
-        assertEquals(10, id.length());
+    public static RandomIdGenerator getIdGenerator() {
+        return new ArkIdGenerator(length);
     }
 }

@@ -22,6 +22,7 @@ package eu.ehri.project.commands;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -34,7 +35,6 @@ import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -55,7 +55,7 @@ public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends SaxXmlHandler> handler;
     private final Class<? extends ItemImporter<?, ?>> importer;
 
-    private final RandomIdGenerator idGenerator = ArkIdGenerator.create(10);
+    private static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
     private final PreImportCallback genPID =
             (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 

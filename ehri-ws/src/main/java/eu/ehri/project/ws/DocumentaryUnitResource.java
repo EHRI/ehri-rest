@@ -29,8 +29,6 @@ import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.idgen.ArkIdGenerator;
-import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.utils.Table;

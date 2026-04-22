@@ -27,6 +27,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -58,7 +59,6 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.AbstractResource;
@@ -81,7 +81,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -116,7 +115,7 @@ public class ImportResource extends AbstractResource {
     public static final String FIELD_SEP_PARAM = "field-separator";
     public static final String ARRAY_SEP_PARAM = "array-separator";
 
-    private final RandomIdGenerator idGenerator = ArkIdGenerator.create(10);
+    private final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
 
     private final PreImportCallback genPID =
             (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());

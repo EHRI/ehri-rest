@@ -21,6 +21,7 @@ package eu.ehri.project.ws.base;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
@@ -33,7 +34,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
@@ -74,7 +74,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     protected final ActionManager actionManager;
     protected final Class<E> cls;
 
-    protected final RandomIdGenerator idGenerator = ArkIdGenerator.create(10);
+    protected final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
 
     /**
      * Functor used to post-process items.

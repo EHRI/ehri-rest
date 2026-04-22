@@ -75,7 +75,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "Resource (call) |||.Ident (num) |||", "eng");
         // System.out.println(xml);
         Document doc = parseDocument(xml);
-        String pidPrefix = config.getString("io.export.pids.prefix");
+        String pidPrefix = config.getString("io.pids.prefix");
         if (config.getBoolean("io.export.ead.includeRevisions")) {
             assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
                     "//ead/eadheader/revisiondesc/change/item/text()");
