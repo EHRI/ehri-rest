@@ -349,7 +349,8 @@ public class AclManagerTest extends GraphTestBase {
         Repository gbrepo = api(gbuser).withScope(gb).create(
                 Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         Repository nlrepo = api(nluser).withScope(nl).create(
-                Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
+                Bundle.fromData(TestData.getTestAgentBundle())
+                        .withDataValue(Ontology.PID_KEY, "r1234"), Repository.class);
 
         assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, CREATE, gbuser));
         assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, UPDATE, gbuser));

@@ -75,6 +75,7 @@ public class TestData {
                 Bundle.TYPE_KEY, Entities.REPOSITORY,
                 Bundle.DATA_KEY, ImmutableMap.of(
                         Ontology.NAME_KEY, "Test Repo 1",
+                        Ontology.PID_KEY, "test-repo-1234",
                         Ontology.IDENTIFIER_KEY, "test-repo-1"
                 ),
                 Bundle.REL_KEY, ImmutableMap.of(

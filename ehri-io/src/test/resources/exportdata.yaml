@@ -5,6 +5,7 @@
   type: Repository
   data:
     identifier: !!str 000001
+    __pid: !!str 00001234
     name: Institution Example
   relationships:
     hasCountry: nl

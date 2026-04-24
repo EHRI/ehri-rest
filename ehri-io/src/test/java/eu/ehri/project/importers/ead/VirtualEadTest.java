@@ -120,8 +120,10 @@ public class VirtualEadTest extends AbstractImporterTest {
 
     private void setStage() throws Exception {
         Bundle repo1Bundle = Bundle.of(EntityClass.REPOSITORY)
+                .withDataValue(Ontology.PID_KEY, REPO1)
                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO1);
         Bundle repo2Bundle = Bundle.of(EntityClass.REPOSITORY)
+                .withDataValue(Ontology.PID_KEY, REPO2)
                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO2);
         Bundle documentaryUnit1Bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1)

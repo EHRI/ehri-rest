@@ -52,7 +52,8 @@ public class Eag2012ExporterTest extends XmlExporterTest {
         Country nl = manager.getEntity("nl", Country.class);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml")) {
             SaxImportManager importManager = SaxImportManager.create(graph, nl, adminUser,
-                    EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
+                    EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"))
+                    .withPreCallback(getPidGeneratorCallback());
             importManager.importInputStream(ios, "Text EAG import/export");
             Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
             testExport(repo, "eng");

@@ -34,6 +34,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
@@ -71,7 +72,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      */
     protected PreImportCallback getPidGeneratorCallback() {
         return (b) -> {
-            if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
+            if (PersistentIdentifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
                 return b.withDataValue(Ontology.PID_KEY, "pid-" + Slugify.slugify(b.getDataValue(Ontology.IDENTIFIER_KEY)));
             } else {
                 return b;
