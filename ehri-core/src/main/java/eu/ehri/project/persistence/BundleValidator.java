@@ -19,6 +19,7 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -40,10 +41,15 @@ public final class BundleValidator {
     private final GraphManager manager;
     private final List<String> scopes;
 
+    private enum ValidationType {
+        create,
+        update
+    }
+
     public BundleValidator(GraphManager manager, Collection<String> scopes) {
         this.manager = manager;
         this.scopes = Lists.newArrayList(Optional.ofNullable(scopes)
-                .orElse(Lists.newArrayList()));
+                .orElse(Collections.emptyList()));
     }
 
     private static void combineErrorSets(
@@ -141,6 +147,34 @@ public final class BundleValidator {
     }
 
     /**
+     * Validate data for either creation or update.
+     *
+     * @param bundle the given Bundle
+     * @return a bundle for generated identifiers
+     * @throws ValidationError if data is missing or malformed.
+     */
+    Bundle validateForCreateOrUpdate(Bundle bundle) throws ValidationError {
+        // This is slightly tricky because to check existence we need
+        // to generate a global ID, and that depends on having a local
+        // identifier, so we need to check the data for updating first,
+        // generate the global ID, check existence, and if it doesn't
+        // exist, validate the data for creation.
+        validateData(bundle, ValidationType.update);
+        Bundle withIds = bundle.generateIds(scopes);
+        boolean exists = manager.exists(withIds.getId());
+        if (!exists) {
+            validateData(withIds, ValidationType.create);
+        }
+        ErrorSet errorSet = exists
+                ? validateTreeForUpdate(withIds)
+                : validateTreeForCreate(withIds);
+        if (!errorSet.isEmpty()) {
+            throw new ValidationError(withIds, errorSet);
+        }
+        return withIds;
+    }
+
+    /**
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for creating in the graph.
      *
@@ -214,6 +248,7 @@ public final class BundleValidator {
      * or containing found errors
      */
     private ErrorSet validateTreeForCreate(Bundle bundle) {
+        Preconditions.checkNotNull(bundle.getId());
         ErrorSet.Builder builder = new ErrorSet.Builder();
         checkIntegrity(bundle, builder);
         checkUniqueness(bundle, builder);
@@ -278,13 +313,13 @@ public final class BundleValidator {
      * Check uniqueness constraints for a bundle's fields.
      */
     private void checkUniqueness(Bundle bundle, ErrorSet.Builder builder) {
-        for (String ukey : bundle.getUniquePropertyKeys()) {
-            Object uval = bundle.getDataValue(ukey);
-            if (uval != null) {
-                try (CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType())) {
+        for (String uniqueKey : bundle.getUniquePropertyKeys()) {
+            Object uniqueValue = bundle.getDataValue(uniqueKey);
+            if (uniqueValue != null) {
+                try (CloseableIterable<Vertex> vertices = manager.getVertices(uniqueKey, uniqueValue, bundle.getType())) {
                     if (vertices.iterator().hasNext()) {
-                        builder.addError(ukey, MessageFormat.format(Messages
-                                .getString("BundleValidator.uniquenessError"), uval));
+                        builder.addError(uniqueKey, MessageFormat.format(Messages
+                                .getString("BundleValidator.uniquenessError"), uniqueValue));
                     }
                 }
             }
@@ -296,26 +331,21 @@ public final class BundleValidator {
      * not already in the graph.
      */
     private void checkUniquenessOnUpdate(Bundle bundle, ErrorSet.Builder builder) {
-        for (String ukey : bundle.getUniquePropertyKeys()) {
-            Object uval = bundle.getDataValue(ukey);
-            if (uval != null) {
-                try (CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType())) {
+        for (String uniqueKey : bundle.getUniquePropertyKeys()) {
+            Object uniqueValue = bundle.getDataValue(uniqueKey);
+            if (uniqueValue != null) {
+                try (CloseableIterable<Vertex> vertices = manager.getVertices(uniqueKey, uniqueValue, bundle.getType())) {
                     if (vertices.iterator().hasNext()) {
                         Vertex v = vertices.iterator().next();
                         // If it's the same vertex, we don't have a problem...
                         if (!manager.getId(v).equals(bundle.getId())) {
-                            builder.addError(ukey, MessageFormat.format(Messages
-                                    .getString("BundleValidator.uniquenessError"), uval));
+                            builder.addError(uniqueKey, MessageFormat.format(Messages
+                                    .getString("BundleValidator.uniquenessError"), uniqueValue));
 
                         }
                     }
                 }
             }
         }
-    }
-
-    private enum ValidationType {
-        create,
-        update
     }
 }

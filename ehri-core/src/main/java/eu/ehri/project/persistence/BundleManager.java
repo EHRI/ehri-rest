@@ -116,11 +116,7 @@ public final class BundleManager {
      * @throws ValidationError if data constraints are not met
      */
     public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls) throws ValidationError {
-        Bundle bundleWithIds = validator.validateForUpdate(bundle);
-        if (!manager.exists(bundleWithIds.getId())) {
-            // FIXME: this is repeating half of the validation!
-            validator.validateForCreate(bundle);
-        }
+        Bundle bundleWithIds = validator.validateForCreateOrUpdate(bundle);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
         return new Mutation<>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
                 vertexMutation.getPrior());
@@ -282,15 +278,13 @@ public final class BundleManager {
                 // relationship. This is *should* be safe, but could easily
                 // break if the model ontology is altered without this
                 // assumption in mind.
-                Set<Vertex> currentRels = getCurrentRelationships(master,
-                        relation, direction);
+                Set<Vertex> currentRels = getCurrentRelationships(master, relation, direction);
 
                 for (Bundle bundle : relations.get(relation)) {
                     Vertex child = createOrUpdateInner(bundle).getNode();
                     // Create a relation if there isn't one already
                     if (!currentRels.contains(child)) {
-                        createChildRelationship(master, child, relation,
-                                direction);
+                        createChildRelationship(master, child, relation, direction);
                     }
                 }
             } else {
