@@ -70,7 +70,7 @@
                             <include>xerces:xercesImpl</include>
                             <include>xml-apis:xml-apis</include>
                             <include>com.typesafe:config</include>
-                            <include>com.flipkart.zjsonpatch:zjsonpatch</include>
+                            <include>io.github.vishwakarma:zjsonpatch</include>
                             <include>org.apache.commons:commons-collections4</include>
 
                             <!-- GraphQL deps -->

@@ -40,6 +40,7 @@ import static org.junit.Assert.*;
 
 public class BundleTest {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
     private Bundle bundle;
 
     @Before
@@ -451,12 +452,33 @@ public class BundleTest {
     }
 
     @Test
+    public void testJsonification() throws Exception {
+        JsonNode jsonNode1 = mapper.valueToTree(bundle);
+        JsonNode jsonNode2 = mapper.valueToTree(bundle.toData());
+        assertEquals(jsonNode1, jsonNode2);
+    }
+
+    @Test
     public void testDiff() throws Exception {
-        String diff = bundle.diff(bundle.withDataValue("foo", "bar"));
-        ObjectMapper mapper = new ObjectMapper();
+        String diff = bundle.diff(bundle.withDataValue("foo", "bar")
+                .withRelation("test", Bundle.of(EntityClass.ACCESS_POINT)));
         JsonNode node = mapper.readValue(diff, JsonNode.class);
         assertEquals("add", node.path(0).path("op").textValue());
         assertEquals("/data/foo", node.path(0).path("path").textValue());
         assertEquals("bar", node.path(0).path("value").textValue());
+        assertEquals("/relationships/test", node.path(1).path("path").textValue());
+    }
+
+    @Test
+    public void testDiffWithInitialisationProperties() throws Exception {
+        String diff = bundle.diff(bundle.withDataValue("__foo", "bar"), true);
+        JsonNode node = mapper.readValue(diff, JsonNode.class);
+        assertEquals("add", node.path(0).path("op").textValue());
+        assertEquals("/data/__foo", node.path(0).path("path").textValue());
+        assertEquals("bar", node.path(0).path("value").textValue());
+
+        String diff2 = bundle.diff(bundle.withDataValue("__foo", "bar"));
+        JsonNode node2 = mapper.readValue(diff2, JsonNode.class);
+        assertTrue(node2.path(0).path("op").isEmpty());
     }
 }

@@ -211,12 +211,14 @@ public final class BundleManager {
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
         Vertex vertex = manager.getVertex(bundle.getId());
         try {
-            Bundle currentBundle = serializer.vertexToBundle(vertex);
+            Bundle currentBundle = serializer.vertexToBundle(vertex).dependentsOnly();
             Bundle newBundle = bundle.dependentsOnly();
             if (!currentBundle.equals(newBundle)) {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Bundles differ: {}:{}", bundle.getType(), bundle.getId());
-                    logger.trace(currentBundle.diff(newBundle));
+                    logger.trace(currentBundle.diff(newBundle, false));
+                    logger.trace(DataConverter.bundleToJson(currentBundle));
+                    logger.trace(DataConverter.bundleToJson(newBundle));
                 }
                 vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getData());
                 updateDependents(vertex, bundle.getBundleJavaClass(), bundle.getRelations());

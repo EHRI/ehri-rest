@@ -19,6 +19,7 @@
 
 package eu.ehri.project.persistence;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.*;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
@@ -681,6 +682,7 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @return A raw data object
      */
+    @JsonValue
     public Map<String, Object> toData() {
         return DataConverter.bundleToData(this);
     }
@@ -836,9 +838,26 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a JSON-Patch, as a string
      */
     public String diff(Bundle target) {
+        return diff(target, false);
+    }
+
+    /**
+     * Return a JSON-Patch representation of the difference between
+     * this bundle and another. Metadata is ignored.
+     *
+     * @param target                          the target bundle
+     * @param includeInitialisationProperties whether to compare
+     *                                        creation-time metadata
+     *                                        properties. By default, only
+     *                                        static properties are included.
+     * @return a JSON-Patch, as a string
+     */
+    public String diff(Bundle target, boolean includeInitialisationProperties) {
+        Bundle first = includeInitialisationProperties ? this : this.withData(this.getDataForUpdate());
+        Bundle second = includeInitialisationProperties ? target : target.withData(target.getDataForUpdate());
         return DataConverter.diffBundles(
-                withMetaData(Collections.emptyMap()),
-                target.withMetaData(Collections.emptyMap()));
+                first.withMetaData(Collections.emptyMap()),
+                second.withMetaData(Collections.emptyMap()));
     }
 
     // Helpers...
