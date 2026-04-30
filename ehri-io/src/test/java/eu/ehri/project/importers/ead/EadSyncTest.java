@@ -3,10 +3,12 @@ package eu.ehri.project.importers.ead;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -22,10 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -35,6 +34,7 @@ public class EadSyncTest extends AbstractImporterTest {
     private Repository repo;
     private SaxImportManager importManager;
     private static final RandomIdGenerator arkIdGenerator = IdGeneratorProvider.getIdGenerator();
+    private final Map<String, String> pidMap = Maps.newHashMap();
 
     @Before
     public void setUp() throws Exception {
@@ -44,7 +44,13 @@ public class EadSyncTest extends AbstractImporterTest {
             importManager = saxImportManager(EadImporter.class, EadHandler.class)
                     .withScope(repo)
                     .withUpdates(true);
-            importManager.importInputStream(ios, "Initial setup");
+            ImportLog importLog = importManager.importInputStream(ios, "Initial setup");
+
+            for (String id : importLog.getCreatedKeys().values()) {
+                DocumentaryUnit doc = manager.getEntity(id, DocumentaryUnit.class);
+                System.out.println(doc.getPersistentIdentifier());
+                pidMap.put(doc.getId(), doc.getPersistentIdentifier());
+            }
         }
     }
 
@@ -173,7 +179,7 @@ public class EadSyncTest extends AbstractImporterTest {
         }
     }
 
-    private void checkSync(PermissionScope scope, String logMessage, SyncLog log) {
+    private void checkSync(PermissionScope scope, String logMessage, SyncLog log) throws Exception {
         assertEquals(Sets.newHashSet("nl-r1-ctop_level_fonds-c00001-c00002-1"), log.deleted());
         assertEquals(Sets.newHashSet("nl-r1-ctop_level_fonds-c00001-c00002-2_parent"), log.created());
         assertEquals(ImmutableMap.of(
@@ -191,9 +197,10 @@ public class EadSyncTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
         assertEquals(log.deleted().size() + log.moved().size(), ev.subjectCount());
         assertEquals(scope, ev.getEventScope());
-    }
 
-    private void checkPersistentIdentifiers() throws Exception {
-
+        // Check we've moved the PID from the old item to the new one:
+        DocumentaryUnit newItem = manager.getEntity("nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2", DocumentaryUnit.class);
+        String actual = pidMap.get("nl-r1-ctop_level_fonds-c00001-c00002-2");
+        assertEquals(newItem.getPersistentIdentifier(), actual);
     }
 }
