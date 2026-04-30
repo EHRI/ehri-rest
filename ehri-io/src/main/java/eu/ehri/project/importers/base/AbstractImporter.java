@@ -35,6 +35,7 @@ import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.persistence.Mutation;
 
+import java.util.Collection;
 import java.util.List;
 
 public abstract class AbstractImporter<I, T extends Accessible> implements ItemImporter<I, T> {
@@ -52,11 +53,12 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     /**
      * Call all registered PreImportCallbacks for the given mutation.
      *
-     * @param data the item data bundle
+     * @param idPath IDs of parent items
+     * @param data   the item data bundle
      * @return data as processed by the set of registered callbacks
      */
-    protected Bundle handlePreCallbacks(Bundle data) {
-        return PreImportCallback.handlePreCallbacks(data, preCallbacks);
+    protected Bundle handlePreCallbacks(Collection<String> idPath, Bundle data) {
+        return PreImportCallback.handlePreCallbacks(idPath, data, preCallbacks);
     }
 
     /**

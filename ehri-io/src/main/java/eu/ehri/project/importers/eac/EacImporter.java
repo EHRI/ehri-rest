@@ -128,7 +128,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         final PermissionScope permissionScope = scopeFinder.apply(localId);
         BundleManager bundleManager = new BundleManager(framedGraph, permissionScope.idPath());
 
-        Bundle processed = handlePreCallbacks(unit);
+        Bundle processed = handlePreCallbacks(permissionScope.idPath(), unit);
         Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(processed, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
         linkResolver.solveUndeterminedRelationships(frame);

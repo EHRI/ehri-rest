@@ -59,7 +59,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
     private final PreImportCallback genPID =
-            (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
+            (s, b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 
     public RepositoryResource(@Context GraphDatabaseService database) {
         super(database, Repository.class);

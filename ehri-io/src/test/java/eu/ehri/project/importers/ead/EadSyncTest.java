@@ -1,5 +1,6 @@
 package eu.ehri.project.importers.ead;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -13,6 +14,7 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
@@ -53,10 +55,14 @@ public class EadSyncTest extends AbstractImporterTest {
      */
     @Override
     protected PreImportCallback getPidGeneratorCallback() {
-        return (b) -> {
-            if (b.getType().equals(EntityClass.DOCUMENTARY_UNIT) || b.getType().equals(EntityClass.VIRTUAL_UNIT)) {
-                return b.withDataValue(Ontology.PID_KEY, String.format("pid-%s-%s",
-                        b.getDataValue(Ontology.IDENTIFIER_KEY), arkIdGenerator.generateId()));
+        return (s, b) -> {
+            if (PersistentIdentifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
+                final String format = String.format(
+                        "pid-%s-%s",
+                        Joiner.on("-").join(s),
+                        b.getDataValue(Ontology.IDENTIFIER_KEY)
+                );
+                return b.withDataValue(Ontology.PID_KEY, format);
             } else {
                 return b;
             }
@@ -185,5 +191,9 @@ public class EadSyncTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
         assertEquals(log.deleted().size() + log.moved().size(), ev.subjectCount());
         assertEquals(scope, ev.getEventScope());
+    }
+
+    private void checkPersistentIdentifiers() throws Exception {
+
     }
 }

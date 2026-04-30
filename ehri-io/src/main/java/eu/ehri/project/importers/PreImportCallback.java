@@ -21,6 +21,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.persistence.Bundle;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,20 +29,22 @@ import java.util.List;
  * a mutation ('created', 'updated', 'unchanged').
  */
 public interface PreImportCallback {
-    Bundle preImport(Bundle data);
+    Bundle preImport(Collection<String> idPath, Bundle data);
 
     /**
      * Generate a new bundle by running it through a set of callbacks.
-     * @param data the Bundle instance
-     * @param todo a list of PreImportCallbacks
+     *
+     * @param idPath IDs of scope items
+     * @param data   the Bundle instance
+     * @param todo   a list of PreImportCallbacks
      * @return a new Bundle
      */
-    static Bundle handlePreCallbacks(Bundle data, List<PreImportCallback> todo) {
+    static Bundle handlePreCallbacks(Collection<String> idPath, Bundle data, List<PreImportCallback> todo) {
         if (todo.isEmpty()) {
             return data;
         } else {
             PreImportCallback callback = todo.get(0);
-            return handlePreCallbacks(callback.preImport(data), todo.subList(1, todo.size()));
+            return handlePreCallbacks(idPath, callback.preImport(idPath, data), todo.subList(1, todo.size()));
         }
     }
 }

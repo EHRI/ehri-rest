@@ -30,13 +30,11 @@ import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.utils.Slugify;
@@ -71,7 +69,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * For testing, use a PID generator that just copies the ID.
      */
     protected PreImportCallback getPidGeneratorCallback() {
-        return (b) -> {
+        return (s, b) -> {
             if (PersistentIdentifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
                 return b.withDataValue(Ontology.PID_KEY, "pid-" + Slugify.slugify(b.getDataValue(Ontology.IDENTIFIER_KEY)));
             } else {

@@ -88,7 +88,7 @@ public class VirtualEadImporter extends EadImporter {
             Bundle description = getDescription(itemData);
 
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
-            Bundle processed = handlePreCallbacks(unit);
+            Bundle processed = handlePreCallbacks(localScope.idPath(), unit);
             Mutation<VirtualUnit> mutation = bundleManager.createOrUpdate(processed, VirtualUnit.class);
             VirtualUnit frame = mutation.getNode();
             logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));

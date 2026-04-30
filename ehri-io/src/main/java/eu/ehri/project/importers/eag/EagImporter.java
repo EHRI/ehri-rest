@@ -134,7 +134,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
         final PermissionScope permissionScope = scopeFinder.apply(localId);
 
         BundleManager bundleManager = getBundleManager(localId);
-        Bundle processed = handlePreCallbacks(unit);
+        Bundle processed = handlePreCallbacks(permissionScope.idPath(), unit);
         Mutation<Repository> mutation = bundleManager.createOrUpdate(processed, Repository.class);
         handleCallbacks(mutation);
 

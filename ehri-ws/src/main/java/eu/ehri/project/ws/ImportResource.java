@@ -118,7 +118,7 @@ public class ImportResource extends AbstractResource {
     private final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
 
     private final PreImportCallback genPID =
-            (b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
+            (s, b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);

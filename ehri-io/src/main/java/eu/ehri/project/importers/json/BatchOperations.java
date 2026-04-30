@@ -160,7 +160,7 @@ public class BatchOperations {
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle rawBundle : bundleIter) {
                 try {
-                    Bundle bundle = PreImportCallback.handlePreCallbacks(rawBundle, preCallbacks);
+                    Bundle bundle = PreImportCallback.handlePreCallbacks(scope.idPath(), rawBundle, preCallbacks);
                     Mutation<Accessible> mutation = dao.createOrUpdate(bundle, Accessible.class);
                     String id = mutation.getNode().getId();
                     switch (mutation.getState()) {
@@ -217,7 +217,7 @@ public class BatchOperations {
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle rawBundle : bundleIter) {
                 try {
-                    Bundle bundle = PreImportCallback.handlePreCallbacks(rawBundle, preCallbacks);
+                    Bundle bundle = PreImportCallback.handlePreCallbacks(scope.idPath(), rawBundle, preCallbacks);
                     Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
                     Bundle oldBundle = serializer.entityToBundle(entity);
                     Bundle newBundle = oldBundle.mergeDataWith(bundle);
