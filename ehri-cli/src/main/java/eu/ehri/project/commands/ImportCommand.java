@@ -26,7 +26,6 @@ import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.PreImportCallback;
@@ -56,8 +55,6 @@ public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends ItemImporter<?, ?>> importer;
 
     private static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
-    private final PreImportCallback genPID =
-            (s, b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
 
     public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter<?, ?>> importer) {
         this.handler = handler;
@@ -171,7 +168,7 @@ public abstract class ImportCommand extends BaseCommand {
                             handler,
                             options
                     )
-                    .withPreCallback(genPID)
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator))
                     .importFiles(filePaths, logMessage);
             System.out.println(log);
 

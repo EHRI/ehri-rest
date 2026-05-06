@@ -308,7 +308,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER),
                     options
-            ).withPreCallback(genPID);
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -420,7 +420,7 @@ public class ImportResource extends AbstractResource {
             );
             SaxImportManager importManager = SaxImportManager
                     .create(graph, scope, user, importer, handler, options)
-                    .withPreCallback(genPID);
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator));
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
             EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager, idGenerator);
@@ -479,7 +479,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, EagImporter.class.getName()),
                     getHandlerCls(handlerClass, EagHandler.class.getName()),
                     options
-            ).withPreCallback(genPID);
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -601,7 +601,7 @@ public class ImportResource extends AbstractResource {
                     getCurrentActioner(),
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     options
-            ).withPreCallback(genPID);
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {

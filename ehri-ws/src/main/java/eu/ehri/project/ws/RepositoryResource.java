@@ -30,6 +30,7 @@ import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -209,7 +210,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                     repository,
                     true,
                     tolerant,
-                    Lists.newArrayList(genPID),
+                    Lists.newArrayList(PreImportCallback.generatePid(idGenerator)),
                     Lists.newArrayList(cb)
             ).batchImport(data, user, getLogMessage());
             if (commit) {

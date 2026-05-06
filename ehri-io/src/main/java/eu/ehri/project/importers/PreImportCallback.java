@@ -19,10 +19,13 @@
 
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Implementing classes do things after an item was imported and created
@@ -46,5 +49,22 @@ public interface PreImportCallback {
             PreImportCallback callback = todo.get(0);
             return handlePreCallbacks(idPath, callback.preImport(idPath, data), todo.subList(1, todo.size()));
         }
+    }
+
+    /**
+     * Pre-import callback that ensures a Bundle has a random
+     * persistent identifier, if it doesn't already.
+     *
+     * @param idGenerator the ID generator
+     * @return a pre-import callback that populates a Bundle with a PID
+     * if it doesn't have one already
+     */
+    static PreImportCallback generatePid(RandomIdGenerator idGenerator) {
+        return (s, b) -> {
+            String pid = Optional
+                    .ofNullable(b.<String>getDataValue(Ontology.PID_KEY))
+                    .orElseGet(idGenerator::generateId);
+            return b.withDataValue(Ontology.PID_KEY, pid);
+        };
     }
 }

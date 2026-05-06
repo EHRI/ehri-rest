@@ -32,10 +32,6 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.IdGeneratorProvider;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.PreImportCallback;
-import eu.ehri.project.models.idgen.RandomIdGenerator;
-import eu.ehri.project.ws.errors.MissingOrInvalidUser;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
@@ -53,8 +49,10 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.ws.errors.MissingOrInvalidUser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,17 +86,8 @@ public abstract class AbstractResource implements TxCheckedResource {
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
     /**
-     * Pre-import callback that ensures a Bundle has a random
-     * persistent identifier, if it doesn't already.
+     * CSV media type.
      */
-    protected static final PreImportCallback genPID = (s, b) -> {
-        String pid = Optional
-                .ofNullable(b.<String>getDataValue(Ontology.PID_KEY))
-                .orElseGet(idGenerator::generateId);
-        return b.withDataValue(Ontology.PID_KEY, pid);
-    };
-
-
     public static final String CSV_MEDIA_TYPE = "text/csv";
 
     /**
@@ -611,7 +600,6 @@ public abstract class AbstractResource implements TxCheckedResource {
                 g.writeEndArray();
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -629,7 +617,6 @@ public abstract class AbstractResource implements TxCheckedResource {
                 g.writeEndArray();
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -652,7 +639,6 @@ public abstract class AbstractResource implements TxCheckedResource {
 
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
