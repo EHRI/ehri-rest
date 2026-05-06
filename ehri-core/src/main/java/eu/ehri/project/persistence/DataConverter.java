@@ -280,26 +280,29 @@ class DataConverter {
         // Since Neo4j doesn't either it's safest to trip these out
         // at the deserialization stage. I can't think of a use-case
         // where we'd need them.
-        Map<String, Object> properties = getSanitisedProperties(data);
-        return Bundle.of(id, type, properties, getRelationships(data));
+        Map<String, Object> properties = getSanitisedProperties(Bundle.DATA_KEY, data);
+        Map<String, Object> meta = getSanitisedProperties(Bundle.META_KEY, data);
+        Multimap<String, Bundle> relations = getRelationships(data);
+        return Bundle.of(id, type, properties, relations, meta);
     }
 
     /**
      * Extract relationships from the bundle data.
      *
      * @param data a plain map
-     * @return a multi-map of string -> bundle list
+     * @return a multimap of string -> bundle list
      *                              valid relationships
      */
-    private static Multimap<String, Bundle> getRelationships(Map<?, ?> data)
+    private static ArrayListMultimap<String, Bundle> getRelationships(Map<?, ?> data)
             throws DeserializationError {
-        Multimap<String, Bundle> relationBundles = ArrayListMultimap
+        ArrayListMultimap<String, Bundle> relationBundles = ArrayListMultimap
                 .create();
 
         // It's okay to pass in a null value for relationships.
         Object relations = data.get(Bundle.REL_KEY);
-        if (relations == null)
+        if (relations == null) {
             return relationBundles;
+        }
 
         if (relations instanceof Map) {
             for (Entry<?, ?> entry : ((Map<?, ?>) relations).entrySet()) {
@@ -317,15 +320,19 @@ class DataConverter {
         return relationBundles;
     }
 
-    private static Map<String, Object> getSanitisedProperties(Map<?, ?> data)
-            throws DeserializationError {
-        Object props = data.get(Bundle.DATA_KEY);
+    private static Map<String, Object> getSanitisedProperties(String key, Map<?, ?> data) throws DeserializationError {
+        Object props = data.get(key);
         if (props != null) {
             if (props instanceof Map) {
                 return sanitiseProperties((Map<?, ?>) props);
             } else {
                 throw new DeserializationError(
-                        "Data value not a map type! " + props.getClass().getSimpleName());
+                        String.format(
+                                "Value '%s' not a map type! %s",
+                                key,
+                                props.getClass().getSimpleName()
+                        )
+                );
             }
         } else {
             return Maps.newHashMap();

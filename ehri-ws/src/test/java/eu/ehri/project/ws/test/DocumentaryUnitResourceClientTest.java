@@ -25,12 +25,13 @@ import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -304,6 +305,40 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         Long data = getEntityCount(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
         assertEquals(Long.valueOf(5), data);
+    }
+
+    @Test
+    public void testCreateDocumentaryUnitBatch() throws Exception {
+        String listJson = "[" + jsonDocumentaryUnitTestStr + "]";
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, "list"))
+                .entity(listJson).post(ClientResponse.class);
+
+        assertStatus(OK, response);
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+    }
+
+    @Test
+    public void testCreateDocumentaryUnitBatchAndPid() throws Exception {
+        final String pid = "this-is-my-pid";
+        Bundle docBundle = Bundle.fromString(jsonDocumentaryUnitTestStr)
+                .withDataValue(Ontology.PID_KEY, pid);
+        String listJson = "[" + docBundle.toJson() + "]";
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUriBuilder("classes", Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, "list")
+                        .queryParam("commit", "true").build())
+                .entity(listJson).post(ClientResponse.class);
+
+        assertStatus(OK, response);
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+
+        Bundle item = getEntityByPid(pid, getAdminUserProfileId());
+        System.out.println(item.getMetaData());
+        assertEquals(pid, item.getMetaData().get("pid"));
     }
 
     @Test

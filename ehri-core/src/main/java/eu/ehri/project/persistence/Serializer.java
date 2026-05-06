@@ -316,8 +316,7 @@ public final class Serializer {
             Bundle.Builder builder = Bundle.Builder.withClass(type)
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
-                    .addRelations(getRelationData(item,
-                            depth, maxDepth, lite, cls))
+                    .addRelations(getRelationData(item, depth, maxDepth, lite, cls))
                     .addMetaData(getVertexMeta(item, cls));
             if (!lite) {
                 builder.addMetaData(getVertexMeta(item, cls))

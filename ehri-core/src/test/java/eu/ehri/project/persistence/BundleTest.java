@@ -21,6 +21,7 @@ package eu.ehri.project.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.*;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
@@ -42,6 +43,12 @@ public class BundleTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private Bundle bundle;
+
+    static {
+        final SimpleModule bundleModule = new SimpleModule();
+        bundleModule.addDeserializer(Bundle.class, new BundleDeserializer());
+        mapper.registerModule(bundleModule);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -456,6 +463,16 @@ public class BundleTest {
         JsonNode jsonNode1 = mapper.valueToTree(bundle);
         JsonNode jsonNode2 = mapper.valueToTree(bundle.toData());
         assertEquals(jsonNode1, jsonNode2);
+    }
+
+    @Test
+    public void testFromJson() throws Exception {
+        JsonNode jsonNode1 = mapper.valueToTree(bundle.withMetaDataValue("pid", "foo"));
+        assertEquals("foo", jsonNode1.path("meta").path("pid").asText());
+
+        String json = jsonNode1.toString();
+        Bundle bundle2 = mapper.readValue(json, Bundle.class);
+        assertEquals("foo", bundle2.getMetaData().get("pid"));
     }
 
     @Test

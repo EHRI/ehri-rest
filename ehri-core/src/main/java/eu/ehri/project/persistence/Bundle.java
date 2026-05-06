@@ -208,8 +208,12 @@ public final class Bundle implements NestableData<Bundle> {
      * @param meta      An initial map of metadata
      * @return a new bundle
      */
-    public static Bundle of(String id, EntityClass type, Map<String, Object> data,
-                            Multimap<String, Bundle> relations, Map<String, Object> meta) {
+    public static Bundle of(
+            String id,
+            EntityClass type,
+            Map<String, Object> data,
+            Multimap<String, Bundle> relations,
+            Map<String, Object> meta) {
         return new Bundle(id, type, data, relations, meta, false);
     }
 
@@ -733,7 +737,14 @@ public final class Bundle implements NestableData<Bundle> {
 
     @Override
     public String toString() {
-        return "<" + getType() + ": '" + (id == null ? "?" : id) + "'> (" + getData() + " + Rels: " + relations + ")";
+        return String.format(
+                "<%s: '%s'> (%s %s %s)",
+                getType(),
+                (id == null ? '?' : id),
+                getData(),
+                relations,
+                getMetaData()
+        );
     }
 
     /**
