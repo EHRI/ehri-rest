@@ -230,6 +230,9 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
     private void addDataSection(XMLStreamWriter sw, DocumentaryUnit subUnit, Description desc, String langCode, Optional<Repository> repoOpt) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
+            tag(sw, "unitid",
+                    String.format("%s%s", config.getString("io.pids.prefix"), subUnit.getPersistentIdentifier()),
+                    attrs("label", config.getString("io.pids.label"), "localtype", "ark"));
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
             addOrigination(sw, desc, langCode);
             addDatePeriods(sw, desc);
