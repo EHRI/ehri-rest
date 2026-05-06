@@ -31,6 +31,10 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.IdGeneratorProvider;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.PreImportCallback;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.ws.errors.MissingOrInvalidUser;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
@@ -78,9 +82,22 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = jsonMapper.getFactory();
+    protected static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
+
+    /**
+     * Pre-import callback that ensures a Bundle has a random
+     * persistent identifier, if it doesn't already.
+     */
+    protected static final PreImportCallback genPID = (s, b) -> {
+        String pid = Optional
+                .ofNullable(b.<String>getDataValue(Ontology.PID_KEY))
+                .orElseGet(idGenerator::generateId);
+        return b.withDataValue(Ontology.PID_KEY, pid);
+    };
+
 
     public static final String CSV_MEDIA_TYPE = "text/csv";
 

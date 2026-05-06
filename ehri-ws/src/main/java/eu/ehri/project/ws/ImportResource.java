@@ -115,11 +115,6 @@ public class ImportResource extends AbstractResource {
     public static final String FIELD_SEP_PARAM = "field-separator";
     public static final String ARRAY_SEP_PARAM = "array-separator";
 
-    private final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
-
-    private final PreImportCallback genPID =
-            (s, b) -> b.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
-
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
     }

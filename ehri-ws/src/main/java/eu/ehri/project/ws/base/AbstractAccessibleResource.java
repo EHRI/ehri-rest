@@ -74,8 +74,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     protected final ActionManager actionManager;
     protected final Class<E> cls;
 
-    protected final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
-
     /**
      * Functor used to post-process items.
      */
