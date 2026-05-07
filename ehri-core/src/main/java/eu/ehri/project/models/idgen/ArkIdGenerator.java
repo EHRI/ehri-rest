@@ -19,13 +19,13 @@ package eu.ehri.project.models.idgen;
 import java.security.SecureRandom;
 
 /**
- * The Archival Resource Key ID generator uses a limited alphabet to avoid
- * ambiguous characters such as o, 0, i, 1, and l. It always starts with a
- * letter, with the remainder being alphanumeric.
+ * The Archival Resource Key ID generator uses a limited set of 'betanumeric'
+ * characters, minus the 'l', to avoid easily-confused characters and
+ * generating words. It always starts with a consonant.
  */
 public class ArkIdGenerator implements RandomIdGenerator {
-    public static final String HEAD_ALPHABET = "abcdefghjkmnpqrstuvwxyz";
-    public static final String ALPHABET = HEAD_ALPHABET + "23456789";
+    public static final String HEAD_BETABET = "bcdfghjkmnpqrstvwxyz";
+    public static final String BETANUMS = HEAD_BETABET + "0123456789";
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -42,14 +42,11 @@ public class ArkIdGenerator implements RandomIdGenerator {
     @Override
     public String generateId() {
         StringBuilder sb = new StringBuilder(length);
-        sb.append(HEAD_ALPHABET.charAt(RANDOM.nextInt(HEAD_ALPHABET.length())));
+        sb.append(HEAD_BETABET.charAt(RANDOM.nextInt(HEAD_BETABET.length())));
 
         for (int i = 1; i < length; i++) {
-            // Pick a random index from 0 to alphabet.length() - 1
-            int index = RANDOM.nextInt(ALPHABET.length());
-
-            // Add the character at that index to our string
-            sb.append(ALPHABET.charAt(index));
+            int index = RANDOM.nextInt(BETANUMS.length());
+            sb.append(BETANUMS.charAt(index));
         }
         return sb.toString();
     }
