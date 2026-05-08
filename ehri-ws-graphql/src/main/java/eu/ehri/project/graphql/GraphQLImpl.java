@@ -332,6 +332,9 @@ public class GraphQLImpl {
                 .put(Entities.ANNOTATION, entityIdDataFetcher(Entities.ANNOTATION))
                 .put(Entities.LINK, entityIdDataFetcher(Entities.LINK))
 
+                // PIDs
+                .put("itemByPid", entityPidDataFetcher())
+
                 // Multiples
                 .put("documentaryUnits", docDataFetcher())
                 .put("topLevelDocumentaryUnits", topLevelDocDataFetcher())
@@ -422,6 +425,12 @@ public class GraphQLImpl {
     private static final GraphQLArgument idArgument = newArgument()
             .name(Bundle.ID_KEY)
             .description(__("graphql.argument.id.description"))
+            .type(GraphQLNonNull.nonNull(GraphQLID))
+            .build();
+
+    private static final GraphQLArgument pidArgument = newArgument()
+            .name("pid")
+            .description(__("graphql.argument.pid.description"))
             .type(GraphQLNonNull.nonNull(GraphQLID))
             .build();
 
@@ -550,6 +559,16 @@ public class GraphQLImpl {
             try {
                 Accessible detail = api().get(env.getArgument(Bundle.ID_KEY), Accessible.class);
                 return Objects.equals(detail.getType(), type) ? detail : null;
+            } catch (ItemNotFound e) {
+                return null;
+            }
+        };
+    }
+
+    private DataFetcher<Entity> entityPidDataFetcher() {
+        return env -> {
+            try {
+                return api().getByPid(env.getArgument("pid"), PersistentIdentifiable.class);
             } catch (ItemNotFound e) {
                 return null;
             }
@@ -1469,6 +1488,9 @@ public class GraphQLImpl {
                         annotationType, idArgument))
                 .field(itemFieldDefinition(Entities.LINK, __("root.single.link.description"),
                         linkType, idArgument))
+
+                // PID lookups
+                .field(itemFieldDefinition("itemByPid", "Lookup by PID", entityInterface, pidArgument))
 
                 // Top level item connections
                 .field(connectionFieldDefinition("documentaryUnits", __("root.connection.documentaryUnit.description"),

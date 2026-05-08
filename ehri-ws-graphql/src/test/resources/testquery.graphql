@@ -259,4 +259,9 @@ query test {
         }
         linkType
     }
+
+    itemByPid(pid: "r1-1234") {
+      id
+      type
+    }
 }

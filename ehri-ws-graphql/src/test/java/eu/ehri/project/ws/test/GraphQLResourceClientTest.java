@@ -175,6 +175,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertEquals("associative", data.path("data").path("link3").path("linkType").textValue());
         assertEquals("c4", data.path("data").path("link4").path("source").path("id").textValue());
         assertEquals("copy", data.path("data").path("link4").path("linkType").textValue());
+        assertEquals("r1", data.path("data").path("itemByPid").path("id").textValue());
     }
 
     @Test
