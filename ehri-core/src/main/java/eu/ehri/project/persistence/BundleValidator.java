@@ -335,8 +335,9 @@ public final class BundleValidator {
             Object uniqueValue = bundle.getDataValue(uniqueKey);
             if (uniqueValue != null) {
                 try (CloseableIterable<Vertex> vertices = manager.getVertices(uniqueKey, uniqueValue, bundle.getType())) {
-                    if (vertices.iterator().hasNext()) {
-                        Vertex v = vertices.iterator().next();
+                    final Iterator<Vertex> iterator = vertices.iterator();
+                    if (iterator.hasNext()) {
+                        Vertex v = iterator.next();
                         // If it's the same vertex, we don't have a problem...
                         if (!manager.getId(v).equals(bundle.getId())) {
                             builder.addError(uniqueKey, MessageFormat.format(Messages

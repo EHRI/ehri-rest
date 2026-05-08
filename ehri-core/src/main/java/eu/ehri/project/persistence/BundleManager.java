@@ -216,7 +216,7 @@ public final class BundleManager {
                     logger.trace(DataConverter.bundleToJson(currentBundle));
                     logger.trace(DataConverter.bundleToJson(newBundle));
                 }
-                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getData());
+                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getDataForUpdate());
                 updateDependents(vertex, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(vertex, MutationState.UPDATED, currentBundle);
             } else {
