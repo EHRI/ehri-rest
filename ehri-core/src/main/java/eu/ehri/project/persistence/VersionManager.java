@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class VersionManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(ActionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(VersionManager.class);
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;

@@ -74,17 +74,33 @@ public final class Bundle implements NestableData<Bundle> {
     /**
      * Properties that are "managed", i.e. automatically set
      * date/time strings or cache values should begin with a
-     * prefix and are ignored Bundle equality calculations.
+     * prefix and are ignored in Bundle equality calculations.
+     * Note: all initialisation keys are also managed keys since
+     * both prefixes begin with "_".
      */
     static final String MANAGED_PREFIX = "_";
 
     /**
      * Properties that are only set at creation time start with
-     * a double prefix, e.g. PIDs. These are also excluded from
-     * equality comparison since they're not considered intrinsic
-     * to the structure of the Bundle.
+     * a double prefix, e.g. PIDs. These are excluded from equality
+     * comparison and from data used in update operations. They are
+     * a subset of managed keys.
+     *
+     * @see #isInitialisationKey(String)
+     * @see #getDataForUpdate()
      */
     static final String INITIALISATION_PREFIX = "__";
+
+    /**
+     * Check whether a property key is an initialisation-only key, i.e.
+     * one that may be set on creation but cannot be modified on update.
+     *
+     * @param key the property key to check
+     * @return true if the key is initialisation-only
+     */
+    public static boolean isInitialisationKey(String key) {
+        return key.startsWith(INITIALISATION_PREFIX);
+    }
 
     public static class Builder {
         private String id;
@@ -353,12 +369,28 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Get the bundle data that's used for updating the vertex.
+     * Get bundle data for updating an existing vertex. Excludes
+     * initialisation-only properties (those with the
+     * {@value INITIALISATION_PREFIX} prefix, e.g. PIDs) which must
+     * not be overwritten after creation.
      *
-     * @return The data map without initialisation values.
+     * @return The data map without initialisation-only values
+     * @see #isInitialisationKey(String)
      */
     public Map<String, Object> getDataForUpdate() {
-        return ImmutableMap.copyOf(Maps.filterKeys(getData(), s -> !s.startsWith(INITIALISATION_PREFIX)));
+        return ImmutableMap.copyOf(Maps.filterKeys(getData(), k -> !isInitialisationKey(k)));
+    }
+
+    /**
+     * Get bundle data that contains only initialisation-only properties,
+     * i.e. those with the {@value INITIALISATION_PREFIX} prefix (e.g. PIDs).
+     * These are set at creation time and not modified on update.
+     *
+     * @return The initialisation-only data map
+     * @see #isInitialisationKey(String)
+     */
+    public Map<String, Object> getInitialisationData() {
+        return ImmutableMap.copyOf(Maps.filterKeys(getData(), Bundle::isInitialisationKey));
     }
 
     /**
@@ -803,6 +835,21 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
+     * Return the bundle without metadata.
+     *
+     * @return a new bundle
+     */
+    public Bundle withoutMeta() {
+        Multimap<String, Bundle> tmp = ArrayListMultimap.create();
+        for (String relation : relations.keySet()) {
+            for (Bundle bundle : relations.get(relation)) {
+                tmp.put(relation, bundle.withoutMeta());
+            }
+        }
+        return new Bundle(id, type, data, tmp, Collections.emptyMap(), temp);
+    }
+
+    /**
      * Generate missing IDs for the subtree.
      *
      * @param scopes A set of parent scopes.
@@ -866,9 +913,7 @@ public final class Bundle implements NestableData<Bundle> {
     public String diff(Bundle target, boolean includeInitialisationProperties) {
         Bundle first = includeInitialisationProperties ? this : this.withData(this.getDataForUpdate());
         Bundle second = includeInitialisationProperties ? target : target.withData(target.getDataForUpdate());
-        return DataConverter.diffBundles(
-                first.withMetaData(Collections.emptyMap()),
-                second.withMetaData(Collections.emptyMap()));
+        return DataConverter.diffBundles(first.withoutMeta(), second.withoutMeta());
     }
 
     // Helpers...

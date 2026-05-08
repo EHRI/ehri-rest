@@ -9,6 +9,7 @@ query test {
     c1: DocumentaryUnit(id: "c1") {
         id
         type
+        pid
         identifier
         otherIdentifiers
         itemCount
@@ -30,6 +31,8 @@ query test {
         }
         repository {
             id
+            pid
+            ark
             itemCount
             english: description(languageCode: "eng") {
                 name
@@ -255,5 +258,10 @@ query test {
             id
         }
         linkType
+    }
+
+    itemByPid(pid: "r1-1234") {
+      id
+      type
     }
 }

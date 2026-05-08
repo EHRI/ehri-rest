@@ -179,7 +179,7 @@ public class IdRegenerator {
      * Obtain a re-generator that will skip items that would collide
      * with existing items.
      *
-     * @param skipCollisions whether or not to error on an ID collision
+     * @param skipCollisions whether to error on an ID collision
      * @return a new, more tolerant, re-generator
      */
     public IdRegenerator skippingCollisions(boolean skipCollisions) {

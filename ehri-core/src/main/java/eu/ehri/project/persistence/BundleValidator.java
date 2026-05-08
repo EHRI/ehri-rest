@@ -88,8 +88,8 @@ public final class BundleValidator {
      */
     private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
-            if (key.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
-                // Keys beginning with __ prefix are only mandatory on creation.
+            if (Bundle.isInitialisationKey(key) && op == ValidationType.update) {
+                // Initialisation-only keys are mandatory only on creation, not update.
                 continue;
             }
             checkMandatoryField(bundle, builder, key, op);
@@ -335,8 +335,9 @@ public final class BundleValidator {
             Object uniqueValue = bundle.getDataValue(uniqueKey);
             if (uniqueValue != null) {
                 try (CloseableIterable<Vertex> vertices = manager.getVertices(uniqueKey, uniqueValue, bundle.getType())) {
-                    if (vertices.iterator().hasNext()) {
-                        Vertex v = vertices.iterator().next();
+                    final Iterator<Vertex> iterator = vertices.iterator();
+                    if (iterator.hasNext()) {
+                        Vertex v = iterator.next();
                         // If it's the same vertex, we don't have a problem...
                         if (!manager.getId(v).equals(bundle.getId())) {
                             builder.addError(uniqueKey, MessageFormat.format(Messages

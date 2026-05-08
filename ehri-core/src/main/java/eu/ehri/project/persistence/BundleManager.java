@@ -182,6 +182,7 @@ public final class BundleManager {
      */
     private Vertex createInner(Bundle bundle) {
         try {
+            // Use getData() so that initialisation-only properties (e.g. PIDs) are written on creation.
             Vertex node = manager.createVertex(bundle.getId(), bundle.getType(), bundle.getData());
             createDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
             return node;
@@ -216,7 +217,8 @@ public final class BundleManager {
                     logger.trace(DataConverter.bundleToJson(currentBundle));
                     logger.trace(DataConverter.bundleToJson(newBundle));
                 }
-                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getData());
+                // Use getDataForUpdate() to exclude initialisation-only properties (e.g. PIDs) from updates.
+                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getDataForUpdate());
                 updateDependents(vertex, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(vertex, MutationState.UPDATED, currentBundle);
             } else {

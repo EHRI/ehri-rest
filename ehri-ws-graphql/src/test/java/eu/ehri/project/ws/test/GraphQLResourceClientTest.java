@@ -26,6 +26,8 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.ws.GraphQLResource;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.ws.providers.GraphQLQueryProvider;
@@ -51,6 +53,8 @@ import static org.junit.Assert.assertTrue;
  * Test for the GraphQL endpoint
  */
 public class GraphQLResourceClientTest extends AbstractResourceClientTest {
+
+    private static final Config config = ConfigFactory.load();
 
     @Before
     public void setUp() {
@@ -90,6 +94,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
                 .entity(testQuery)
                 .post(ClientResponse.class);
+        String arkPrefix = config.getString("io.pids.prefix");
 
         // Without the X-Stream header we should get strict execution.
         assertNull(response.getHeaders().getFirst("Transfer-Encoding"));
@@ -98,6 +103,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         JsonNode data = response.getEntity(JsonNode.class);
         // System.out.println(data.toPrettyString());
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
+        assertEquals("c1-12345678", data.path("data").path("c1").path("pid").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
         assertEquals(1, data.path("data").path("c1")
                 .path("children").path("items").size());
@@ -120,6 +126,10 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .path(0).path("context").path("body").path(0).path("id").textValue());
         assertEquals("Person Access 2", data.path("data").path("c3").path("related")
                 .path(0).path("context").path("body").path(0).path("name").textValue());
+        assertEquals("r1-1234", data.path("data").path("c1").path("repository")
+                .path("pid").textValue());
+        assertEquals(arkPrefix + "r1-1234", data.path("data").path("c1").path("repository")
+                        .path("ark").textValue());
         assertEquals("An Address", data.path("data").path("c1").path("repository")
                 .path("english").path("addresses").path(0)
                 .path("addressName").textValue());
@@ -165,6 +175,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertEquals("associative", data.path("data").path("link3").path("linkType").textValue());
         assertEquals("c4", data.path("data").path("link4").path("source").path("id").textValue());
         assertEquals("copy", data.path("data").path("link4").path("linkType").textValue());
+        assertEquals("r1", data.path("data").path("itemByPid").path("id").textValue());
     }
 
     @Test

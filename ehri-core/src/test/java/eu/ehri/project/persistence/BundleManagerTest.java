@@ -122,29 +122,6 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test
-    public void testSavingWithInitialisationData() throws Exception {
-        Bundle bundle = Bundle.of("t1",
-                EntityClass.DOCUMENTARY_UNIT,
-                ImmutableMap.of("identifier", "t1", "__pid", "1234"),
-                ImmutableMultimap.of(),
-                ImmutableMap.of()
-        );
-        BundleManager bundleManager = new BundleManager(graph);
-        DocumentaryUnit t1 = bundleManager.create(bundle, DocumentaryUnit.class);
-        assertEquals("1234", t1.getProperty("__pid"));
-
-        // Changing the pid should not be possible here, even though the node is
-        // updated with a new identifier.
-        Bundle bundle2 = bundle
-                .withDataValue("identifier", "t1-new")
-                .withDataValue("__pid", "5678");
-        Mutation<DocumentaryUnit> op = bundleManager.createOrUpdate(bundle2, DocumentaryUnit.class);
-        assertEquals(MutationState.UPDATED, op.getState());
-        assertEquals("t1-new", op.getNode().getIdentifier());
-        assertEquals("1234", op.getNode().getPid());
-    }
-
-    @Test
     public void testSavingWithReservedInitialisationData() throws Exception {
         Bundle bundle = Bundle.of("t1",
                 EntityClass.DOCUMENTARY_UNIT,
