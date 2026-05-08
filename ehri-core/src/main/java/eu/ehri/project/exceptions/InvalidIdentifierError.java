@@ -17,22 +17,14 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models.base;
-
-import com.tinkerpop.frames.Property;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.annotations.Unique;
-import org.neo4j.cypher.internal.v3_4.functions.Id;
+package eu.ehri.project.exceptions;
 
 /**
- * Base interface for entities that have a persistent identifier property (other than the
- * internally assigned node ID).
+ * Checked error similar to {@link IllegalArgumentException}
  */
-public interface PersistentIdentifiable extends Accessible, Identifiable {
+public class InvalidIdentifierError extends Exception {
 
-    @Unique
-    @Mandatory
-    @Property(Ontology.PID_KEY)
-    String getPersistentIdentifier();
+    public InvalidIdentifierError(String message) {
+        super(message);
+    }
 }
