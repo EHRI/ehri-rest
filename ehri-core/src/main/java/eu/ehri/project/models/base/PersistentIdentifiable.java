@@ -23,7 +23,6 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Unique;
-import org.neo4j.cypher.internal.v3_4.functions.Id;
 
 /**
  * Base interface for entities that have a persistent identifier property (other than the

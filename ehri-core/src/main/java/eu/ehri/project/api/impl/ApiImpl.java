@@ -528,7 +528,7 @@ public class ApiImpl implements Api {
         Iterable<Accessible> children = all
                 ? scope.getAllContainedItems()
                 : scope.getContainedItems();
-        List<String> ids = StreamSupport
+        final List<String> ids = StreamSupport
                 .stream(children.spliterator(), false)
                 .map(Entity::getId)
                 .sorted()
