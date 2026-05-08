@@ -88,8 +88,8 @@ public final class BundleValidator {
      */
     private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
-            if (key.startsWith(Bundle.INITIALISATION_PREFIX) && op.equals(ValidationType.update)) {
-                // Keys beginning with __ prefix are only mandatory on creation.
+            if (Bundle.isInitialisationKey(key) && op == ValidationType.update) {
+                // Initialisation-only keys are mandatory only on creation, not update.
                 continue;
             }
             checkMandatoryField(bundle, builder, key, op);
