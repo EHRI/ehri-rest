@@ -66,6 +66,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
         Document doc = parseDocument(testExport(test, "eng"));
         assertXPath(doc, "NL-000001", "//eag/control/recordId");
         assertXPath(doc, "nl-000001", "//eag/control/otherRecordId");
+        assertXPath(doc, config.getString("io.pids.prefix") + "00001234", "//eag/control/otherRecordId[2]");
         assertXPath(doc, "2013-09-09",
                 "//eag/control/maintenanceHistory/maintenanceEvent/eventDateTime");
         assertXPath(doc, "Institution Example", "//eag/archguide/identity/autform");
