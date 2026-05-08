@@ -296,8 +296,8 @@ public final class ActionManager {
      * @return The latest event node
      */
     public SystemEvent getLatestGlobalEvent() {
-        Iterable<SystemEvent> latest = getEventRoot().getSystemEvents();
-        return latest.iterator().hasNext() ? latest.iterator().next() : null;
+        Iterator<SystemEvent> latest = getEventRoot().getSystemEvents().iterator();
+        return latest.hasNext() ? latest.next() : null;
     }
 
     /**
