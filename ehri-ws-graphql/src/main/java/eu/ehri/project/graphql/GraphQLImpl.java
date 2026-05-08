@@ -437,7 +437,7 @@ public class GraphQLImpl {
     // Data fetchers...
 
     private DataFetcher<Iterable<SystemEvent>> itemEventsDataFetcher() {
-        return env -> events().listForItem(env.<Entity>getSource().as(SystemEvent.class));
+        return env -> events().listForItem(env.<Entity>getSource().as(Accessible.class));
     }
 
     private DataFetcher<Map<String, Object>> docDataFetcher() {
@@ -584,8 +584,10 @@ public class GraphQLImpl {
     private static final DataFetcher<String> pidDataFetcher =
             env -> (env.<Entity>getSource()).getProperty(Ontology.PID_KEY);
 
-    private static final DataFetcher<String> arkDataFetcher = env ->
-            config.getString("io.pids.prefix") + pidDataFetcher.get(env);
+    private static final DataFetcher<String> arkDataFetcher = env -> {
+        final String pid = pidDataFetcher.get(env);
+        return pid == null ? null : config.getString("io.pids.prefix") + pid;
+    };
 
     private static final DataFetcher<Object> attributeDataFetcher = env -> {
         Entity source = env.getSource();
@@ -629,10 +631,10 @@ public class GraphQLImpl {
             String checkedCode = LanguageHelpers.convertCode(lang2).orElse(lang);
             for (Description next : descriptions) {
                 String langCode = next.getLanguageOfDescription();
-                if (langCode.equalsIgnoreCase(checkedCode)) {
+                if (langCode != null && langCode.equalsIgnoreCase(checkedCode)) {
                     if (code != null && !code.isEmpty()) {
                         String ident = next.getDescriptionCode();
-                        if (ident.equals(code)) {
+                        if (code.equals(ident)) {
                             return next;
                         }
                     } else {
