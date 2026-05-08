@@ -8,6 +8,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
@@ -50,7 +51,7 @@ public class Functions {
 
     @UserFunction
     public String ark(@Name("node") Node node) {
-        String pid = (String)node.getProperty(Ontology.PID_KEY);
+        String pid = (String) node.getProperty(Ontology.PID_KEY, null);
         return pid == null ? null : config.getString("io.pids.prefix") + pid;
     }
 
