@@ -1,6 +1,7 @@
 package eu.ehri.project.cypher;
 
 import com.google.common.collect.Lists;
+import com.typesafe.config.ConfigFactory;
 import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.driver.v1.*;
@@ -14,6 +15,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 
 public class FunctionsTest {
+
+    private final com.typesafe.config.Config config = ConfigFactory.load();
 
     @Rule
     public Neo4jRule neo4j = new Neo4jRule().withFunction(Functions.class);
@@ -90,6 +93,18 @@ public class FunctionsTest {
                 Value value = result.single().get("value");
                 assertThat(value.asList().toString(), equalTo(expected.get(i + 1).toString()));
             }
+        }
+    }
+
+    @Test
+    public void testGeneratePid() {
+        try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
+                .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
+
+            StatementResult result = session.run(
+                    "RETURN eu.ehri.project.cypher.generatePid() as pid");
+            assertThat(result.single().get("pid").asString().length(),
+                    equalTo(config.getInt("io.pids.length")));
         }
     }
 }
