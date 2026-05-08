@@ -97,6 +97,19 @@ public class FunctionsTest {
     }
 
     @Test
+    public void testArk() {
+        try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
+                .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
+            session.run("CREATE (n {__pid: '1234'})");
+
+            StatementResult result = session.run(
+                    "MATCH (n {__pid:'1234'}) RETURN eu.ehri.project.cypher.ark(n) as ark");
+            assertThat(result.single().get("ark").asString(),
+                    equalTo(config.getString("io.pids.prefix") + "1234"));
+        }
+    }
+
+    @Test
     public void testGeneratePid() {
         try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
                 .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
