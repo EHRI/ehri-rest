@@ -463,6 +463,10 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         Table expected = Table.of(Lists.<List<String>>newArrayList(
                 Lists.newArrayList("c1", "nl-r1-m19")
         ));
+        Bundle c1 = getEntity(Entities.DOCUMENTARY_UNIT, "c1", getAdminUserProfileId());
+        // Check the rename hasn't taken place.
+        assertEquals("c1", c1.getDataValue(Ontology.IDENTIFIER_KEY));
+        // Check the output.
         assertEquals(expected, response2.getEntity(Table.class));
     }
 

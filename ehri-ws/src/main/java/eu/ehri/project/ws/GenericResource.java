@@ -462,8 +462,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             Described item = api().get(id, Described.class);
             Description desc = api().get(did, Description.class);
-            AccessPoint rel = api().createDependent(id, bundle,
-                    AccessPoint.class, getLogMessage());
+            AccessPoint rel = api().createDependent(id, bundle, AccessPoint.class, getLogMessage());
             desc.addAccessPoint(rel);
             Response response = buildResponse(item, rel, Response.Status.CREATED);
             tx.success();
