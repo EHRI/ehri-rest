@@ -37,6 +37,7 @@ import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
+import eu.ehri.project.importers.util.ImportResourceFetcher;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -62,7 +63,6 @@ import java.util.Optional;
  */
 public abstract class AbstractImportManager implements ImportManager {
 
-    private static final int MAX_RETRIES = 3;
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
     private static final JsonFactory factory = new JsonFactory();
 
@@ -70,6 +70,7 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
     protected final ImportOptions options;
+    protected final ImportResourceFetcher resourceFetcher;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -77,7 +78,6 @@ public abstract class AbstractImportManager implements ImportManager {
     protected Integer currentPosition;
     protected PermissionScopeFinder scopeFinder;
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
-    private int consecutiveIoErrors = 0;
 
     /**
      * Constructor.
@@ -100,6 +100,7 @@ public abstract class AbstractImportManager implements ImportManager {
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.options = options;
+        this.resourceFetcher = new ImportResourceFetcher();
 
         if (options.hierarchyMap != null) {
             this.scopeFinder = new DynamicPermissionScopeFinder(scope, options.hierarchyMap);
@@ -165,10 +166,9 @@ public abstract class AbstractImportManager implements ImportManager {
 
             for (int i = 1; (currentFile = parser.nextFieldName()) != null; i++) {
                 URL url = new URL(parser.nextTextValue());
-                try (InputStream stream = readUrl(url, 0)) {
+                try {
                     logger.info("Importing URL {} with identifier: {}", i, currentFile);
-
-                    importInputStream(stream, currentFile, action, log);
+                    resourceFetcher.fetch(url, inputStream -> importInputStream(inputStream, currentFile, action, log));
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!options.tolerant) {
@@ -176,12 +176,16 @@ public abstract class AbstractImportManager implements ImportManager {
                         // a formatted error location since the XML file is always null
                         throw new ImportValidationError(e.getMessage(), e);
                     }
-                } catch (IOException | InputParseError e) {
-                    logger.error("Input parse error", e);
+                } catch (InputParseError e) {
+                    logger.error(String.format("Input parse error: %s", url), e);
                     log.addError(formatErrorLocation(), e.getMessage());
-                    // Error regardless of tolerant setting if more than 5 consecutive items
-                    // fail to download... this prevents an endless blocking stall...
-                    if (!options.tolerant || consecutiveIoErrors > (MAX_RETRIES * 5)) {
+                    if (!options.tolerant) {
+                        throw e;
+                    }
+                } catch (IOException e) {
+                    logger.error(String.format("IO error on URL: %s", url), e);
+                    log.addError(formatErrorLocation(), e.getMessage());
+                    if (!options.tolerant) {
                         throw e;
                     }
                 }
@@ -348,37 +352,5 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private String formatErrorLocation() {
         return String.format("File: %s, XML document: %d", currentFile, currentPosition);
-    }
-
-    private InputStream readUrl(URL url, int retry) throws IOException {
-        // EXTREMELY INADVISABLE CODE! This stuff runs inside the database
-        // where Thread.sleep()ing is obviously not a good idea. However,
-        // since import errors caused by HTTP rate-limiting are generally
-        // very rare I've resorted to it here with exponential backoff as
-        // by far the easiest way to prevent sporadic import problems.
-        // Generally we only need one retry with a 100ms sleep per several
-        // thousand import URLs to make HTTP imports much more resilient,
-        // and very few dataset batches have that many items anyway.
-        try {
-            InputStream stream = url.openStream();
-            consecutiveIoErrors = 0;
-            return stream;
-        } catch (IOException e) {
-            if (isSlowDownError(e) && retry < MAX_RETRIES) {
-                logger.debug("Got slow down error... retry {}, {}", retry + 1, url);
-                consecutiveIoErrors++;
-                try {
-                    Thread.sleep((long) (Math.pow(2, retry) * 100));
-                    return readUrl(url, retry + 1);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-            throw e;
-        }
-    }
-
-    private boolean isSlowDownError(IOException e) {
-        return e.getMessage().contains("Server returned HTTP response code: 503");
     }
 }
