@@ -16,9 +16,13 @@
 
 package eu.ehri.project.importers.util;
 
+import com.google.common.io.ByteStreams;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -29,13 +33,31 @@ import java.net.URL;
  */
 class HttpImportResourceFetcher {
 
-    private static final int MAX_RETRIES = 3;
+    private static final Config config = ConfigFactory.load();
+    private static final boolean BUFFER_REMOTE = config.getBoolean("io.import.http.buffer");
+    private static final int MAX_RETRIES = config.getInt("io.import.http.maxRetries");
+
     private static final long INITIAL_BACKOFF_MS = 1_000;
     private static final long MAX_BACKOFF_MS = 30_000;
     private static final double BACKOFF_MULTIPLIER = 2.0;
-    public static final int CONNECT_TIMEOUT = 10_000;
-    public static final int READ_TIMEOUT = 60_000;
+    private static final int CONNECT_TIMEOUT = 10_000;
+    private static final int READ_TIMEOUT = 60_000;
 
+    @FunctionalInterface
+    public interface ResponseHandler {
+        void handle(InputStream in) throws IOException, InputParseError, ValidationError;
+    }
+
+    /**
+     * Fetch data from a URL, processing it with the given
+     * import response handler.
+     *
+     * @param url     a resource URL
+     * @param handler a handler function
+     * @throws IOException     if an error is encountered fetching the data
+     * @throws ValidationError if a validation error occurs on import
+     * @throws InputParseError if the fetched data is invalid
+     */
     public void fetch(URL url, ResponseHandler handler) throws IOException, ValidationError, InputParseError {
         IOException lastException = null;
 
@@ -47,14 +69,30 @@ class HttpImportResourceFetcher {
             HttpURLConnection connection = null;
             try {
                 connection = openConnection(url);
-                try (InputStream in = connection.getInputStream()) {
-                    handler.handle(in);
-                    return; // success — return immediately
+
+                final InputStream toUse;
+                if (BUFFER_REMOTE) {
+                    // Buffer fully, then we can release the connection early
+                    try (InputStream inputStream = connection.getInputStream()) {
+                        toUse = new ByteArrayInputStream(ByteStreams.toByteArray(inputStream));
+                    }
+                    connection.disconnect();
+                    connection = null; // prevent double-disconnect in finally
+                } else {
+                    toUse = connection.getInputStream();
                 }
+
+                try (InputStream is = toUse) {
+                    handler.handle(is);
+                }
+
+                // success — exit retry loop cleanly
+                break;
+
             } catch (IOException e) {
                 lastException = e;
                 if (!isRetryable(e, connection)) {
-                    break;  // no point retrying (e.g. 404)
+                    break;
                 }
             } finally {
                 if (connection != null) {
@@ -63,7 +101,9 @@ class HttpImportResourceFetcher {
             }
         }
 
-        throw new IOException("Request failed after " + MAX_RETRIES + " retries", lastException);
+        if (lastException != null) {
+            throw new IOException("Request failed after " + MAX_RETRIES + " retries", lastException);
+        }
     }
 
     private HttpURLConnection openConnection(URL url) throws IOException {
@@ -115,11 +155,6 @@ class HttpImportResourceFetcher {
             }
         } catch (IOException ignored) {
         }
-    }
-
-    @FunctionalInterface
-    public interface ResponseHandler {
-        void handle(InputStream in) throws IOException, InputParseError, ValidationError;
     }
 
     public static class HttpStatusException extends IOException {
