@@ -55,7 +55,6 @@ public class SaxImportManager extends AbstractImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxImportManager.class);
 
-    private static final Config config = ConfigFactory.load();
     private final Class<? extends SaxXmlHandler> handlerClass;
     private final ImportOptions options;
     private final List<ImportCallback> extraCallbacks;
