@@ -471,7 +471,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/diff/{versionId:[^/]+}")
-    public JsonNode diff(
+    public String diff(
             @PathParam("id") String id,
             @PathParam("versionId") String versionId)
             throws ItemNotFound, DeserializationError, JsonProcessingException, SerializationError {
@@ -486,7 +486,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Bundle b2 = Bundle.fromString(version.getEntityData());
             final String diff = b2.diff(b1);
             tx.success();
-            return jsonMapper.readTree(diff);
+            return diff;
         }
     }
 
