@@ -81,8 +81,8 @@ public class BatchResource extends AbstractResource {
     @Path("update")
     public ImportLog batchUpdate(
             @QueryParam(SCOPE_PARAM) String scope,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) boolean tolerant,
+            @DefaultValue("true") @QueryParam(VERSION_PARAM) boolean version,
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream inputStream)

@@ -21,9 +21,10 @@ public class ImportOptions {
     public final boolean useSourceId;
     public final Map<String, String> hierarchyMap;
     public final XmlImportProperties properties;
+    public final boolean versioning;
 
     public static ImportOptions properties(String properties) {
-        return create(false, false, false, null, null, properties);
+        return create(false, false, false, null, null, properties, false);
     }
 
     /**
@@ -32,10 +33,10 @@ public class ImportOptions {
      * @return an options object
      */
     public static ImportOptions basic() {
-        return create(false, false, false, null, null, null);
+        return create(false, false, false, null, null, null, false);
     }
 
-    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, Character defaultFieldSep, String defaultArraySep, Map<String, String> hierarchyMap, String properties) {
+    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, Character defaultFieldSep, String defaultArraySep, Map<String, String> hierarchyMap, String properties, boolean versioning) {
         this(
                 tolerant,
                 updates,
@@ -46,11 +47,12 @@ public class ImportOptions {
                 hierarchyMap,
                 properties == null
                         ? new XmlImportProperties(config.getString("io.import.defaultProperties"))
-                        : new XmlImportProperties(properties)
+                        : new XmlImportProperties(properties),
+                versioning
         );
     }
 
-    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, Character defaultFieldSep, String defaultArraySep, Map<String, String> hierarchyMap, XmlImportProperties properties) {
+    private ImportOptions(boolean tolerant, boolean updates, boolean useSourceId, String defaultLang, Character defaultFieldSep, String defaultArraySep, Map<String, String> hierarchyMap, XmlImportProperties properties, boolean versioning) {
         this.tolerant = tolerant;
         this.updates = updates;
         this.useSourceId = useSourceId;
@@ -59,6 +61,7 @@ public class ImportOptions {
         this.defaultArraySep = defaultArraySep;
         this.hierarchyMap = hierarchyMap;
         this.properties = properties;
+        this.versioning = versioning;
     }
 
     /**
@@ -74,8 +77,8 @@ public class ImportOptions {
      * @param properties   a property mapping configuration
      * @return an options object
      */
-    public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, Map<String, String> hierarchyMap, String properties) {
-        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, null, null, hierarchyMap, properties);
+    public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, Map<String, String> hierarchyMap, String properties, boolean versioning) {
+        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, null, null, hierarchyMap, properties, versioning);
     }
 
     /**
@@ -93,42 +96,46 @@ public class ImportOptions {
      * @param properties   a property mapping configuration
      * @return an options object
      */
-    public static ImportOptions csv(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, Character fieldSep, String arraySep, Map<String, String> hierarchyMap, String properties) {
-        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, fieldSep, arraySep, hierarchyMap, properties);
+    public static ImportOptions csv(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, Character fieldSep, String arraySep, Map<String, String> hierarchyMap, String properties, boolean versioning) {
+        return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, fieldSep, arraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withProperties(String properties) {
         XmlImportProperties props = properties == null
                 ? new XmlImportProperties(config.getString("io.import.defaultProperties"))
                 : new XmlImportProperties(properties);
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, props);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, props, versioning);
     }
 
     public ImportOptions withUpdates(boolean updates) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withLang(String lang) {
-        return new ImportOptions(tolerant, updates, useSourceId, lang, defaultFieldSep, defaultArraySep, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, lang, defaultFieldSep, defaultArraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withTolerant(boolean tolerant) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withUseSourceId(boolean merging) {
-        return new ImportOptions(tolerant, updates, merging, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, merging, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withHierarchyMap(Map<String, String> hierarchyMap) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withFieldSeparator(Character delimiter) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, delimiter, defaultArraySep, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, delimiter, defaultArraySep, hierarchyMap, properties, versioning);
     }
 
     public ImportOptions withArraySeparator(String delimiter) {
-        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, delimiter, hierarchyMap, properties);
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, delimiter, hierarchyMap, properties, versioning);
+    }
+
+    public ImportOptions withVersioning(boolean versioning) {
+        return new ImportOptions(tolerant, updates, useSourceId, defaultLang, defaultFieldSep, defaultArraySep, hierarchyMap, properties, versioning);
     }
 }
