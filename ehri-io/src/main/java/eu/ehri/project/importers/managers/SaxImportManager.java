@@ -21,8 +21,6 @@ package eu.ehri.project.importers.managers;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;

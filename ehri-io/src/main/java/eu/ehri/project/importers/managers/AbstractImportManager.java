@@ -313,6 +313,9 @@ public abstract class AbstractImportManager implements ImportManager {
                 }
                 logger.info("Item updated: {}", id);
                 context.addSubjects(mutation.getNode());
+                if (options.versioning && mutation.getPrior().isPresent()) {
+                    context.createVersion(mutation.getNode(), mutation.getPrior().get());
+                }
                 log.addUpdated(tag, id);
                 break;
             default:

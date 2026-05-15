@@ -24,7 +24,7 @@ public class EadDescriptionUpdateTest extends AbstractImporterTest {
     @Test
     public void testUpdateDescription() throws Exception {
         int count = getNodeCount(graph);
-        ImportOptions options = ImportOptions.basic();
+        ImportOptions options = ImportOptions.basic().withVersioning(true);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, options);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-multilang-eng.xml")) {
             importManager.importInputStream(ios, "Import English description");
@@ -35,14 +35,16 @@ public class EadDescriptionUpdateTest extends AbstractImporterTest {
 
         DocumentaryUnit unit = manager.getEntity("nl-r1-c00001", DocumentaryUnit.class);
         assertEquals(1, Iterables.size(unit.getDocumentDescriptions()));
+        assertEquals(0, toList(unit.getAllPriorVersions()).size());
 
         SaxImportManager importManager2 = saxImportManager(EadImporter.class, EadHandler.class, options.withUpdates(true));
         try (InputStream ios2 = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu.xml")) {
             importManager2.importInputStream(ios2, "Import German description");
         }
 
-        // Should only have: 1 event, 2 event links , 1 new description
-        assertEquals(count + 9, getNodeCount(graph));
+        // Should only have: 1 event, 2 event links , 1 new description, 1 version
+        assertEquals(count + 10, getNodeCount(graph));
+        assertEquals(1, toList(unit.getAllPriorVersions()).size());
 
         unit = manager.getEntity("nl-r1-c00001", DocumentaryUnit.class);
         List<DocumentaryUnitDescription> descriptions = Lists.newArrayList(unit.getDocumentDescriptions());
@@ -52,7 +54,8 @@ public class EadDescriptionUpdateTest extends AbstractImporterTest {
         try (InputStream ios3 = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu-2.xml")) {
             importManager2.importInputStream(ios3, "Import German description again");
         }
-        // Should only have: 1 event, 2 event links
-        assertEquals(count + 12, getNodeCount(graph));
+        // Should only have: 1 event, 2 event links, 1 version
+        assertEquals(count + 14, getNodeCount(graph));
+        assertEquals(2, toList(unit.getAllPriorVersions()).size());
     }
 }

@@ -273,6 +273,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
@@ -293,7 +294,8 @@ public class ImportResource extends AbstractResource {
                     useSourceId,
                     defaultLang,
                     hierarchyMap,
-                    propertyFile
+                    propertyFile,
+                    version
             );
             ImportManager importManager = SaxImportManager.create(
                     graph,
@@ -376,6 +378,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam("ex") Set<String> ex,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
@@ -402,7 +405,15 @@ public class ImportResource extends AbstractResource {
 
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, hierarchyMap, propertyFile);
+            ImportOptions options = ImportOptions.create(
+                    tolerant,
+                    allowUpdates,
+                    useSourceId,
+                    lang,
+                    hierarchyMap,
+                    propertyFile,
+                    version
+            );
             SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
@@ -437,6 +448,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
@@ -451,7 +463,8 @@ public class ImportResource extends AbstractResource {
                     false,
                     defaultLang,
                     null,
-                    nameOrDefault(propertyFile, "eag.properties")
+                    nameOrDefault(propertyFile, "eag.properties"),
+                    version
             );
             ImportManager importManager = SaxImportManager.create(
                     graph,
@@ -487,6 +500,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
@@ -501,7 +515,8 @@ public class ImportResource extends AbstractResource {
                     false,
                     defaultLang,
                     null,
-                    nameOrDefault(propertyFile, "eac.properties")
+                    nameOrDefault(propertyFile, "eac.properties"),
+                    version
             );
             ImportManager importManager = SaxImportManager.create(
                     graph,
@@ -541,6 +556,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
@@ -570,7 +586,8 @@ public class ImportResource extends AbstractResource {
                     fieldSep != null ? fieldSep.charAt(0) : null,
                     arraySep,
                     hierarchyMap,
-                    propertyFile
+                    propertyFile,
+                    version
             );
             ImportManager importManager = CsvImportManager.create(
                     graph,
