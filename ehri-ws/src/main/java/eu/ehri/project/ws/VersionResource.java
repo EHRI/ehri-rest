@@ -19,12 +19,12 @@
 
 package eu.ehri.project.ws;
 
-import eu.ehri.project.ws.base.AbstractAccessibleResource;
-import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.ws.base.GetResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.events.Version;
+import eu.ehri.project.ws.base.AbstractAccessibleResource;
+import eu.ehri.project.ws.base.AbstractResource;
+import eu.ehri.project.ws.base.GetResource;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.GET;
