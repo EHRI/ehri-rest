@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.project.ws.GenericResource;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
@@ -238,6 +240,38 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(LIMITED_USER_NAME,
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
+    }
+
+    @Test
+    public void testDiff() throws Exception {
+        // Create a version
+        Bundle before = getEntity(Entities.REPOSITORY, "r1", getAdminUserProfileId());
+        String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.REPOSITORY, "r1"))
+                .entity(jsonAgentTestString)
+                .put(ClientResponse.class);
+        assertStatus(OK, response);
+
+        List<Bundle> versions = getItemList(ehriUri(GenericResource.ENDPOINT, "r1", "versions"),
+                getAdminUserProfileId());
+        assertEquals(1, versions.size());
+
+        ClientResponse response2 = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(GenericResource.ENDPOINT, "r1", "diff", versions.get(0).getId()))
+                .get(ClientResponse.class);
+        assertStatus(OK, response2);
+        JsonNode out = jsonMapper.readTree(response2.getEntity(String.class));
+        // NB: If this starts failing it's due to JsonDiff output not being
+        // consistently ordered.
+        assertEquals("replace", out.path(0).path("op").textValue());
+        assertEquals("/data/identifier", out.path(0).path("path").textValue());
+        assertEquals("jmp", out.path(0).path("value").textValue());
+        assertEquals("remove", out.path(1).path("op").textValue());
+        assertEquals("/data/name", out.path(1).path("path").textValue());
+        assertEquals("remove", out.path(2).path("op").textValue());
+        assertEquals("/relationships/describes", out.path(2).path("path").textValue());
+
     }
 
 

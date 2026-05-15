@@ -19,8 +19,10 @@
 
 package eu.ehri.project.ws;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -464,6 +466,30 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             return page;
         }
     }
+
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:[^/]+}/diff/{versionId:[^/]+}")
+    public JsonNode diff(
+            @PathParam("id") String id,
+            @PathParam("versionId") String versionId)
+            throws ItemNotFound, DeserializationError, JsonProcessingException, SerializationError {
+        try (Tx tx = beginTx()) {
+            Accessible item = api().get(id, Accessible.class);
+            Version version = api().get(versionId, Version.class);
+            if (!version.getEntityId().equals(item.getId())) {
+                throw new ItemNotFound(versionId);
+            }
+
+            Bundle b1 = getSerializer().withDependentOnly(true).entityToBundle(item);
+            Bundle b2 = Bundle.fromString(version.getEntityData());
+            final String diff = b2.diff(b1);
+            tx.success();
+            return jsonMapper.readTree(diff);
+        }
+    }
+
 
     @GET
     @Path("{id:[^/]+}/dc")
