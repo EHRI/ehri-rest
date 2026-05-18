@@ -835,6 +835,21 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
+     * Return the bundle without metadata.
+     *
+     * @return a new bundle
+     */
+    public Bundle withoutMeta() {
+        Multimap<String, Bundle> tmp = ArrayListMultimap.create();
+        for (String relation : relations.keySet()) {
+            for (Bundle bundle : relations.get(relation)) {
+                tmp.put(relation, bundle.withoutMeta());
+            }
+        }
+        return new Bundle(id, type, data, tmp, Collections.emptyMap(), temp);
+    }
+
+    /**
      * Generate missing IDs for the subtree.
      *
      * @param scopes A set of parent scopes.
@@ -898,9 +913,7 @@ public final class Bundle implements NestableData<Bundle> {
     public String diff(Bundle target, boolean includeInitialisationProperties) {
         Bundle first = includeInitialisationProperties ? this : this.withData(this.getDataForUpdate());
         Bundle second = includeInitialisationProperties ? target : target.withData(target.getDataForUpdate());
-        return DataConverter.diffBundles(
-                first.withMetaData(Collections.emptyMap()),
-                second.withMetaData(Collections.emptyMap()));
+        return DataConverter.diffBundles(first.withoutMeta(), second.withoutMeta());
     }
 
     // Helpers...

@@ -54,10 +54,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -530,8 +527,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                 throw new ItemNotFound(versionId);
             }
 
-            Bundle b1 = getSerializer().withDependentOnly(true).entityToBundle(item);
-            Bundle b2 = Bundle.fromString(version.getEntityData());
+            Bundle b1 = getSerializer().withDependentOnly(true).entityToBundle(item).withoutMeta();
+            Bundle b2 = Bundle.fromString(version.getEntityData()).withoutMeta();
             final String diff = b2.diff(b1);
             tx.success();
             return diff;
