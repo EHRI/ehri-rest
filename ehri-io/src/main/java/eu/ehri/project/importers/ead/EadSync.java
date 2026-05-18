@@ -2,36 +2,33 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.tools.Migrator;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -46,25 +43,20 @@ public class EadSync {
     private final PermissionScope scope;
     private final Actioner actioner;
     private final SaxImportManager importManager;
-    private final GraphManager manager;
-    private final Serializer depSerializer;
-    private final RandomIdGenerator idGenerator;
+    private final Migrator migrator;
 
     private EadSync(
             FramedGraph<?> graph,
             Api api,
             PermissionScope scope,
             Actioner actioner,
-            SaxImportManager importManager,
-            RandomIdGenerator idGenerator) {
+            SaxImportManager importManager) {
         this.graph = graph;
         this.api = api;
         this.scope = scope;
         this.actioner = actioner;
         this.importManager = importManager;
-        this.manager = GraphManagerFactory.getInstance(graph);
-        this.depSerializer = api.serializer().withDependentOnly(true);
-        this.idGenerator = idGenerator;
+        this.migrator = new Migrator(graph, api);
     }
 
     public static EadSync create(
@@ -72,9 +64,8 @@ public class EadSync {
             Api api,
             PermissionScope scope,
             Actioner actioner,
-            SaxImportManager importManager,
-            RandomIdGenerator idGenerator) {
-        return new EadSync(graph, api, scope, actioner, importManager, idGenerator);
+            SaxImportManager importManager) {
+        return new EadSync(graph, api, scope, actioner, importManager);
     }
 
     /**
@@ -176,14 +167,6 @@ public class EadSync {
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
     }
 
-    private void transferPersistentIdentifiers(DocumentaryUnit from, DocumentaryUnit to) {
-        Vertex fromV = from.asVertex();
-        Vertex toV = to.asVertex();
-        String fromPid = from.getPersistentIdentifier();
-        fromV.setProperty(Ontology.PID_KEY, idGenerator.generateId());
-        toV.setProperty(Ontology.PID_KEY, fromPid);
-    }
-
     private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) {
         if (!movedGraphIds.isEmpty()) {
             try {
@@ -196,10 +179,7 @@ public class EadSync {
                 for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
                     DocumentaryUnit from = api.get(entry.getKey(), DocumentaryUnit.class);
                     DocumentaryUnit to = api.get(entry.getValue(), DocumentaryUnit.class);
-
-                    transferPersistentIdentifiers(from, to);
-                    transferUserGeneratedContent(from, to);
-                    transferAccessors(from, to);
+                    migrator.migrate(from, to);
 
                     ctx.addSubjects(to);
                     modified++;
@@ -214,60 +194,6 @@ public class EadSync {
                 throw new RuntimeException("Unexpected error when transferring metadata", e);
             }
         }
-    }
-
-    private void transferUserGeneratedContent(DocumentaryUnit from, DocumentaryUnit to)
-            throws SerializationError, ItemNotFound {
-        List<Link> links = Lists.newArrayList(from.getLinks());
-        for (Link link : links) {
-            if (link.getLinkBodies().iterator().hasNext()) {
-                // Skip links with a body...
-                continue;
-            }
-            logger.debug("Moving link from {} to {}...", from.getId(), to.getId());
-            to.addLink(link);
-        }
-        List<Annotation> annotations = Lists.newArrayList(from.getAnnotations());
-        for (Annotation annotation : annotations) {
-            logger.debug("Moving annotation from {} to {}...", from.getId(), to.getId());
-            to.addAnnotation(annotation);
-            for (Annotatable part : annotation.getTargetParts()) {
-                findPart(part, to).ifPresent(altPart -> {
-                    logger.debug("Found equivalent target part: {}", altPart.getId());
-                    altPart.addAnnotationPart(annotation);
-                });
-            }
-        }
-        List<VirtualUnit> inVc = Lists.newArrayList(from.getVirtualParents());
-        for (VirtualUnit vc : inVc) {
-            logger.debug("Moving VC membership from {} to {}", from.getId(), to.getId());
-            vc.addIncludedUnit(to);
-        }
-    }
-
-    private void transferAccessors(DocumentaryUnit from, DocumentaryUnit to) {
-        ArrayList<Accessor> accessors = Lists.newArrayList(from.getAccessors());
-        if (!accessors.isEmpty()) {
-            api.aclManager().setAccessors(to, accessors);
-            logger.debug("Copying access control from {} to {}", from.getId(), to.getId());
-        }
-    }
-
-    private Optional<Annotatable> findPart(Annotatable orig, DocumentaryUnit newParent)
-            throws SerializationError, ItemNotFound {
-        Bundle newParentBundle = depSerializer.entityToBundle(newParent);
-        Bundle dep = depSerializer.entityToBundle(orig);
-
-        BiFunction<Bundle, Bundle, Boolean> isEquivalentDescription =
-                (Bundle a, Bundle b) -> Objects.equals(a.getType(), b.getType())
-                        && Objects.equals(a.getDataValue(Ontology.LANGUAGE), b.getDataValue(Ontology.LANGUAGE))
-                        && Objects.equals(a.getDataValue(Ontology.IDENTIFIER_KEY), b.getDataValue(Ontology.IDENTIFIER_KEY));
-
-        Optional<Bundle> bundle = newParentBundle.find(b ->
-                b.equals(dep) || isEquivalentDescription.apply(dep, b));
-        return bundle.isPresent()
-                ? Optional.of(manager.getEntity(bundle.get().getId(), Annotatable.class))
-                : Optional.empty();
     }
 
     private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) {

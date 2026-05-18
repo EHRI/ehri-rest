@@ -17,6 +17,7 @@
 package eu.ehri.project.tools;
 
 import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.PermissionUtils;
