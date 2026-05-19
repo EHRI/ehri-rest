@@ -9,6 +9,7 @@
   type: Country
   data:
     identifier: gb
+    __pid: gb-1234
     report: Test
     situation: Test
     dataSummary: Test
@@ -18,11 +19,13 @@
   type: Country
   data:
     identifier: nl
+    __pid: nl-1234
 
 - id: be
   type: Country
   data:
     identifier: be
+    __pid: be-1234
 
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
@@ -445,6 +448,7 @@
   type: HistoricalAgent
   data:
     identifier: a1
+    __pid: a1-1234
   relationships:
     describes:
       - id: ad1
@@ -476,6 +480,7 @@
   type: HistoricalAgent
   data:
     identifier: a2
+    __pid: a2-1234
   relationships:
     describes:
       - id: ad2
@@ -726,6 +731,7 @@
   type: CvocConcept
   data:
     identifier: cvocc1
+    __pid: cvocc1-1234
   relationships:
     describes:
       - id: cvocc1-desc
@@ -742,6 +748,7 @@
   type: CvocConcept
   data:
     identifier: cvocc2
+    __pid: cvocc2-1234
   relationships:
     describes:
       - id: cvocc2-desc

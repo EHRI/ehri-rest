@@ -27,6 +27,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
 import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
@@ -158,7 +159,7 @@ public class AuthoritativeSetResource extends
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
             final AuthoritativeSet set = api().get(id, cls);
-            Response item = createItem(bundle, accessors, agent -> {
+            Response item = createItem(setPid(bundle), accessors, agent -> {
                 set.addItem(agent);
                 agent.setPermissionScope(set);
             }, api().withScope(set), HistoricalAgent.class);
@@ -193,7 +194,7 @@ public class AuthoritativeSetResource extends
                     set,
                     version,
                     tolerant,
-                    Lists.newArrayList(),
+                    Lists.newArrayList(PreImportCallback.generatePid(idGenerator)),
                     Lists.newArrayList(cb)
             ).batchImport(data, user, getLogMessage());
             if (commit) {

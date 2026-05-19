@@ -36,10 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class JoodsRaadTest extends AbstractImporterTest {
@@ -58,8 +55,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
             assertNotNull(ios);
 
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
-            importer.setTolerant(true);
+            SkosImporter importer = skosImporter(vocabulary);
 
             // Before...
             List<VertexProxy> graphState1 = getGraphState(graph);
@@ -74,8 +70,8 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         /*  How many new nodes will have been created? We should have
          * 5 more Concepts
-       	 * 9 more ConceptDescription
-     	 * 6 more import Event links
+         * 9 more ConceptDescription
+         * 6 more import Event links
          * 1 more import Event
          */
         assertEquals(count + 21, getNodeCount(graph));
@@ -110,7 +106,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         int count;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
+            SkosImporter importer = skosImporter(cvoc1)
                     .setTolerant(true);
             importer.importFile(ios, logMessage);
 
@@ -124,8 +120,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         List<VertexProxy> graphState1;
         try (InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM)) {
             assertNotNull(niod_ios);
-            SkosImporter niod_importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc2);
-            niod_importer.setTolerant(true);
+            SkosImporter niod_importer = skosImporter(cvoc2);
             vocCount = toList(cvoc2.getConcepts()).size();
 
             // Before...
@@ -140,9 +135,9 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         /*  How many new nodes will have been created? We should have
          * 1 more Concepts
-       	 * 1 more ConceptDescription
+         * 1 more ConceptDescription
          * 1 more Link
-	 * 2 more import Event links (8 for every Unit, 1 for the User)
+         * 2 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
         assertEquals(count + 6, getNodeCount(graph));

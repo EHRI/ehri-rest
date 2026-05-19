@@ -41,10 +41,10 @@ import java.util.List;
  * Vocabulary is not possible via this API.
  */
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_CONCEPT)
-public class CvocConceptResource extends AbstractAccessibleResource<Concept>
+public class ConceptResource extends AbstractAccessibleResource<Concept>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource, ChildResource {
 
-    public CvocConceptResource(@Context GraphDatabaseService database) {
+    public ConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
     }
 

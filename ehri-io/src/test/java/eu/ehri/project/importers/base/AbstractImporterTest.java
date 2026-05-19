@@ -27,6 +27,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.PreImportCallback;
+import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -35,6 +37,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.utils.Slugify;
@@ -94,6 +97,11 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {
         SaxImportManager importer = saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
         return importer.withPreCallback(getPidGeneratorCallback());
+    }
+
+    protected SkosImporter skosImporter(Vocabulary vocabulary) {
+        return SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+                .withPreCallback(getPidGeneratorCallback());
     }
 
     /**
