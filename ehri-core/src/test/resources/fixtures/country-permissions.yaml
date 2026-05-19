@@ -13,11 +13,13 @@
   type: Country
   data:
     identifier: gb
+    __pid: gb-1234
 
 - id: nl
   type: Country
   data:
     identifier: nl
+    __pid: nl-1234
 
 # Institutions
 - id: repo-gb

@@ -9,6 +9,7 @@
   type: Country
   data:
     identifier: gb
+    __pid: gb-1234
     report: Test
     situation: Test
     dataSummary: Test
@@ -18,11 +19,13 @@
   type: Country
   data:
     identifier: nl
+    __pid: nl-1234
 
 - id: be
   type: Country
   data:
     identifier: be
+    __pid: be-1234
 
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
