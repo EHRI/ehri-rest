@@ -45,7 +45,9 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int vocCount = toList(vocabulary.getConcepts()).size();
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            SkosImporter importer = SkosImporterFactory
+                    .newSkosImporter(graph, adminUser, vocabulary)
+                    .withPreCallback(getPidGeneratorCallback());
             importer.setTolerant(true);
             ImportLog log = importer.importFile(ios, logMessage);
             assertEquals(2, log.getCreated());

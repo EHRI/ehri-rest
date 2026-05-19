@@ -57,6 +57,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
                  OutputStream outputStream = new ByteArrayOutputStream()) {
                 SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
                         .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
+                        .withPreCallback(getPidGeneratorCallback())
                         .allowUpdates(true);
                 importer
                         .importFile(stream, "test");
@@ -118,7 +119,8 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
     }
 
     private void importFile(Vocabulary vocabulary, String file) throws Exception {
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                .withPreCallback(getPidGeneratorCallback());
         try (final InputStream stream = ClassLoader.getSystemResourceAsStream(file)) {
             importer.importFile(stream, "test");
         }

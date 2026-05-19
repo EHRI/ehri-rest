@@ -448,6 +448,7 @@
   type: HistoricalAgent
   data:
     identifier: a1
+    __pid: a1-1234
   relationships:
     describes:
       - id: ad1
@@ -479,6 +480,7 @@
   type: HistoricalAgent
   data:
     identifier: a2
+    __pid: a2-1234
   relationships:
     describes:
       - id: ad2
@@ -729,6 +731,7 @@
   type: CvocConcept
   data:
     identifier: cvocc1
+    __pid: cvocc1-1234
   relationships:
     describes:
       - id: cvocc1-desc
@@ -745,6 +748,7 @@
   type: CvocConcept
   data:
     identifier: cvocc2
+    __pid: cvocc2-1234
   relationships:
     describes:
       - id: cvocc2-desc

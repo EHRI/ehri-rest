@@ -25,11 +25,12 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.base.Linkable;
+import eu.ehri.project.models.base.PersistentIdentifiable;
 
 /**
  * An item that belongs in some authoritative set.
  */
-public interface AuthoritativeItem extends Linkable, Identifiable {
+public interface AuthoritativeItem extends Linkable, PersistentIdentifiable {
     @Mandatory
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)

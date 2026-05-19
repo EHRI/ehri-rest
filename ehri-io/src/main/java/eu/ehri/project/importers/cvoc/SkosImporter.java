@@ -21,6 +21,7 @@ package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 
@@ -116,4 +117,12 @@ public interface SkosImporter {
      * @return A new SKOS importer
      */
     SkosImporter setConceptScheme(URI conceptSchemeURI);
+
+    /**
+     * Add a pre-import callback.
+     *
+     * @param callback a pre-import callback function
+     * @return A new SKOS importer
+     */
+    SkosImporter withPreCallback(PreImportCallback callback);
 }

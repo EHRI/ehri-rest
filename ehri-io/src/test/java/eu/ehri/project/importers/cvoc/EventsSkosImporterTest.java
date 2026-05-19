@@ -50,7 +50,9 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/allEhriEvents.rdf")) {
             Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            SkosImporter importer = SkosImporterFactory
+                    .newSkosImporter(graph, adminUser, vocabulary)
+                    .withPreCallback(getPidGeneratorCallback());
             importer.setTolerant(true);
             // Before...
             graphState1 = getGraphState(graph);
@@ -79,7 +81,9 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         List<VertexProxy> graphState1;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+            SkosImporter importer = SkosImporterFactory
+                    .newSkosImporter(graph, adminUser, vocabulary)
+                    .withPreCallback(getPidGeneratorCallback())
                     .setTolerant(true);
             //auths
             // Before...
@@ -131,6 +135,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
             SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
+                    .withPreCallback(getPidGeneratorCallback())
                     .setTolerant(true)
                     .importFile(ios, logMessage);
         }
@@ -139,7 +144,8 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         List<VertexProxy> graphState1;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+                    .withPreCallback(getPidGeneratorCallback());
             importer.setTolerant(true);
 
             // Before...

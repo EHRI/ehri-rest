@@ -177,7 +177,8 @@ public class ImportResource extends AbstractResource {
             // from the query params...
             Actioner user = getCurrentActioner();
             Vocabulary scope = manager.getEntity(scopeId, Vocabulary.class);
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope);
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope)
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator));
 
             ImportLog log = importer
                     .setFormat(format)
@@ -531,7 +532,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, EacImporter.class.getName()),
                     getHandlerCls(handlerClass, EacHandler.class.getName()),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 

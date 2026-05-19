@@ -47,14 +47,16 @@ public class CampsImporterTest extends AbstractImporterTest {
         int vocCount = toList(vocabulary.getConcepts()).size();
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
             assertNotNull(ios);
-            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).importFile(ios, logMessage);
+            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+                    .withPreCallback(getPidGeneratorCallback())
+                    .importFile(ios, logMessage);
         }
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 8 more Concepts
-       	 * 8 more ConceptDescription
-	     * 9 more import Event links (8 for every Unit, 1 for the User)
+         * 8 more ConceptDescription
+         * 9 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
         int afterNodeCount = count + 26;
@@ -83,7 +85,10 @@ public class CampsImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         int vocCount = toList(vocabulary.getConcepts()).size();
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).setTolerant(true);
+        SkosImporter importer = SkosImporterFactory
+                .newSkosImporter(graph, adminUser, vocabulary)
+                .setTolerant(true)
+                .withPreCallback(getPidGeneratorCallback());
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
             importer.importFile(ios, "Importing the camps as a SKOS file");
         }
@@ -91,8 +96,8 @@ public class CampsImporterTest extends AbstractImporterTest {
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 8 more Concepts
-       	 * 8 more ConceptDescription
-     	 * 9 more import Event links (8 for every Unit, 1 for the User)
+         * 8 more ConceptDescription
+         * 9 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
         int afterNodeCount = count + 26;
@@ -117,14 +122,15 @@ public class CampsImporterTest extends AbstractImporterTest {
         String version2 = "cvoc/campsv02.rdf";
         try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(version2)) {
             SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                .allowUpdates(true)
-                .importFile(ios2, "Importing the modified camps as a SKOS file");
+                    .allowUpdates(true)
+                    .withPreCallback(getPidGeneratorCallback())
+                    .importFile(ios2, "Importing the modified camps as a SKOS file");
         }
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 0 new concepts, 2 modified concepts (counts as 0)
-       	 * 0 new ConceptDescription, 2 modified (counts as 0)
+         * 0 new ConceptDescription, 2 modified (counts as 0)
          * 2 more import Event links (2 for every modified Unit, 1 for the User)
          * 1 more import Event
          */
