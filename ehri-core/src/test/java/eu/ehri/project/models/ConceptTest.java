@@ -39,7 +39,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class CvocConceptTest extends ModelTestBase {
+public class ConceptTest extends ModelTestBase {
 
     /**
      * Just play a bit with a small 'graph' of concepts.
@@ -53,22 +53,34 @@ public class CvocConceptTest extends ModelTestBase {
         Vertex v_fruit = manager.createVertex(
                 "fruit_id",
                 EntityClass.CVOC_CONCEPT,
-                ImmutableMap.of(Ontology.IDENTIFIER_KEY, "fruit")
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "fruit",
+                        Ontology.PID_KEY, "fruit-1234"
+                )
         );
         Vertex v_apples = manager.createVertex(
                 "applies_id",
                 EntityClass.CVOC_CONCEPT,
-                ImmutableMap.of(Ontology.IDENTIFIER_KEY, "apples")
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "apples",
+                        Ontology.PID_KEY, "apples-1234"
+                )
         );
         Vertex v_bananas = manager.createVertex(
                 "bananas_id",
                 EntityClass.CVOC_CONCEPT,
-                ImmutableMap.of(Ontology.IDENTIFIER_KEY, "bananas")
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "bananas",
+                        Ontology.PID_KEY, "bananas-1234"
+                )
         );
         Vertex v_trees = manager.createVertex(
                 "trees_id",
                 EntityClass.CVOC_CONCEPT,
-                ImmutableMap.of(Ontology.IDENTIFIER_KEY, "trees")
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "trees",
+                        Ontology.PID_KEY, "trees-1234"
+                )
         );
 
         // OK, so now we have fruit and more....
@@ -109,7 +121,8 @@ public class CvocConceptTest extends ModelTestBase {
                 // Note: Bundle.ID_KEY omitted as ImmutableMap does not allow null values
                 Bundle.TYPE_KEY, Entities.CVOC_CONCEPT,
                 Bundle.DATA_KEY, ImmutableMap.of(
-                        Ontology.IDENTIFIER_KEY, "apple"
+                        Ontology.IDENTIFIER_KEY, "apple",
+                        Ontology.PID_KEY, "apple-1234"
                 ),
                 Bundle.REL_KEY, ImmutableMap.of(
                         "describes", ImmutableList.of(
@@ -165,12 +178,18 @@ public class CvocConceptTest extends ModelTestBase {
         Vertex v_voc = manager.createVertex(
                 "voc_id",
                 EntityClass.CVOC_VOCABULARY,
-                ImmutableMap.of(Ontology.IDENTIFIER_KEY, "testVocabulary")
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "testVocabulary",
+                        Ontology.PID_KEY, "testVocabulary-1234"
+                )
         );
         Vertex v_apples = manager.createVertex(
                 "applies_id",
                 EntityClass.CVOC_CONCEPT,
-                ImmutableMap.of(Ontology.IDENTIFIER_KEY, "apples")
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "apples",
+                        Ontology.PID_KEY, "apples-1234"
+                )
         );
 
         // frame it

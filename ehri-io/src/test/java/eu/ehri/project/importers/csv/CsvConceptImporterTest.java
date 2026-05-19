@@ -65,6 +65,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
             CsvImportManager.create(graph, authoritativeSet, adminUser, CsvConceptImporter.class,
                             ImportOptions.basic().withFieldSeparator(';'))
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, logMessage);
         }
         /*

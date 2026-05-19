@@ -34,7 +34,7 @@ public class EntityAddTest extends AbstractFixtureTest {
     @Test
     public void testEntityAdd() throws Exception {
         String[] args = new String[]{EntityClass.COUNTRY.getName(),
-                "-P", "name=Elbonia", "-P", "identifier=el",
+                "-P", "name=Elbonia", "-P", "identifier=el", "-P", "__pid=el-1234",
                 "--user", "mike"};
         EntityAdd ua = new EntityAdd();
         CommandLine cmdLine = ua.getCmdLine(args);
@@ -46,7 +46,7 @@ public class EntityAddTest extends AbstractFixtureTest {
     @Test
     public void testEntityAddWithBadType() throws Exception {
         String[] args = new String[]{EntityClass.ADDRESS.getName(),
-                "-P", "name=Elbonia", "-P", "identifier=el",
+                "-P", "name=Elbonia", "-P", "identifier=el", "-P", "__pid=el-1234",
                 "--user", "mike"};
         EntityAdd ua = new EntityAdd();
         CommandLine cmdLine = ua.getCmdLine(args);

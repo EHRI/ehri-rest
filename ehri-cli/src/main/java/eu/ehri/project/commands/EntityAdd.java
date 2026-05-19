@@ -119,6 +119,7 @@ public class EntityAdd extends BaseCommand {
             builder.addDataValue((String) prop, properties.getProperty((String) prop));
         }
         Bundle bundle = builder.build();
+        System.out.println(bundle.toJson());
         String id = entityClass.getIdGen().generateId(scope.idPath(), bundle);
 
         try {

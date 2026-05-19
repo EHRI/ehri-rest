@@ -23,6 +23,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public abstract class AbstractSkosTest extends AbstractFixtureTest {
+public abstract class AbstractSkosTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractSkosTest.class);
     public static final String FILE1 = "cvoc/simple.xml";
     public static final String FILE2 = "cvoc/simple.n3";
@@ -60,14 +61,14 @@ public abstract class AbstractSkosTest extends AbstractFixtureTest {
         for (Vertex v : graph.getVertices()) {
             logger.debug(++vcount + " -------------------------");
             for (String key : v.getPropertyKeys()) {
-                String value = "";
+                StringBuilder value = new StringBuilder();
                 if (v.getProperty(key) instanceof String[]) {
                     String[] list = v.getProperty(key);
                     for (String o : list) {
-                        value += "[" + o + "] ";
+                        value.append("[").append(o).append("] ");
                     }
                 } else {
-                    value = v.getProperty(key).toString();
+                    value = new StringBuilder(v.getProperty(key).toString());
                 }
                 logger.debug(key + ": " + value);
             }

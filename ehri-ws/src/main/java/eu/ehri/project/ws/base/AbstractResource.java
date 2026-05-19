@@ -31,7 +31,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.project.IdGeneratorProvider;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
@@ -80,7 +80,7 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = jsonMapper.getFactory();
-    protected static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
+    protected static final RandomIdGenerator idGenerator = IdGeneratorFactory.getIdGenerator();
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());

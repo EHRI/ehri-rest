@@ -37,7 +37,7 @@ import eu.ehri.project.models.base.*;
  * be represented by an ISO3166 Alpha 2 code, lower cased.
  */
 @EntityType(EntityClass.COUNTRY)
-public interface Country extends PermissionScope, ItemHolder, Versioned, Annotatable, Linkable {
+public interface Country extends PermissionScope, ItemHolder, Versioned, Annotatable, Linkable, PersistentIdentifiable {
 
     /**
      * Alias function for fetching the country code identifier.

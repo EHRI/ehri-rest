@@ -22,7 +22,6 @@ package eu.ehri.project.exporters.cvoc;
 import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.AbstractSkosTest;
-import eu.ehri.project.importers.cvoc.JenaSkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.junit.Test;
@@ -55,7 +54,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
 
             try (final InputStream stream = ClassLoader.getSystemResourceAsStream(entry.getKey());
                  OutputStream outputStream = new ByteArrayOutputStream()) {
-                SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                SkosImporter importer = skosImporter(vocabulary)
                         .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
                         .allowUpdates(true);
                 importer
@@ -118,7 +117,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
     }
 
     private void importFile(Vocabulary vocabulary, String file) throws Exception {
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        SkosImporter importer = skosImporter(vocabulary);
         try (final InputStream stream = ClassLoader.getSystemResourceAsStream(file)) {
             importer.importFile(stream, "test");
         }

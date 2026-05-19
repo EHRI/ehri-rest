@@ -58,7 +58,9 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
             CsvImportManager.create(graph, authoritativeSet, adminUser,
                     PersonalitiesImporter.class, ImportOptions.basic()
-                            .withFieldSeparator(';')).importInputStream(ios, logMessage);
+                            .withFieldSeparator(';'))
+                    .withPreCallback(getPidGeneratorCallback())
+                    .importInputStream(ios, logMessage);
         }
         SystemEvent ev = actionManager.getLatestGlobalEvent();
 

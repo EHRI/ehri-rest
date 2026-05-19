@@ -13,6 +13,7 @@
   type: Country
   data:
     identifier: gb
+    __pid: gb-1234
 
 # Institution
 - id: repo

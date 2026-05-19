@@ -3,12 +3,11 @@ package eu.ehri.project.cypher;
 import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import eu.ehri.project.IdGeneratorProvider;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
@@ -19,7 +18,7 @@ import java.util.List;
 public class Functions {
 
     private static final Config config = ConfigFactory.load();
-    private static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
+    private static final RandomIdGenerator idGenerator = IdGeneratorFactory.getIdGenerator();
 
     @UserFunction
     public String join(@Name("list") Object list, @Name("sep") String sep) {

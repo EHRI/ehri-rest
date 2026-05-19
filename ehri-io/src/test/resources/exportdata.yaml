@@ -102,6 +102,7 @@
   type: HistoricalAgent
   data:
     identifier: !!str 000001
+    __pid: 000001-1234
     name: Historical Agent Example
   relationships:
     hasAuthoritativeSet: auths

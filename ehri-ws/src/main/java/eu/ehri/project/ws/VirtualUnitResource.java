@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.IdGeneratorProvider;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
@@ -53,7 +53,7 @@ public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
-    private final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
+    private final RandomIdGenerator idGenerator = IdGeneratorFactory.getIdGenerator();
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);

@@ -35,19 +35,19 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     static final String TEST_ID = "a1";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String authorityTestData;
+    private String historicalAgentTestData;
 
     @Before
     public void setUp() throws Exception {
-        authorityTestData = readResourceFileAsString("HistoricalAgent.json");
+        historicalAgentTestData = readResourceFileAsString("HistoricalAgent.json");
     }
 
     @Test
-    public void testCreateAuthority() throws Exception {
+    public void testCreateHistoricalAgent() {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT))
-                .entity(authorityTestData)
+                entityUri(Entities.AUTHORITATIVE_SET, "auths"))
+                .entity(historicalAgentTestData)
                 .post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -60,26 +60,33 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     }
 
     @Test
-    public void testCreateAuthorityWithExistingIdentifier() throws Exception {
-        String json = Bundle.fromString(authorityTestData)
-                .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
+    public void testCreateHistoricalAgentWithExistingIdentifier() throws Exception {
+        String json = Bundle.fromString(historicalAgentTestData)
+                .withDataValue(Ontology.IDENTIFIER_KEY, "a2").toJson();
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT)).entity(json)
+                entityUri(Entities.AUTHORITATIVE_SET, "auths"))
+                .entity(json)
                 .post(ClientResponse.class);
-        assertStatus(BAD_REQUEST, response);
+        assertStatus(CREATED, response);
+
+        ClientResponse response2 = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.AUTHORITATIVE_SET, "auths"))
+                .entity(json)
+                .post(ClientResponse.class);
+        assertStatus(BAD_REQUEST, response2);
     }
 
     @Test
-    public void testUpdateAuthorityByIdentifier() throws Exception {
+    public void testUpdateHistoricalAgentByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT)).entity(authorityTestData)
+                entityUri(Entities.AUTHORITATIVE_SET, "auths")).entity(historicalAgentTestData)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
 
         // Obtain some update data.
-        String updateData = Bundle.fromString(authorityTestData)
+        String updateData = Bundle.fromString(historicalAgentTestData)
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
@@ -89,19 +96,19 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     }
 
     @Test
-    public void testCreateAuthorityWithDeserializationError() throws Exception {
+    public void testCreateHistoricalAgentWithDeserializationError() {
         // Create
-        String badAuthorityTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
+        String badHistoricalAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.HISTORICAL_AGENT)).entity(badAuthorityTestData)
+                entityUri(Entities.AUTHORITATIVE_SET, "auths"))
+                .entity(badHistoricalAgentTestData)
                 .post(ClientResponse.class);
 
         assertStatus(BAD_REQUEST, response);
     }
 
     @Test
-    public void testDeleteAuthority() throws Exception {
-        // Create
+    public void testDeleteHistoricalAgent() {
         URI uri = entityUri(Entities.HISTORICAL_AGENT, TEST_ID);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);

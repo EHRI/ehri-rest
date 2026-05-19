@@ -22,7 +22,7 @@ package eu.ehri.project.commands;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.IdGeneratorProvider;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -54,7 +54,7 @@ public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends SaxXmlHandler> handler;
     private final Class<? extends ItemImporter<?, ?>> importer;
 
-    private static final RandomIdGenerator idGenerator = IdGeneratorProvider.getIdGenerator();
+    private static final RandomIdGenerator idGenerator = IdGeneratorFactory.getIdGenerator();
 
     public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter<?, ?>> importer) {
         this.handler = handler;

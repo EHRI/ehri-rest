@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import eu.ehri.project.IdGeneratorProvider;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
@@ -33,7 +33,7 @@ public class EadSyncTest extends AbstractImporterTest {
 
     private Repository repo;
     private SaxImportManager importManager;
-    private static final RandomIdGenerator arkIdGenerator = IdGeneratorProvider.getIdGenerator();
+    private static final RandomIdGenerator arkIdGenerator = IdGeneratorFactory.getIdGenerator();
     private final Map<String, String> pidMap = Maps.newHashMap();
 
     @Before

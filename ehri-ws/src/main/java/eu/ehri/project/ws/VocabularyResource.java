@@ -155,7 +155,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Vocabulary vocabulary = api().get(id, cls);
-            Response item = createItem(bundle, accessors,
+            Response item = createItem(setPid(bundle), accessors,
                     concept -> concept.setVocabulary(vocabulary),
                     api().withScope(vocabulary), Concept.class);
             tx.success();

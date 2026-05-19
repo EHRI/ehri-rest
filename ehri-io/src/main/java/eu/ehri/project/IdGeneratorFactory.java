@@ -21,7 +21,7 @@ import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.models.idgen.RandomIdGenerator;
 
-public class IdGeneratorProvider {
+public class IdGeneratorFactory {
     private static final Config config = ConfigFactory.load();
     private static final int length = config.getInt("io.pids.length");
 
