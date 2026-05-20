@@ -21,7 +21,6 @@ package eu.ehri.project.ws.base;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import eu.ehri.project.IdGeneratorProvider;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
@@ -34,7 +33,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
