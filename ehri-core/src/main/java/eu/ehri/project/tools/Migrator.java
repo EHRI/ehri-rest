@@ -17,7 +17,6 @@
 package eu.ehri.project.tools;
 
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.GraphManager;
@@ -72,11 +71,12 @@ public class Migrator {
     }
 
     private void transferPersistentIdentifiers(DocumentaryUnit from, DocumentaryUnit to) {
-        Vertex fromV = from.asVertex();
-        Vertex toV = to.asVertex();
         String fromPid = from.getPersistentIdentifier();
-        fromV.setProperty(Ontology.PID_KEY, PID_PREFIX + fromPid);
-        toV.setProperty(Ontology.PID_KEY, fromPid);
+        if (fromPid == null) {
+            throw new IllegalStateException("Source item " + from.getId() + " has no PID");
+        }
+        from.asVertex().setProperty(Ontology.PID_KEY, PID_PREFIX + fromPid);
+        to.asVertex().setProperty(Ontology.PID_KEY, fromPid);
     }
 
     private void transferUserGeneratedContent(DocumentaryUnit from, DocumentaryUnit to) throws SerializationError, ItemNotFound {
