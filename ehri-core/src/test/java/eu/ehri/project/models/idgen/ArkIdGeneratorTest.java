@@ -24,8 +24,8 @@ public class ArkIdGeneratorTest {
 
     @Test
     public void testGenerateIdLength() {
-        RandomIdGenerator gen = ArkIdGenerator.create(10);
+        RandomIdGenerator gen = ArkIdGenerator.create(12);
         String id = gen.generateId();
-        assertEquals(10, id.length());
+        assertEquals(12, id.length());
     }
 }
