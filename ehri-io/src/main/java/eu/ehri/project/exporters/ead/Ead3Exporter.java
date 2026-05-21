@@ -34,7 +34,6 @@ import static eu.ehri.project.exporters.ead.EadExporter.getEventDescription;
 public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Ead3Exporter.class);
-    private static final Config config = ConfigFactory.load();
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYY-MM-dd");
 
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead3Exporter.class.getName());

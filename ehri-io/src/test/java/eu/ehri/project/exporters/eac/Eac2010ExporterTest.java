@@ -72,6 +72,7 @@ public class Eac2010ExporterTest extends XmlExporterTest {
         assertXPath(doc, "2013-09-09",
                 "//eac-cpf/control/maintenanceHistory/maintenanceEvent/eventDateTime");
         assertXPath(doc, "000001", "//eac-cpf/cpfDescription/identity/entityId");
+        assertXPath(doc, "ark:41045/p0000001-1234", "//eac-cpf/cpfDescription/identity/entityId[2]");
         assertXPath(doc, "person", "//eac-cpf/cpfDescription/identity/entityType");
         assertXPath(doc, "Historical Agent Example", "//eac-cpf/cpfDescription/identity/nameEntry/part");
         assertXPath(doc, "HAE", "//eac-cpf/cpfDescription/identity/nameEntry[2]/part");
