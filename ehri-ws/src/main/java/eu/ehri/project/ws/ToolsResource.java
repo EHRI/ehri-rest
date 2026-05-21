@@ -37,7 +37,9 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
@@ -388,6 +390,58 @@ public class ToolsResource extends AbstractResource {
             return String.valueOf(done);
         } catch (SerializationError e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Regenerate description IDs.
+     *
+     * @param bufferSize the transaction buffer size
+     * @param commit     actually commit the changes
+     */
+    @POST
+    @Produces("text/plain")
+    @Path("generate-pids")
+    public String generatePids(
+            @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
+        EntityClass[] types = {
+                EntityClass.COUNTRY,
+                EntityClass.REPOSITORY,
+                EntityClass.DOCUMENTARY_UNIT,
+                EntityClass.VIRTUAL_UNIT,
+                EntityClass.CVOC_VOCABULARY,
+                EntityClass.CVOC_CONCEPT,
+                EntityClass.AUTHORITATIVE_SET,
+                EntityClass.HISTORICAL_AGENT
+        };
+        int done = 0;
+        try (final Tx tx = beginTx()) {
+            for (EntityClass entityClass : types) {
+                try (CloseableIterable<Accessible> descriptions = manager.getEntities(entityClass, Accessible.class)) {
+                    for (Accessible accessible : descriptions) {
+                        Vertex vertex = accessible.asVertex();
+                        String existing = vertex.getProperty(Ontology.PID_KEY);
+                        if (existing == null) {
+                            String pid = idGenerator.generateId();
+                            vertex.setProperty(Ontology.PID_KEY, pid);
+                            for (Version version : accessible.as(Versioned.class).getAllPriorVersions()) {
+                                Vertex versionVertex = version.asVertex();
+                                versionVertex.setProperty(Ontology.VERSION_ENTITY_PID, pid);
+                            }
+                            done++;
+
+                            if (bufferSize > 0 && done % bufferSize == 0) {
+                                tx.success();
+                            }
+                        }
+                    }
+                }
+            }
+            if (commit && done > 0) {
+                tx.success();
+            }
+            return String.valueOf(done);
         }
     }
 
