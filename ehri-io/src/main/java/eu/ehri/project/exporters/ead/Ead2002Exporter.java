@@ -32,7 +32,6 @@ import static eu.ehri.project.exporters.ead.EadExporter.*;
 public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);
-    private static final Config config = ConfigFactory.load();
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
 

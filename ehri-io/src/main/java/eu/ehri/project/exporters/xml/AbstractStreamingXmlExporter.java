@@ -2,6 +2,8 @@ package eu.ehri.project.exporters.xml;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.models.base.Entity;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -21,6 +23,7 @@ public abstract class AbstractStreamingXmlExporter<E extends Entity>
         extends StreamingXmlDsl
         implements StreamingXmlExporter<E>, XmlExporter<E> {
 
+    protected static final Config config = ConfigFactory.load();
     private static final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
 
     @Override
