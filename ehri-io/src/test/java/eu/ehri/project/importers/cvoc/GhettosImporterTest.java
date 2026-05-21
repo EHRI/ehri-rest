@@ -46,9 +46,7 @@ public class GhettosImporterTest extends AbstractImporterTest {
         int vocCount = toList(vocabulary.getConcepts()).size();
         ImportLog log;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                    .withPreCallback(getPidGeneratorCallback());
-            importer.setTolerant(true);
+            SkosImporter importer = skosImporter(vocabulary);
             log = importer.importFile(ios, logMessage);
         }
         //printGraph(graph);

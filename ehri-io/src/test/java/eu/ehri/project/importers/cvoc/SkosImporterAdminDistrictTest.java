@@ -41,9 +41,8 @@ public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_SKOS)) {
-            SkosImporter importer = SkosImporterFactory
-                    .newSkosImporter(graph, adminUser, vocabulary).setTolerant(true)
-                    .withPreCallback(getPidGeneratorCallback());
+            SkosImporter importer = skosImporter(vocabulary)
+                    .setTolerant(true);
             importer.importFile(ios, logMessage);
         }
 

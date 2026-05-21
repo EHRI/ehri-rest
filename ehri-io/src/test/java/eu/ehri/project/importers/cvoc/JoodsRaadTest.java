@@ -55,9 +55,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
             assertNotNull(ios);
 
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                    .withPreCallback(getPidGeneratorCallback());
-            importer.setTolerant(true);
+            SkosImporter importer = skosImporter(vocabulary);
 
             // Before...
             List<VertexProxy> graphState1 = getGraphState(graph);
@@ -108,8 +106,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         int count;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
-                    .withPreCallback(getPidGeneratorCallback())
+            SkosImporter importer = skosImporter(cvoc1)
                     .setTolerant(true);
             importer.importFile(ios, logMessage);
 
@@ -123,10 +120,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         List<VertexProxy> graphState1;
         try (InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM)) {
             assertNotNull(niod_ios);
-            SkosImporter niod_importer = SkosImporterFactory
-                    .newSkosImporter(graph, adminUser, cvoc2)
-                    .withPreCallback(getPidGeneratorCallback());
-            niod_importer.setTolerant(true);
+            SkosImporter niod_importer = skosImporter(cvoc2);
             vocCount = toList(cvoc2.getConcepts()).size();
 
             // Before...

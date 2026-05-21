@@ -47,8 +47,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         int vocCount = toList(vocabulary.getConcepts()).size();
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
             assertNotNull(ios);
-            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                    .withPreCallback(getPidGeneratorCallback())
+            skosImporter(vocabulary)
                     .importFile(ios, logMessage);
         }
 
@@ -85,10 +84,8 @@ public class CampsImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         int vocCount = toList(vocabulary.getConcepts()).size();
-        SkosImporter importer = SkosImporterFactory
-                .newSkosImporter(graph, adminUser, vocabulary)
-                .setTolerant(true)
-                .withPreCallback(getPidGeneratorCallback());
+        SkosImporter importer = skosImporter(vocabulary)
+                .setTolerant(true);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
             importer.importFile(ios, "Importing the camps as a SKOS file");
         }
@@ -121,9 +118,8 @@ public class CampsImporterTest extends AbstractImporterTest {
         //import version 2
         String version2 = "cvoc/campsv02.rdf";
         try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(version2)) {
-            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+            skosImporter(vocabulary)
                     .allowUpdates(true)
-                    .withPreCallback(getPidGeneratorCallback())
                     .importFile(ios2, "Importing the modified camps as a SKOS file");
         }
 

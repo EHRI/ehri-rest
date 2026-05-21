@@ -46,9 +46,8 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int vocCount = toList(vocabulary.getConcepts()).size();
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
-            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+            skosImporter(vocabulary)
                     .setTolerant(true)
-                    .withPreCallback(getPidGeneratorCallback())
                     .importFile(ios, logMessage);
         }
 

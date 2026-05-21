@@ -44,7 +44,7 @@ import static org.junit.Assert.assertTrue;
 public class JenaSkosImporterTest extends AbstractSkosTest {
     @Test
     public void testImportFile1() throws Exception {
-        SkosImporter importer = getSkosImporter();
+        SkosImporter importer = skosImporter(vocabulary);
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE1)) {
             ImportLog importLog = importer
                     .importFile(ios, "simple 1");
@@ -54,7 +54,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testSetDefaultLang() throws Exception {
-        SkosImporter importer = getSkosImporter();
+        SkosImporter importer = skosImporter(vocabulary);
         // Setting a two-letter language code should result in a description
         // being created with the corresponding 3-letter code.
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE1)) {
@@ -69,7 +69,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testLangWithScriptCode() throws Exception {
-        SkosImporter importer = getSkosImporter();
+        SkosImporter importer = skosImporter(vocabulary);
         // Setting a two-letter language code should result in a description
         // being created with the corresponding 3-letter code.
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE6)) {
@@ -95,7 +95,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportFile2() throws Exception {
-        SkosImporter importer = getSkosImporter().setFormat("N3");
+        SkosImporter importer = skosImporter(vocabulary).setFormat("N3");
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE2)) {
             ImportLog importLog = importer
                     .importFile(ios, "simple 2");
@@ -105,7 +105,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportFile3() throws Exception {
-        SkosImporter importer = getSkosImporter();
+        SkosImporter importer = skosImporter(vocabulary);
         try (InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE3)) {
             ImportLog importLog1 = importer
                     .importFile(ios1, "repositories");
@@ -120,7 +120,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportFile4() throws Exception {
-        SkosImporter importer = getSkosImporter();
+        SkosImporter importer = skosImporter(vocabulary);
         try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE4)) {
             ImportLog importLog1 = importer
                     .importFile(ios1, "camps");
@@ -135,7 +135,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportFile5() throws Exception {
-        SkosImporter importer = getSkosImporter();
+        SkosImporter importer = skosImporter(vocabulary);
         try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE5)) {
             ImportLog importLog1 = importer
                     .importFile(ios1, "ghettos");
@@ -150,7 +150,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportFile7SkosXL() throws Exception {
-        SkosImporter importer = getSkosImporter().setFormat("N3");
+        SkosImporter importer = skosImporter(vocabulary).setFormat("N3");
         try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE7)) {
             ImportLog importLog = importer
                     .importFile(ios1, "simple 1 XL");
@@ -165,7 +165,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test(expected = InvalidInputFormatError.class)
     public void testImportMissingConceptScheme() throws Exception {
-        SkosImporter importer = getSkosImporter()
+        SkosImporter importer = skosImporter(vocabulary)
                 .setFormat("RDF/XML")
                 .setConceptScheme(URI.create("http://example.com/foobar"));
         try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE3)) {
@@ -176,7 +176,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportSpecificConceptScheme() throws Exception {
-        SkosImporter importer = getSkosImporter()
+        SkosImporter importer = skosImporter(vocabulary)
                 .setFormat("RDF/XML")
                 .setConceptScheme(URI.create("http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"));
         try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE3)) {
@@ -188,7 +188,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
 
     @Test
     public void testImportGeonames() throws Exception {
-        SkosImporter importer = getSkosImporter()
+        SkosImporter importer = skosImporter(vocabulary)
                 .setBaseURI("http://sws.geonames.org/")
                 .setURISuffix("/")
                 .setFormat("TTL");
@@ -206,10 +206,5 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         List<String> altLabels = larestan.getDescriptions().iterator().next()
                 .<List<String>>getProperty(SkosMultilingual.altLabel.toString());
         assertEquals(15, altLabels.size());
-    }
-
-    private JenaSkosImporter getSkosImporter() {
-        return new JenaSkosImporter(graph, actioner, vocabulary)
-                .withPreCallback(getPidGeneratorCallback());
     }
 }
