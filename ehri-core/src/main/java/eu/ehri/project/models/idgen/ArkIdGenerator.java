@@ -21,17 +21,14 @@ import java.security.SecureRandom;
 /**
  * The Archival Resource Key ID generator uses a limited set of 'betanumeric'
  * characters, minus the 'l', to avoid easily-confused characters and
- * generating words. It always starts with a consonant.
+ * generating words.
  */
 public class ArkIdGenerator implements RandomIdGenerator {
-    public static final String HEAD_BETABET = "bcdfghjkmnpqrstvwxyz";
-    public static final String BETANUMS = HEAD_BETABET + "0123456789";
-
+    public static final String BETANUMERICS = "bcdfghjkmnpqrstvwxyz0123456789";
     private static final SecureRandom RANDOM = new SecureRandom();
-
     private final int length;
 
-    public ArkIdGenerator(int length) {
+    private ArkIdGenerator(int length) {
         this.length = length;
     }
 
@@ -42,11 +39,9 @@ public class ArkIdGenerator implements RandomIdGenerator {
     @Override
     public String generateId() {
         StringBuilder sb = new StringBuilder(length);
-        sb.append(HEAD_BETABET.charAt(RANDOM.nextInt(HEAD_BETABET.length())));
-
-        for (int i = 1; i < length; i++) {
-            int index = RANDOM.nextInt(BETANUMS.length());
-            sb.append(BETANUMS.charAt(index));
+        for (int i = 0; i < length; i++) {
+            int index = RANDOM.nextInt(BETANUMERICS.length());
+            sb.append(BETANUMERICS.charAt(index));
         }
         return sb.toString();
     }
