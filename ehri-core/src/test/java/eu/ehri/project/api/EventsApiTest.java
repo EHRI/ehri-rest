@@ -87,13 +87,13 @@ public class EventsApiTest extends AbstractFixtureTest {
                 .to(timestamp)
                 .list());
         assertEquals(1, Iterables.size(toList));
-        assertEquals(doc2, toList.get(0).getFirstSubject());
+        assertEquals(doc1, toList.get(0).getFirstSubject());
 
         List<SystemEvent> fromList = Lists.newArrayList(events(user1)
                 .from(timestamp)
                 .list());
         assertEquals(1, Iterables.size(fromList));
-        assertEquals(doc1, fromList.get(0).getFirstSubject());
+        assertEquals(doc2, fromList.get(0).getFirstSubject());
 
         // Test ID filter
         List<SystemEvent> idList = Lists.newArrayList(events(user1)
@@ -120,6 +120,30 @@ public class EventsApiTest extends AbstractFixtureTest {
         // events are temporally ordered, so the second item
         // in the queue will be the first thing created.
         assertEquals(doc1, eventPage.get(0).getFirstSubject());
+    }
+
+    @Test
+    public void testFromAndToFilterByTimestampRange() throws Exception {
+        // doc1 is created before `midpoint`, doc2 after, so:
+        //  - .from(midpoint) should keep only the doc2 event (timestamp >= midpoint)
+        //  - .to(midpoint)   should keep only the doc1 event (timestamp <= midpoint)
+        DocumentaryUnit doc1 = createItemWithIdentifier("foo", user1);
+        Thread.sleep(10);
+        String midpoint = ActionManager.getTimestamp();
+        Thread.sleep(10);
+        DocumentaryUnit doc2 = createItemWithIdentifier("bar", user1);
+
+        List<SystemEvent> fromList = Lists.newArrayList(events(user1)
+                .from(midpoint)
+                .list());
+        assertEquals(1, fromList.size());
+        assertEquals(doc2, fromList.get(0).getFirstSubject());
+
+        List<SystemEvent> toList = Lists.newArrayList(events(user1)
+                .to(midpoint)
+                .list());
+        assertEquals(1, toList.size());
+        assertEquals(doc1, toList.get(0).getFirstSubject());
     }
 
     @Test
