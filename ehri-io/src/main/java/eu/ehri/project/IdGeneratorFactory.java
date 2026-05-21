@@ -26,6 +26,6 @@ public class IdGeneratorFactory {
     private static final int length = config.getInt("io.pids.length");
 
     public static RandomIdGenerator getIdGenerator() {
-        return new ArkIdGenerator(length);
+        return ArkIdGenerator.create(length);
     }
 }
