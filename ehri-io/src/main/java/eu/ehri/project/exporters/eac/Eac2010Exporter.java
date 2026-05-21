@@ -199,6 +199,9 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
     private void addIdentitySection(XMLStreamWriter sw, HistoricalAgent agent, Description desc) {
         tag(sw, "identity", () -> {
             tag(sw, "entityId", agent.getIdentifier());
+            tag(sw, "entityId",
+                    String.format("%s%s", config.getString("io.pids.prefix"), agent.getPersistentIdentifier()),
+                    attrs("localType", "ARK"));
             tag(sw, "entityType", desc.<String>getProperty(Isaar.typeOfEntity));
             tag(sw, "nameEntry", () -> {
                 tag(sw, "part", desc.getName());

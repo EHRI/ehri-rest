@@ -56,7 +56,6 @@ import java.util.stream.Collectors;
  */
 public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Repository> implements EagExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eag2012Exporter.class);
-    private static final Config config = ConfigFactory.load();
     private static final String DEFAULT_NAMESPACE = "http://www.archivesportaleurope.net/Portal/profiles/eag_2012/";
 
     private final Api api;
