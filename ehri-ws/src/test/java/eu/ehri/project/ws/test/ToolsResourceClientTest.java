@@ -134,6 +134,17 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
+    public void testGeneratePids() throws Exception {
+        WebResource resource = client
+                .resource(ehriUri(ToolsResource.ENDPOINT, "generate-pids"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource.post(ClientResponse.class);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertEquals("0", out);
+    }
+
+    @Test
     public void testRelinking() throws Exception {
         WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "relink-targets"));
         ClientResponse response = resource
