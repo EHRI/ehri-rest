@@ -111,13 +111,13 @@ public class EventsApiImpl implements EventsApi {
             this.accessor = eventsApi.accessor;
             this.offset = eventsApi.offset;
             this.limit = eventsApi.limit;
-            this.users = eventsApi.users;
-            this.ids = eventsApi.ids;
-            this.entityTypes = eventsApi.entityTypes;
-            this.eventTypes = eventsApi.eventTypes;
+            this.users = Sets.newHashSet(eventsApi.users);
+            this.ids = Sets.newHashSet(eventsApi.ids);
+            this.entityTypes = Sets.newHashSet(eventsApi.entityTypes);
+            this.eventTypes = Sets.newHashSet(eventsApi.eventTypes);
             this.from = eventsApi.from;
             this.to = eventsApi.to;
-            this.showType = eventsApi.showType;
+            this.showType = Sets.newHashSet(eventsApi.showType);
             this.aggregation = eventsApi.aggregation;
         }
 

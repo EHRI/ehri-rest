@@ -123,6 +123,17 @@ public class EventsApiTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testWithFiltersDoesNotMutateSource() throws Exception {
+        createItemWithIdentifier("foo", user1);
+        createItemWithIdentifier("bar", user1);
+
+        EventsApi base = events(user1);
+        // Deriving a filtered view must not bleed back into `base`.
+        base.withUsers(user2.getId()).list();
+        assertEquals(2, Iterables.size(base.list()));
+    }
+
+    @Test
     public void testFromAndToFilterByTimestampRange() throws Exception {
         // doc1 is created before `midpoint`, doc2 after, so:
         //  - .from(midpoint) should keep only the doc2 event (timestamp >= midpoint)
