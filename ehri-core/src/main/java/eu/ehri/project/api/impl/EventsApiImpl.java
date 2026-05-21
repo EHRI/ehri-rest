@@ -429,14 +429,14 @@ public class EventsApiImpl implements EventsApi {
         if (from != null) {
             pipe = pipe.filter(event -> {
                 String timestamp = event.getTimestamp();
-                return from.compareTo(timestamp) >= 0;
+                return timestamp.compareTo(from) >= 0;
             });
         }
 
         if (to != null) {
             pipe = pipe.filter(event -> {
                 String timestamp = event.getTimestamp();
-                return to.compareTo(timestamp) <= 0;
+                return timestamp.compareTo(to) <= 0;
             });
         }
 
