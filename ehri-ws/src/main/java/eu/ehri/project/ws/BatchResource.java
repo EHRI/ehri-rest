@@ -23,6 +23,7 @@ import com.google.common.base.Charsets;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
@@ -86,7 +87,7 @@ public class BatchResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream inputStream)
-            throws IOException, ItemNotFound, ValidationError, DeserializationError {
+            throws IOException, ItemNotFound, ValidationError, DeserializationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             PermissionScope parent = scope != null
@@ -131,7 +132,7 @@ public class BatchResource extends AbstractResource {
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            Table ids) throws IOException, DeserializationError {
+            Table ids) throws IOException, DeserializationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             PermissionScope parent = scope != null
@@ -155,9 +156,6 @@ public class BatchResource extends AbstractResource {
         }
     }
 
-
-    // Helpers
-
     private Optional<String> getLogMessage(String logMessagePathOrText) throws IOException {
         if (logMessagePathOrText == null || logMessagePathOrText.trim().isEmpty()) {
             return getLogMessage();
@@ -170,5 +168,4 @@ public class BatchResource extends AbstractResource {
             }
         }
     }
-
 }

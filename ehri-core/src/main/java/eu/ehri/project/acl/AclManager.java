@@ -719,7 +719,7 @@ public final class AclManager {
     /**
      * Get the content type with the given id.
      */
-    private ContentTypes getContentType(EntityClass type) {
+    public ContentTypes getContentType(EntityClass type) {
         try {
             return ContentTypes.withName(type.getName());
         } catch (NoSuchElementException e) {

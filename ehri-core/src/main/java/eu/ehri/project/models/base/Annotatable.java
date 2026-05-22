@@ -34,6 +34,12 @@ public interface Annotatable extends Entity {
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
     void addAnnotation(Annotation annotation);
 
+    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
+    void removeAnnotation(Annotation annotation);
+
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART, direction = Direction.IN)
     void addAnnotationPart(Annotation annotation);
+
+    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART, direction = Direction.IN)
+    void removeAnnotationPart(Annotation annotation);
 }

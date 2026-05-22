@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
@@ -383,7 +384,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError, PermissionDenied {
 
         try (final Tx tx = beginTx()) {
             checkConfigFileReference(propertyFile);
