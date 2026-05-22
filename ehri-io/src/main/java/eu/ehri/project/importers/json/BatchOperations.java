@@ -4,21 +4,18 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.PermissionUtils;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.PreImportCallback;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +38,8 @@ public class BatchOperations {
     private final BundleManager dao;
     private final Serializer serializer;
     private final GraphManager manager;
+    private final AclManager aclManager;
+    private final PermissionUtils permissionUtils;
     private final PermissionScope scope;
     private final boolean version;
     private final boolean tolerant;
@@ -69,6 +68,8 @@ public class BatchOperations {
 
         this.manager = GraphManagerFactory.getInstance(graph);
         this.actionManager = new ActionManager(graph, scope);
+        this.aclManager = new AclManager(graph, scope);
+        this.permissionUtils = new PermissionUtils(graph, scope);
         this.dao = new BundleManager(graph, scope.idPath());
         this.serializer = new Serializer.Builder(graph).dependentOnly().build();
     }
@@ -153,7 +154,7 @@ public class BatchOperations {
      * @throws ValidationError      if data constraints are not met
      */
     public ImportLog batchImport(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
-            throws DeserializationError, ValidationError {
+            throws DeserializationError, ValidationError, PermissionDenied {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
         ImportLog log = new ImportLog(logMessage.orElse(null));
@@ -161,6 +162,11 @@ public class BatchOperations {
             for (Bundle rawBundle : bundleIter) {
                 try {
                     Bundle bundle = PreImportCallback.handlePreCallbacks(scope.idPath(), rawBundle, preCallbacks);
+                    permissionUtils.checkContentPermission(
+                            actioner.as(Accessor.class),
+                            aclManager.getContentType(bundle.getType()),
+                            PermissionType.CREATE
+                    );
                     Mutation<Accessible> mutation = dao.createOrUpdate(bundle, Accessible.class);
                     String id = mutation.getNode().getId();
                     switch (mutation.getState()) {
@@ -210,7 +216,7 @@ public class BatchOperations {
      * @throws ValidationError      if data constraints are not met
      */
     public ImportLog batchUpdate(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
-            throws DeserializationError, ItemNotFound, ValidationError {
+            throws DeserializationError, ItemNotFound, ValidationError, PermissionDenied {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
         ImportLog log = new ImportLog(logMessage.orElse(null));
@@ -219,6 +225,11 @@ public class BatchOperations {
                 try {
                     Bundle bundle = PreImportCallback.handlePreCallbacks(scope.idPath(), rawBundle, preCallbacks);
                     Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
+                    permissionUtils.checkEntityPermission(
+                            entity.as(Accessible.class),
+                            actioner.as(Accessor.class),
+                            PermissionType.CREATE
+                    );
                     Bundle oldBundle = serializer.entityToBundle(entity);
                     Bundle newBundle = oldBundle.mergeDataWith(bundle);
                     Mutation<Accessible> update = dao.update(newBundle, Accessible.class);
@@ -264,17 +275,22 @@ public class BatchOperations {
      *                      mode is not enabled
      */
     public int batchDelete(Collection<String> ids, Actioner actioner, Optional<String> logMessage)
-            throws ItemNotFound {
+            throws ItemNotFound, PermissionDenied {
         boolean logged = false;
         int done = 0;
         if (!ids.isEmpty()) {
             try {
-                ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
-                        EventTypes.deletion, logMessage);
+                ActionManager.EventContext ctx = actionManager.newEventContext(actioner, EventTypes.deletion, logMessage);
                 for (String id : ids) {
                     try {
-                        Entity entity = manager.getEntity(id, Entity.class);
-                        ctx = ctx.addSubjects(entity.as(Accessible.class));
+                        Accessible entity = manager.getEntity(id, Accessible.class);
+                        permissionUtils.checkEntityPermission(
+                                entity,
+                                actioner.as(Accessor.class),
+                                PermissionType.DELETE
+                        );
+
+                        ctx = ctx.addSubjects(entity);
                         if (version) {
                             ctx = ctx.createVersion(entity);
                         }

@@ -37,6 +37,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.tools.Migrator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -218,6 +219,57 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 tx.success();
             }
             return log;
+        }
+    }
+
+    /**
+     * Migrate a set of items from one location in the hierarchy to another.
+     *
+     * @param commit  commit the transaction
+     * @param mapping input data table
+     * @return the affected items
+     * @throws DeserializationError if input data in malformed
+     * @throws PermissionDenied     if the user can't complete the action
+     */
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Path("{id:[^/]+}/migrate")
+    public Table migrate(
+            @PathParam("id") String id,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
+            Table mapping) throws DeserializationError, PermissionDenied, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            Repository repository = api().get(id, cls);
+            final Api api = api().withScope(repository);
+            Migrator migrator = new Migrator(graph, api, repository);
+            List<List<String>> done = Lists.newArrayList();
+            for (List<String> row : mapping.rows()) {
+                if (row.size() != 2) {
+                    throw new DeserializationError(
+                            "Invalid table data: must contain 2 columns only");
+                }
+                try {
+                    String fromId = row.get(0);
+                    String toId = row.get(1);
+                    DocumentaryUnit from = api().get(fromId, DocumentaryUnit.class);
+                    DocumentaryUnit to = api().get(toId, DocumentaryUnit.class);
+                    migrator.migrate(from, to, getCurrentActioner());
+                    done.add(Lists.newArrayList(toId));
+                } catch (ItemNotFound e) {
+                    if (!tolerant) {
+                        throw new DeserializationError("Unable to locate item with ID: " + e.getId());
+                    }
+                }
+            }
+
+            if (commit) {
+                tx.success();
+            }
+            return Table.of(done);
+        } catch (SerializationError e) {
+            throw new RuntimeException(e);
         }
     }
 
