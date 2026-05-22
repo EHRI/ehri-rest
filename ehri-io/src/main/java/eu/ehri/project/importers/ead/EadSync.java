@@ -8,6 +8,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
@@ -56,7 +57,7 @@ public class EadSync {
         this.scope = scope;
         this.actioner = actioner;
         this.importManager = importManager;
-        this.migrator = new Migrator(graph, api);
+        this.migrator = new Migrator(graph, api, scope);
     }
 
     public static EadSync create(
@@ -110,7 +111,7 @@ public class EadSync {
      * @throws ImportValidationError if data constraints are not met
      */
     public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
-            throws ImportValidationError, DeserializationError, IOException, EadSyncError {
+            throws ImportValidationError, DeserializationError, IOException, EadSyncError, PermissionDenied {
 
         // Get a mapping of graph ID to local ID within the scope,
         // Pre-sync, ALL of the local IDs must be unique (and
@@ -167,7 +168,7 @@ public class EadSync {
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
     }
 
-    private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) {
+    private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) throws PermissionDenied {
         if (!movedGraphIds.isEmpty()) {
             try {
                 int modified = 0;
@@ -179,7 +180,7 @@ public class EadSync {
                 for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
                     DocumentaryUnit from = api.get(entry.getKey(), DocumentaryUnit.class);
                     DocumentaryUnit to = api.get(entry.getValue(), DocumentaryUnit.class);
-                    migrator.migrate(from, to);
+                    migrator.migrate(from, to, actioner);
 
                     ctx.addSubjects(to);
                     modified++;
@@ -196,7 +197,7 @@ public class EadSync {
         }
     }
 
-    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) {
+    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) throws PermissionDenied {
         if (!toDeleteGraphIds.isEmpty()) {
             try {
                 int deleted = new BatchOperations(graph)

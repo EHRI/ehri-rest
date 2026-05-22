@@ -177,7 +177,7 @@ public class AuthoritativeSetResource extends
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
+            InputStream data) throws ItemNotFound, DeserializationError, ValidationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             AuthoritativeSet set = api().get(id, cls);

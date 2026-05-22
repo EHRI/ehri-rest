@@ -18,18 +18,23 @@ package eu.ehri.project.tools;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.PermissionUtils;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
@@ -52,19 +57,30 @@ import java.util.function.BiFunction;
 public class Migrator {
     private static final Logger logger = LoggerFactory.getLogger(Migrator.class);
 
-    private static final String PID_PREFIX = "MOVED-";
+    public static final String PID_PREFIX = "MOVED-";
 
     private final Api api;
     private final GraphManager manager;
     private final Serializer depSerializer;
+    private final PermissionUtils helper;
+    private final PermissionScope scope;
 
-    public Migrator(FramedGraph<?> graph, Api api) {
+    public Migrator(FramedGraph<?> graph, Api api, PermissionScope scope) {
         this.api = api;
+        this.scope = scope;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.depSerializer = api.serializer().withDependentOnly(true);
+        this.helper = new PermissionUtils(graph, scope);
     }
 
-    public void migrate(DocumentaryUnit from, DocumentaryUnit to) throws SerializationError, ItemNotFound {
+    public void migrate(DocumentaryUnit from, DocumentaryUnit to, Actioner actioner)
+            throws SerializationError, ItemNotFound, PermissionDenied {
+        this.helper.checkEntityPermission(from, actioner.as(Accessor.class), PermissionType.UPDATE);
+        this.helper.checkEntityPermission(from, actioner.as(Accessor.class), PermissionType.DELETE);
+        this.helper.checkEntityPermission(to, actioner.as(Accessor.class), PermissionType.UPDATE);
+        if (!Objects.equals(from.getRepository(), to.getRepository())) {
+            throw new IllegalArgumentException("migration source and destination must share the same repository");
+        }
         transferPersistentIdentifiers(from, to);
         transferUserGeneratedContent(from, to);
         transferAccessors(from, to);
