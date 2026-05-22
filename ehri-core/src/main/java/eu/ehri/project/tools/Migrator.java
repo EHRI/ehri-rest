@@ -91,6 +91,9 @@ public class Migrator {
         if (fromPid == null) {
             throw new IllegalStateException("Source item " + from.getId() + " has no PID");
         }
+        if (fromPid.startsWith(PID_PREFIX)) {
+            throw new IllegalArgumentException("Attempting to migrate an already-moved PID");
+        }
         from.asVertex().setProperty(Ontology.PID_KEY, PID_PREFIX + fromPid);
         to.asVertex().setProperty(Ontology.PID_KEY, fromPid);
     }
@@ -103,16 +106,19 @@ public class Migrator {
                 continue;
             }
             logger.debug("Moving link from {} to {}...", from.getId(), to.getId());
-            to.addLink(link);
+            link.addLinkTarget(to);
+            link.removeLinkTarget(from);
         }
         List<Annotation> annotations = Lists.newArrayList(from.getAnnotations());
         for (Annotation annotation : annotations) {
             logger.debug("Moving annotation from {} to {}...", from.getId(), to.getId());
             to.addAnnotation(annotation);
+            from.removeAnnotation(annotation);
             for (Annotatable part : annotation.getTargetParts()) {
                 findPart(part, to).ifPresent(altPart -> {
                     logger.debug("Found equivalent target part: {}", altPart.getId());
                     altPart.addAnnotationPart(annotation);
+                    part.removeAnnotationPart(annotation);
                 });
             }
         }
@@ -120,6 +126,7 @@ public class Migrator {
         for (VirtualUnit vc : inVc) {
             logger.debug("Moving VC membership from {} to {}", from.getId(), to.getId());
             vc.addIncludedUnit(to);
+            vc.removeIncludedUnit(from);
         }
     }
 
