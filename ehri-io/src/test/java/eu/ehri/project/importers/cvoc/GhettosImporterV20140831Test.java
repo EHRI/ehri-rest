@@ -47,7 +47,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         SkosImporter importer;
         ImportLog log;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/ghettos.rdf")) {
-            importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+            importer = skosImporter(vocabulary)
                     .setTolerant(true)
                     .allowUpdates(true);
             log = importer.importFile(ios, logMessage);

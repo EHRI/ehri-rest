@@ -28,14 +28,16 @@ import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.xml.XmlExporter;
-import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.tools.Migrator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -147,7 +149,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @return The new unit
      * @throws ItemNotFound         if the parent does not exist
      * @throws PermissionDenied     if the user cannot perform the action
-     * @throws DeserializationError if the input data is not well formed
+     * @throws DeserializationError if the input data is not well-formed
      * @throws ValidationError      if data constraints are not met
      */
     @POST
@@ -162,7 +164,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Repository repository = api().get(id, cls);
-            Response response = createItem(bundle, accessors,
+            Response response = createItem(setPid(bundle), accessors,
                     repository::addTopLevelDocumentaryUnit,
                     api().withScope(repository), DocumentaryUnit.class);
             tx.success();
@@ -196,7 +198,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             Repository repository = api().get(id, cls);
-            ImportCallback cb = mutation -> {
+            PostImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.DOCUMENTARY_UNIT.equals(accessible.getType())) {
                     throw new RuntimeException("Bundle is not a documentary unit: " + accessible.getId());
@@ -204,13 +206,66 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 accessible.setPermissionScope(repository);
                 repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
             };
-            ImportLog log = new BatchOperations(graph, repository, true, tolerant,
-                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            ImportLog log = new BatchOperations(
+                    graph,
+                    repository,
+                    true,
+                    tolerant,
+                    Lists.newArrayList(PreImportCallback.generatePid(idGenerator)),
+                    Lists.newArrayList(cb)
+            ).batchImport(data, user, getLogMessage());
             if (commit) {
                 logger.debug("Committing batch ingest transaction...");
                 tx.success();
             }
             return log;
+        }
+    }
+
+    /**
+     * Migrate a set of items from one location in the hierarchy to another.
+     *
+     * @param commit  commit the transaction
+     * @param mapping input data table
+     * @return the affected items
+     * @throws DeserializationError if input data in malformed
+     * @throws PermissionDenied     if the user can't complete the action
+     */
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Path("{id:[^/]+}/migrate")
+    public Table migrate(
+            @PathParam("id") String id,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
+            Table mapping) throws DeserializationError, PermissionDenied {
+        try (final Tx tx = beginTx()) {
+            Repository repository = api().get(id, cls);
+            final Api api = api().withScope(repository);
+            Migrator migrator = new Migrator(graph, api, repository);
+            List<List<String>> done = Lists.newArrayList();
+            for (List<String> row : mapping.rows()) {
+                if (row.size() != 2) {
+                    throw new DeserializationError(
+                            "Invalid table data: must contain 2 columns only");
+                }
+                DocumentaryUnit from = api().get(row.get(0), DocumentaryUnit.class);
+                final String toId = row.get(1);
+                DocumentaryUnit to = api().get(toId, DocumentaryUnit.class);
+                migrator.migrate(from, to, getCurrentActioner());
+                done.add(Lists.newArrayList(toId));
+            }
+
+            if (commit) {
+                tx.success();
+            }
+            return Table.of(done);
+        } catch (ItemNotFound e) {
+            e.printStackTrace();
+            throw new DeserializationError("Unable to locate item with ID: " + e.getId());
+        } catch (SerializationError e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

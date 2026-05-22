@@ -2,6 +2,7 @@ package eu.ehri.project.api.impl;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.*;
 import eu.ehri.project.api.*;
@@ -136,13 +137,29 @@ public class ApiImpl implements Api {
         } catch (ItemNotFound e) {
             // If the item has been deleted, augment the exception with a deletion time...
             Optional<Version> versionOpt = versionManager.versionAtDeletion(id);
-            if (versionOpt.isPresent()) {
-                Version version = versionOpt.get();
-                SystemEvent event = version.getTriggeringEvent();
-                throw e.withDeletedAt(event.getTimestamp());
-            } else {
-                throw e;
+            throw versionOpt.map(v -> addTimestamp(e, v)).orElse(e);
+        }
+    }
+
+    @Override
+    public <E extends Accessible> E getByPid(String pid, Class<E> cls) throws ItemNotFound, InvalidIdentifierError {
+        try {
+            if (!PersistentIdentifiable.class.isAssignableFrom(cls)) {
+                throw new InvalidIdentifierError(pid);
             }
+            Optional<Vertex> opt = manager.getVertex(Ontology.PID_KEY, pid);
+            if (!opt.isPresent()) {
+                throw new ItemNotFound(pid);
+            }
+            E item = graph.frame(opt.get(), cls);
+            if (!aclManager.canAccess(item, accessor)) {
+                throw new ItemNotFound(pid);
+            }
+            return item;
+        } catch (ItemNotFound e) {
+            // If the item has been deleted, augment the exception with a deletion time...
+            Optional<Version> versionOpt = versionManager.versionAtDeletion(pid, true);
+            throw versionOpt.map(v -> addTimestamp(e, v)).orElse(e);
         }
     }
 
@@ -511,7 +528,7 @@ public class ApiImpl implements Api {
         Iterable<Accessible> children = all
                 ? scope.getAllContainedItems()
                 : scope.getContainedItems();
-        List<String> ids = StreamSupport
+        final List<String> ids = StreamSupport
                 .stream(children.spliterator(), false)
                 .map(Entity::getId)
                 .sorted()
@@ -661,5 +678,10 @@ public class ApiImpl implements Api {
                     grantee, PermissionType.GRANT);
             helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
         }
+    }
+
+    private ItemNotFound addTimestamp(ItemNotFound e, Version version) {
+        SystemEvent event = version.getTriggeringEvent();
+        return e.withDeletedAt(event.getTimestamp());
     }
 }

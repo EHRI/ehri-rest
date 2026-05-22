@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.Isdiah;
@@ -46,10 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -143,7 +142,7 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
 
                         List<String> elems = historyElements
                                 .stream().<String>map(desc::getProperty)
-                                .filter(v -> v != null).collect(Collectors.toList());
+                                .filter(Objects::nonNull).collect(Collectors.toList());
                         if (!elems.isEmpty()) {
                             tag(sw, ImmutableList.of("repositorhist", "descriptiveNote"), () -> {
                                 for (String e : elems) {
@@ -178,6 +177,9 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
                     repository.getIdentifier()));
 
             tag(sw, "otherRecordId", repository.getId(), attrs("localType", "yes"));
+            tag(sw, "otherRecordId",
+                    String.format("%s%s", config.getString("io.pids.prefix"), repository.getPersistentIdentifier()),
+                    attrs("localType", "no"));
 
             tag(sw, "maintenanceAgency", () -> {
                 tag(sw, "agencyCode", "EHRI");

@@ -40,7 +40,7 @@ import java.util.List;
  */
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.HISTORICAL_AGENT)
 public class HistoricalAgentResource extends AbstractAccessibleResource<HistoricalAgent>
-        implements GetResource, ListResource, CreateResource, UpdateResource, DeleteResource {
+        implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public HistoricalAgentResource(@Context GraphDatabaseService database) {
         super(database, HistoricalAgent.class);
@@ -60,20 +60,6 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     @Override
     public Response list() {
         return listItems();
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public Response create(Bundle bundle,
-                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, DeserializationError {
-        try (final Tx tx = beginTx()) {
-            Response item = createItem(bundle, accessors);
-            tx.success();
-            return item;
-        }
     }
 
     @PUT

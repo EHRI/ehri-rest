@@ -116,7 +116,7 @@ public final class BundleManager {
      * @throws ValidationError if data constraints are not met
      */
     public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls) throws ValidationError {
-        Bundle bundleWithIds = validator.validateForUpdate(bundle);
+        Bundle bundleWithIds = validator.validateForCreateOrUpdate(bundle);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
         return new Mutation<>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
                 vertexMutation.getPrior());
@@ -182,8 +182,8 @@ public final class BundleManager {
      */
     private Vertex createInner(Bundle bundle) {
         try {
-            Vertex node = manager.createVertex(bundle.getId(), bundle.getType(),
-                    bundle.getData());
+            // Use getData() so that initialisation-only properties (e.g. PIDs) are written on creation.
+            Vertex node = manager.createVertex(bundle.getId(), bundle.getType(), bundle.getData());
             createDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
             return node;
         } catch (IntegrityError e) {
@@ -208,14 +208,17 @@ public final class BundleManager {
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
         Vertex vertex = manager.getVertex(bundle.getId());
         try {
-            Bundle currentBundle = serializer.vertexToBundle(vertex);
+            Bundle currentBundle = serializer.vertexToBundle(vertex).dependentsOnly();
             Bundle newBundle = bundle.dependentsOnly();
             if (!currentBundle.equals(newBundle)) {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Bundles differ: {}:{}", bundle.getType(), bundle.getId());
-                    logger.trace(currentBundle.diff(newBundle));
+                    logger.trace(currentBundle.diff(newBundle, false));
+                    logger.trace(DataConverter.bundleToJson(currentBundle));
+                    logger.trace(DataConverter.bundleToJson(newBundle));
                 }
-                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getData());
+                // Use getDataForUpdate() to exclude initialisation-only properties (e.g. PIDs) from updates.
+                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getDataForUpdate());
                 updateDependents(vertex, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(vertex, MutationState.UPDATED, currentBundle);
             } else {
@@ -231,18 +234,17 @@ public final class BundleManager {
     /**
      * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
      *
-     * @param master    The master vertex
-     * @param cls       The master vertex class
+     * @param parent    The parent vertex
+     * @param cls       The parent vertex class
      * @param relations A map of relations
      */
-    private void createDependents(Vertex master, Class<?> cls, Multimap<String, Bundle> relations) {
+    private void createDependents(Vertex parent, Class<?> cls, Multimap<String, Bundle> relations) {
         Map<String, Direction> dependents = ClassUtils.getDependentRelations(cls);
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle bundle : relations.get(relation)) {
                     Vertex child = createInner(bundle);
-                    createChildRelationship(master, child, relation,
-                            dependents.get(relation));
+                    createChildRelationship(parent, child, relation, dependents.get(relation));
                 }
             } else {
                 logger.error("Nested data being ignored on creation because it is not a dependent relation: {}: {}", relation, relations.get(relation));
@@ -253,22 +255,22 @@ public final class BundleManager {
     /**
      * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
      *
-     * @param master    The master vertex
-     * @param cls       The master vertex class
+     * @param parent    The parent vertex
+     * @param cls       The parent vertex class
      * @param relations A map of relations
      */
-    private void updateDependents(Vertex master, Class<?> cls, Multimap<String, Bundle> relations) {
+    private void updateDependents(Vertex parent, Class<?> cls, Multimap<String, Bundle> relations) {
 
-        // Get a list of dependent relationships for this class, and their
-        // directions.
+        // Get a list of dependent relationships for this class, and their directions.
         Map<String, Direction> dependents = ClassUtils.getDependentRelations(cls);
-        // Build a list of the IDs of existing dependents we're going to be
-        // updating.
-        Set<String> updating = getUpdateSet(relations);
-        // Any that we're not going to update can have their subtrees deleted.
-        deleteMissingFromUpdateSet(master, dependents, updating);
 
-        // Now go throw and create or update the new subtrees.
+        // Build a list of the IDs of existing dependents we're going to be updating.
+        Set<String> updating = getUpdateSet(relations);
+
+        // Any that we're not going to update can have their subtrees deleted.
+        deleteMissingFromUpdateSet(parent, dependents, updating);
+
+        // Now go through and create or update the new subtrees.
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 Direction direction = dependents.get(relation);
@@ -277,21 +279,21 @@ public final class BundleManager {
                 // relationship. This is *should* be safe, but could easily
                 // break if the model ontology is altered without this
                 // assumption in mind.
-                Set<Vertex> currentRels = getCurrentRelationships(master,
-                        relation, direction);
+                Set<Vertex> currentRels = getCurrentRelationships(parent, relation, direction);
 
                 for (Bundle bundle : relations.get(relation)) {
                     Vertex child = createOrUpdateInner(bundle).getNode();
                     // Create a relation if there isn't one already
                     if (!currentRels.contains(child)) {
-                        createChildRelationship(master, child, relation,
-                                direction);
+                        createChildRelationship(parent, child, relation, direction);
                     }
                 }
             } else {
-                logger.warn("Nested data being ignored on update because " +
-                                "it is not a dependent relation: {}: {}",
-                        relation, relations.get(relation));
+                logger.warn(
+                        "Nested data being ignored on update because it is not a dependent relation: {}: {}",
+                        relation,
+                        relations.get(relation)
+                );
             }
         }
     }
@@ -306,10 +308,9 @@ public final class BundleManager {
         return updating;
     }
 
-    private void deleteMissingFromUpdateSet(Vertex master,
-                                            Map<String, Direction> dependents, Set<String> updating) {
+    private void deleteMissingFromUpdateSet(Vertex parent, Map<String, Direction> dependents, Set<String> updating) {
         for (Entry<String, Direction> relEntry : dependents.entrySet()) {
-            for (Vertex v : getCurrentRelationships(master,
+            for (Vertex v : getCurrentRelationships(parent,
                     relEntry.getKey(), relEntry.getValue())) {
                 if (!updating.contains(manager.getId(v))) {
                     try {
@@ -343,17 +344,17 @@ public final class BundleManager {
     /**
      * Create a relationship between a parent and child vertex.
      *
-     * @param master    The master vertex
+     * @param parent    The parent vertex
      * @param child     The child vertex
      * @param label     The relationship label
      * @param direction The direction of the relationship
      */
-    private void createChildRelationship(Vertex master, Vertex child,
+    private void createChildRelationship(Vertex parent, Vertex child,
                                          String label, Direction direction) {
         if (direction == Direction.OUT) {
-            graph.addEdge(null, master, child, label);
+            graph.addEdge(null, parent, child, label);
         } else {
-            graph.addEdge(null, child, master, label);
+            graph.addEdge(null, child, parent, label);
         }
     }
 }

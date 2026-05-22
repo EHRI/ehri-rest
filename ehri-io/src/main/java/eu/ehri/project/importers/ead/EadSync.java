@@ -4,32 +4,32 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.tools.Migrator;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -44,8 +44,7 @@ public class EadSync {
     private final PermissionScope scope;
     private final Actioner actioner;
     private final SaxImportManager importManager;
-    private final GraphManager manager;
-    private final Serializer depSerializer;
+    private final Migrator migrator;
 
     private EadSync(
             FramedGraph<?> graph,
@@ -58,8 +57,7 @@ public class EadSync {
         this.scope = scope;
         this.actioner = actioner;
         this.importManager = importManager;
-        this.manager = GraphManagerFactory.getInstance(graph);
-        this.depSerializer = api.serializer().withDependentOnly(true);
+        this.migrator = new Migrator(graph, api, scope);
     }
 
     public static EadSync create(
@@ -85,6 +83,7 @@ public class EadSync {
      * Signal that something has gone wrong with the sync operation.
      */
     public static class EadSyncError extends Exception {
+        private static final long serialVersionUID = -2639850065428684371L;
         EadSyncError(String message, Throwable underlying) {
             super(message, underlying);
         }
@@ -112,7 +111,7 @@ public class EadSync {
      * @throws ImportValidationError if data constraints are not met
      */
     public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
-            throws ImportValidationError, DeserializationError, IOException, EadSyncError {
+            throws ImportValidationError, DeserializationError, IOException, EadSyncError, PermissionDenied {
 
         // Get a mapping of graph ID to local ID within the scope,
         // Pre-sync, ALL of the local IDs must be unique (and
@@ -141,7 +140,7 @@ public class EadSync {
             DocumentaryUnit doc = m.getNode().as(DocumentaryUnit.class);
             newGraphToLocal.put(doc.getId(), doc.getIdentifier());
         });
-        // Actually run the ingest...
+        // Actually run the ingest operation...
         ImportLog log = op.runIngest(manager);
 
         // Find moved items... this gets us a map of old graph ID to new graph ID
@@ -169,7 +168,7 @@ public class EadSync {
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
     }
 
-    private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) {
+    private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) throws PermissionDenied {
         if (!movedGraphIds.isEmpty()) {
             try {
                 int modified = 0;
@@ -181,12 +180,10 @@ public class EadSync {
                 for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
                     DocumentaryUnit from = api.get(entry.getKey(), DocumentaryUnit.class);
                     DocumentaryUnit to = api.get(entry.getValue(), DocumentaryUnit.class);
-                    boolean ugc = transferUserGeneratedContent(from, to);
-                    boolean acc = transferAccessors(from, to);
-                    if (ugc || acc) {
-                        ctx.addSubjects(to);
-                        modified++;
-                    }
+                    migrator.migrate(from, to, actioner);
+
+                    ctx.addSubjects(to);
+                    modified++;
                 }
 
                 if (modified > 0) {
@@ -200,68 +197,7 @@ public class EadSync {
         }
     }
 
-    private boolean transferUserGeneratedContent(DocumentaryUnit from, DocumentaryUnit to)
-            throws SerializationError, ItemNotFound {
-        int moved = 0;
-        List<Link> links = Lists.newArrayList(from.getLinks());
-        for (Link link : links) {
-            if (link.getLinkBodies().iterator().hasNext()) {
-                // Skip links with a body...
-                continue;
-            }
-            logger.debug("Moving link from {} to {}...", from.getId(), to.getId());
-            to.addLink(link);
-            moved++;
-        }
-        List<Annotation> annotations = Lists.newArrayList(from.getAnnotations());
-        for (Annotation annotation : annotations) {
-            logger.debug("Moving annotation from {} to {}...", from.getId(), to.getId());
-            to.addAnnotation(annotation);
-            for (Annotatable part : annotation.getTargetParts()) {
-                findPart(part, to).ifPresent(altPart -> {
-                    logger.debug("Found equivalent target part: {}", altPart.getId());
-                    altPart.addAnnotationPart(annotation);
-                });
-            }
-            moved++;
-        }
-        List<VirtualUnit> inVc = Lists.newArrayList(from.getVirtualParents());
-        for (VirtualUnit vc : inVc) {
-            logger.debug("Moving VC membership from {} to {}", from.getId(), to.getId());
-            vc.addIncludedUnit(to);
-            moved++;
-        }
-        return moved > 0;
-    }
-
-    private boolean transferAccessors(DocumentaryUnit from, DocumentaryUnit to) {
-        ArrayList<Accessor> accessors = Lists.newArrayList(from.getAccessors());
-        if (!accessors.isEmpty()) {
-            api.aclManager().setAccessors(to, accessors);
-            logger.debug("Copying access control from {} to {}", from.getId(), to.getId());
-            return true;
-        }
-        return false;
-    }
-
-    private Optional<Annotatable> findPart(Annotatable orig, DocumentaryUnit newParent)
-            throws SerializationError, ItemNotFound {
-        Bundle newParentBundle = depSerializer.entityToBundle(newParent);
-        Bundle dep = depSerializer.entityToBundle(orig);
-
-        BiFunction<Bundle, Bundle, Boolean> isEquivalentDescription =
-                (Bundle a, Bundle b) -> Objects.equals(a.getType(), b.getType())
-                        && Objects.equals(a.getDataValue(Ontology.LANGUAGE), b.getDataValue(Ontology.LANGUAGE))
-                        && Objects.equals(a.getDataValue(Ontology.IDENTIFIER_KEY), b.getDataValue(Ontology.IDENTIFIER_KEY));
-
-        Optional<Bundle> bundle = newParentBundle.find(b ->
-                b.equals(dep) || isEquivalentDescription.apply(dep, b));
-        return bundle.isPresent()
-                ? Optional.of(manager.getEntity(bundle.get().getId(), Annotatable.class))
-                : Optional.empty();
-    }
-
-    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) {
+    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) throws PermissionDenied {
         if (!toDeleteGraphIds.isEmpty()) {
             try {
                 int deleted = new BatchOperations(graph)

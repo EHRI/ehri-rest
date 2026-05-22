@@ -31,7 +31,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.project.ws.errors.MissingOrInvalidUser;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
@@ -49,8 +49,10 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.ws.errors.MissingOrInvalidUser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,10 +80,14 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = jsonMapper.getFactory();
+    protected static final RandomIdGenerator idGenerator = IdGeneratorFactory.getIdGenerator();
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
+    /**
+     * CSV media type.
+     */
     public static final String CSV_MEDIA_TYPE = "text/csv";
 
     /**
@@ -594,7 +600,6 @@ public abstract class AbstractResource implements TxCheckedResource {
                 g.writeEndArray();
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -612,7 +617,6 @@ public abstract class AbstractResource implements TxCheckedResource {
                 g.writeEndArray();
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -635,7 +639,6 @@ public abstract class AbstractResource implements TxCheckedResource {
 
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();

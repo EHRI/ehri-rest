@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * <pre>
  *   public class MyEntity {
  *      &064;Mandatory
- *      &064;Property("indentifier")
+ *      &064;Property("identifier")
  *      public String getIdentifier();
  *   }
  * </pre>
@@ -39,5 +39,4 @@ import java.lang.annotation.Target;
  * Indicates that a property or adjacency is mandatory.
  */
 public @interface Mandatory {
-
 }

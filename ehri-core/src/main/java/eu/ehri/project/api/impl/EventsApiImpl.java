@@ -111,13 +111,13 @@ public class EventsApiImpl implements EventsApi {
             this.accessor = eventsApi.accessor;
             this.offset = eventsApi.offset;
             this.limit = eventsApi.limit;
-            this.users = eventsApi.users;
-            this.ids = eventsApi.ids;
-            this.entityTypes = eventsApi.entityTypes;
-            this.eventTypes = eventsApi.eventTypes;
+            this.users = Sets.newHashSet(eventsApi.users);
+            this.ids = Sets.newHashSet(eventsApi.ids);
+            this.entityTypes = Sets.newHashSet(eventsApi.entityTypes);
+            this.eventTypes = Sets.newHashSet(eventsApi.eventTypes);
             this.from = eventsApi.from;
             this.to = eventsApi.to;
-            this.showType = eventsApi.showType;
+            this.showType = Sets.newHashSet(eventsApi.showType);
             this.aggregation = eventsApi.aggregation;
         }
 
@@ -429,14 +429,14 @@ public class EventsApiImpl implements EventsApi {
         if (from != null) {
             pipe = pipe.filter(event -> {
                 String timestamp = event.getTimestamp();
-                return from.compareTo(timestamp) >= 0;
+                return timestamp.compareTo(from) >= 0;
             });
         }
 
         if (to != null) {
             pipe = pipe.filter(event -> {
                 String timestamp = event.getTimestamp();
-                return to.compareTo(timestamp) <= 0;
+                return timestamp.compareTo(to) <= 0;
             });
         }
 

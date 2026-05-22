@@ -58,9 +58,11 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                .withDataValue(Ontology.PID_KEY, "wp2")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
-                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288")
+                .withDataValue(Ontology.PID_KEY, "pid-KEYWORD.JMP.288");
         Vocabulary vocabulary = api(adminUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
         Concept concept_288 = api(adminUser).create(conceptBundle, Concept.class);
@@ -73,7 +75,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
 
-        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "wp2ead.properties");
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "wp2ead.properties")
+                .withPreCallback(getPidGeneratorCallback());
         try (final InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
              final InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
             ImportLog log = importManager.importInputStream(ios, logMessage);

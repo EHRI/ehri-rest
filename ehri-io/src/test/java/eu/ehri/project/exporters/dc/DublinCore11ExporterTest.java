@@ -22,6 +22,8 @@ package eu.ehri.project.exporters.dc;
 import eu.ehri.project.exporters.test.XmlExporterTest;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Described;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -39,7 +41,18 @@ public class DublinCore11ExporterTest extends XmlExporterTest {
     @Test
     public void testExport1() throws Exception {
         HistoricalAgent agent = manager.getEntity("a1", HistoricalAgent.class);
-        testExport(agent, "eng");
+        String xml = testExport(agent, "eng");
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "ark:41045/p0a1-1234", "//dc/identifier[2]");
+    }
+
+    @Test
+    public void testExport2() throws Exception {
+        UserProfile agent = manager.getEntity("mike", UserProfile.class);
+        String xml = testExport(agent, "eng");
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "mike", "//dc/identifier");
+        assertXPath(doc, "", "//dc/identifier[2]");
     }
 
     @Test
@@ -48,6 +61,7 @@ public class DublinCore11ExporterTest extends XmlExporterTest {
         String xml = testExport(test, "eng");
         Document doc = parseDocument(xml);
         assertXPath(doc, "1", "//dc/identifier");
+        assertXPath(doc, "ark:41045/p01", "//dc/identifier[2]");
         assertXPath(doc, "fonds", "//dc/type");
         assertXPath(doc, "Institution Example", "//dc/publisher");
         assertXPath(doc, "1939-01-01 - 1945-01-01", "//dc/coverage");
@@ -56,12 +70,12 @@ public class DublinCore11ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example Subject 1", "//dc/subject");
     }
 
-    private String testExport(Described item, String lang) throws Exception {
+    private String testExport(Accessible item, String lang) throws Exception {
         DublinCoreExporter exporter = new DublinCore11Exporter(api(adminUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        exporter.export(item, baos, lang);
+        exporter.export(item.as(Described.class), baos, lang);
         String xml = baos.toString("UTF-8");
-        //System.out.println(xml);
+        System.out.println(xml);
         isValidDc(xml);
         return xml;
     }

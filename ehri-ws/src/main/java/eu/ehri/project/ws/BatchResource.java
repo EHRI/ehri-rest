@@ -23,6 +23,7 @@ import com.google.common.base.Charsets;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
@@ -86,14 +87,20 @@ public class BatchResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream inputStream)
-            throws IOException, ItemNotFound, ValidationError, DeserializationError {
+            throws IOException, ItemNotFound, ValidationError, DeserializationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            ImportLog importLog = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
-                    .batchUpdate(inputStream, user, getLogMessage(log));
+            ImportLog importLog = new BatchOperations(
+                    graph,
+                    parent,
+                    version,
+                    tolerant,
+                    Collections.emptyList(),
+                    Collections.emptyList()
+            ).batchUpdate(inputStream, user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch update transaction...");
                 tx.success();
@@ -125,14 +132,20 @@ public class BatchResource extends AbstractResource {
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            Table ids) throws IOException, DeserializationError {
+            Table ids) throws IOException, DeserializationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            int done = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
-                    .batchDelete(ids.column(0), user, getLogMessage(log));
+            int done = new BatchOperations(
+                    graph,
+                    parent,
+                    version,
+                    tolerant,
+                    Collections.emptyList(),
+                    Collections.emptyList()
+            ).batchDelete(ids.column(0), user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch delete transaction...");
                 tx.success();
@@ -142,9 +155,6 @@ public class BatchResource extends AbstractResource {
             throw new DeserializationError("Unable to locate item with ID: " + e.getId());
         }
     }
-
-
-    // Helpers
 
     private Optional<String> getLogMessage(String logMessagePathOrText) throws IOException {
         if (logMessagePathOrText == null || logMessagePathOrText.trim().isEmpty()) {
@@ -158,5 +168,4 @@ public class BatchResource extends AbstractResource {
             }
         }
     }
-
 }

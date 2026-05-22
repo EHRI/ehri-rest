@@ -21,6 +21,8 @@ package eu.ehri.project.graphql;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
@@ -66,6 +68,7 @@ public class GraphQLImpl {
 
     private static final ResourceBundle bundle = ResourceBundle.getBundle("eu.ehri.project.graphql.messages");
     private static final Logger logger = LoggerFactory.getLogger(GraphQLImpl.class);
+    private static final Config config = ConfigFactory.load();
 
     private static final String SLICE_PARAM = "at";
     private static final String FIRST_PARAM = "first";
@@ -179,6 +182,12 @@ public class GraphQLImpl {
                         break;
                     case Bundle.TYPE_KEY:
                         builder.dataFetcher(type, field, typeDataFetcher);
+                        break;
+                    case "pid":
+                        builder.dataFetcher(type, field, pidDataFetcher);
+                        break;
+                    case "ark":
+                        builder.dataFetcher(type, field, arkDataFetcher);
                         break;
                     case "systemEvents":
                         builder.dataFetcher(type, field, itemEventsDataFetcher());
@@ -323,6 +332,9 @@ public class GraphQLImpl {
                 .put(Entities.ANNOTATION, entityIdDataFetcher(Entities.ANNOTATION))
                 .put(Entities.LINK, entityIdDataFetcher(Entities.LINK))
 
+                // PIDs
+                .put("itemByPid", entityPidDataFetcher())
+
                 // Multiples
                 .put("documentaryUnits", docDataFetcher())
                 .put("topLevelDocumentaryUnits", topLevelDocDataFetcher())
@@ -416,10 +428,16 @@ public class GraphQLImpl {
             .type(GraphQLNonNull.nonNull(GraphQLID))
             .build();
 
+    private static final GraphQLArgument pidArgument = newArgument()
+            .name("pid")
+            .description(__("graphql.argument.pid.description"))
+            .type(GraphQLNonNull.nonNull(GraphQLID))
+            .build();
+
     // Data fetchers...
 
     private DataFetcher<Iterable<SystemEvent>> itemEventsDataFetcher() {
-        return env -> events().listForItem(env.<Entity>getSource().as(SystemEvent.class));
+        return env -> events().listForItem(env.<Entity>getSource().as(Accessible.class));
     }
 
     private DataFetcher<Map<String, Object>> docDataFetcher() {
@@ -547,11 +565,29 @@ public class GraphQLImpl {
         };
     }
 
+    private DataFetcher<Entity> entityPidDataFetcher() {
+        return env -> {
+            try {
+                return api().getByPid(env.getArgument("pid"), PersistentIdentifiable.class);
+            } catch (ItemNotFound e) {
+                return null;
+            }
+        };
+    }
+
     private static final DataFetcher<String> idDataFetcher =
             env -> (env.<Entity>getSource()).getProperty(EntityType.ID_KEY);
 
     private static final DataFetcher<String> typeDataFetcher =
             env -> (env.<Entity>getSource()).getProperty(EntityType.TYPE_KEY);
+
+    private static final DataFetcher<String> pidDataFetcher =
+            env -> (env.<Entity>getSource()).getProperty(Ontology.PID_KEY);
+
+    private static final DataFetcher<String> arkDataFetcher = env -> {
+        final String pid = pidDataFetcher.get(env);
+        return pid == null ? null : config.getString("io.pids.prefix") + pid;
+    };
 
     private static final DataFetcher<Object> attributeDataFetcher = env -> {
         Entity source = env.getSource();
@@ -595,10 +631,10 @@ public class GraphQLImpl {
             String checkedCode = LanguageHelpers.convertCode(lang2).orElse(lang);
             for (Description next : descriptions) {
                 String langCode = next.getLanguageOfDescription();
-                if (langCode.equalsIgnoreCase(checkedCode)) {
+                if (langCode != null && langCode.equalsIgnoreCase(checkedCode)) {
                     if (code != null && !code.isEmpty()) {
                         String ident = next.getDescriptionCode();
-                        if (ident.equals(code)) {
+                        if (code.equals(ident)) {
                             return next;
                         }
                     } else {
@@ -716,6 +752,18 @@ public class GraphQLImpl {
             .description(__("graphql.field.type.description"))
             .build();
 
+    private static final GraphQLFieldDefinition pidField = newFieldDefinition()
+            .type(GraphQLNonNullString)
+            .name("pid")
+            .description(__("graphql.field.pid.description"))
+            .build();
+
+    private static final GraphQLFieldDefinition arkField = newFieldDefinition()
+            .type(GraphQLNonNullString)
+            .name("ark")
+            .description(__("graphql.field.ark.description"))
+            .build();
+
     private static GraphQLFieldDefinition.Builder singleDescriptionFieldDefinition(GraphQLOutputType descriptionType) {
         return newFieldDefinition()
                 .type(descriptionType)
@@ -793,6 +841,9 @@ public class GraphQLImpl {
 
     private static final List<GraphQLFieldDefinition> entityFields =
             ImmutableList.of(idField, typeField);
+
+    private static final List<GraphQLFieldDefinition> pidFields =
+            ImmutableList.of(pidField, arkField);
 
     private static final List<GraphQLFieldDefinition> geoFields = ImmutableList.of(
             newFieldDefinition()
@@ -1214,6 +1265,7 @@ public class GraphQLImpl {
             .name(Entities.REPOSITORY)
             .description(__("repository.description"))
             .fields(entityFields)
+            .fields(pidFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("repository.field.identifier.description")))
             .field(itemCountFieldDefinition())
             .field(connectionFieldDefinition("documentaryUnits", __("repository.field.documentaryUnits.description"),
@@ -1235,6 +1287,7 @@ public class GraphQLImpl {
             .name(Entities.DOCUMENTARY_UNIT)
             .description(__("documentaryUnit.description"))
             .fields(entityFields)
+            .fields(pidFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("documentaryUnit.field.identifier.description")))
             .field(listFieldDefinition(Ontology.OTHER_IDENTIFIERS, __("documentaryUnit.field.otherIdentifiers.description"), GraphQLString))
             .field(descriptionsFieldDefinition(documentaryUnitDescriptionType))
@@ -1272,6 +1325,7 @@ public class GraphQLImpl {
             .name(Entities.AUTHORITATIVE_SET)
             .description(__("authoritativeSet.description"))
             .fields(entityFields)
+            .fields(pidFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("authoritativeSet.field.identifier.description")))
             .field(nonNullAttr(Ontology.NAME_KEY, __("authoritativeSet.field.name.description")))
             .field(nullAttr("description", __("authoritativeSet.field.description.description")))
@@ -1333,6 +1387,7 @@ public class GraphQLImpl {
             .name(Entities.CVOC_VOCABULARY)
             .description(__("cvocVocabulary.description"))
             .fields(entityFields)
+            .fields(pidFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("cvocVocabulary.field.identifier.description")))
             .field(nonNullAttr(Ontology.NAME_KEY, __("cvocVocabulary.field.name.description")))
             .field(nullAttr("description", __("cvocVocabulary.field.description.description")))
@@ -1435,6 +1490,9 @@ public class GraphQLImpl {
                         annotationType, idArgument))
                 .field(itemFieldDefinition(Entities.LINK, __("root.single.link.description"),
                         linkType, idArgument))
+
+                // PID lookups
+                .field(itemFieldDefinition("itemByPid", "Lookup by PID", entityInterface, pidArgument))
 
                 // Top level item connections
                 .field(connectionFieldDefinition("documentaryUnits", __("root.connection.documentaryUnit.description"),

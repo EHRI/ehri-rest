@@ -25,8 +25,9 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
-import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
@@ -98,7 +99,7 @@ public class AuthoritativeSetResource extends
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = beginTx()) {
-            Response response = createItem(bundle, accessors);
+            Response response = createItem(setPid(bundle), accessors);
             tx.success();
             return response;
         }
@@ -158,7 +159,7 @@ public class AuthoritativeSetResource extends
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
             final AuthoritativeSet set = api().get(id, cls);
-            Response item = createItem(bundle, accessors, agent -> {
+            Response item = createItem(setPid(bundle), accessors, agent -> {
                 set.addItem(agent);
                 agent.setPermissionScope(set);
             }, api().withScope(set), HistoricalAgent.class);
@@ -176,11 +177,11 @@ public class AuthoritativeSetResource extends
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
+            InputStream data) throws ItemNotFound, DeserializationError, ValidationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             AuthoritativeSet set = api().get(id, cls);
-            ImportCallback cb = mutation -> {
+            PostImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.HISTORICAL_AGENT.equals(accessible.getType())) {
                     throw new RuntimeException("Bundle is not an historical agent: " + accessible.getId());
@@ -188,8 +189,14 @@ public class AuthoritativeSetResource extends
                 accessible.setPermissionScope(set);
                 set.addItem(accessible.as(HistoricalAgent.class));
             };
-            ImportLog log = new BatchOperations(graph, set, version, tolerant,
-                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            ImportLog log = new BatchOperations(
+                    graph,
+                    set,
+                    version,
+                    tolerant,
+                    Lists.newArrayList(PreImportCallback.generatePid(idGenerator)),
+                    Lists.newArrayList(cb)
+            ).batchImport(data, user, getLogMessage());
             if (commit) {
                 logger.debug("Committing batch ingest transaction...");
                 tx.success();

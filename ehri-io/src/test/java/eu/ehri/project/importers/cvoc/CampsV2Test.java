@@ -34,7 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
-public class CampsV2_1Test extends AbstractImporterTest {
+public class CampsV2Test extends AbstractImporterTest {
 
     private final String SKOS_FILE = "cvoc/camps.rdf";
 
@@ -48,7 +48,8 @@ public class CampsV2_1Test extends AbstractImporterTest {
         int vocCount = toList(vocabulary.getConcepts()).size();
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
             assertNotNull(ios);
-            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).importFile(ios, logMessage);
+            skosImporter(vocabulary)
+                    .importFile(ios, logMessage);
         }
 
         printGraph(graph);
@@ -88,7 +89,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         List<VertexProxy> graphState1;
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
 
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+            SkosImporter importer = skosImporter(vocabulary)
                     .setTolerant(true);
             importer.importFile(ios, "Importing the camps as a SKOS file");
         }
@@ -121,7 +122,8 @@ public class CampsV2_1Test extends AbstractImporterTest {
         //import version 2
         String version2 = "cvoc/camps-v2-1.rdf.xml";
         try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(version2)) {
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).allowUpdates(true);
+            SkosImporter importer = skosImporter(vocabulary)
+                    .allowUpdates(true);
 
             // Before...
             graphState1 = getGraphState(graph);

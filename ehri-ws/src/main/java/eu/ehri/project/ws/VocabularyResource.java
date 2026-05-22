@@ -94,7 +94,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
-            Response item = createItem(bundle, accessors);
+            Response item = createItem(setPid(bundle), accessors);
             tx.success();
             return item;
         }
@@ -155,7 +155,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Vocabulary vocabulary = api().get(id, cls);
-            Response item = createItem(bundle, accessors,
+            Response item = createItem(setPid(bundle), accessors,
                     concept -> concept.setVocabulary(vocabulary),
                     api().withScope(vocabulary), Concept.class);
             tx.success();

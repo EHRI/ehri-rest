@@ -52,6 +52,7 @@ public final class Serializer {
     private static final int DEFAULT_CACHE_SIZE = 100;
 
     private static class LruCache<A, B> extends LinkedHashMap<A, B> {
+        private static final long serialVersionUID = -5094946431180768722L;
         private final int maxEntries;
 
         public LruCache(int maxEntries) {
@@ -315,13 +316,9 @@ public final class Serializer {
             Bundle.Builder builder = Bundle.Builder.withClass(type)
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
-                    .addRelations(getRelationData(item,
-                            depth, maxDepth, lite, cls))
-                    .addMetaData(getVertexMeta(item, cls));
-            if (!lite) {
-                builder.addMetaData(getVertexMeta(item, cls))
-                        .addMetaDataValue("gid", item.getId());
-            }
+                    .addRelations(getRelationData(item, depth, maxDepth, lite, cls))
+                    .addMetaData(getVertexMeta(item, cls))
+                    .addMetaDataValue("gid", item.getId());
             return builder.build();
         } catch (IllegalArgumentException e) {
             logger.error("Error serializing vertex with data: {}", getVertexData(item));
@@ -344,7 +341,7 @@ public final class Serializer {
     // TODO: Profiling shows that (unsurprisingly) this method is a
     // performance hotspot. Rewrite it so that instead of using Frames
     // method invocations to do the traversal, we use regular traversals
-    // whereever possible. Unfortunately the use of @JavaHandler Frame
+    // wherever possible. Unfortunately the use of @JavaHandler Frame
     // annotations will make this difficult.
     private ListMultimap<String, Bundle> getRelationData(
             Vertex item, int depth, int maxDepth, boolean lite, Class<?> cls) {
@@ -356,8 +353,7 @@ public final class Serializer {
                 String relationName = entry.getKey();
                 Method method = entry.getValue();
 
-                boolean isLite = liteMode || lite
-                        || shouldSerializeLite(method);
+                boolean isLite = liteMode || lite || shouldSerializeLite(method);
 
                 if (shouldTraverse(relationName, method, depth, isLite)) {
                     int nextDepth = depth + 1;
@@ -381,7 +377,6 @@ public final class Serializer {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
                         logger.error("Error serializing relationship for {} ({}): {}, depth {}, {}",
                                 item, item.getProperty(EntityType.TYPE_KEY),
                                 relationName, depth, method.getName());
@@ -488,14 +483,20 @@ public final class Serializer {
 
     /**
      * Fetch a map of metadata sourced from vertex properties.
-     * This is anything that begins with an underscore (but now
+     * This is anything that begins with an underscore (but not
      * two underscores)
      */
     private Map<String, Object> getVertexMeta(Vertex item, Class<?> cls) {
         Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
-            if (!key.startsWith("__") && key.startsWith("_")) {
-                data.put(key.substring(1), item.getProperty(key));
+            if (!(key.startsWith(EntityType.ID_KEY) || key.startsWith(EntityType.TYPE_KEY))
+                    && key.startsWith("_")) {
+                // Strip the underscores.
+                int count = 0;
+                while (count < key.length() && key.charAt(count) == '_') {
+                    count++;
+                }
+                data.put(key.substring(count), item.getProperty(key));
             }
         }
         Map<String, Method> metaMethods = ClassUtils.getMetaMethods(cls);
@@ -527,42 +528,38 @@ public final class Serializer {
      * Run a callback every time a node in a subtree is encountered, excepting
      * the top-level node.
      */
-    private <T extends Entity> void traverseSubtree(T item, int depth,
-                                                    TraversalCallback cb) {
+    private <T extends Entity> void traverseSubtree(T item, int depth, TraversalCallback cb) {
+        if (depth >= maxTraversals) {
+            return;
+        }
+        Class<?> cls = EntityClass.withName(item.getProperty(EntityType.TYPE_KEY)).getJavaClass();
+        Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+        for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
-        if (depth < maxTraversals) {
-            Class<?> cls = EntityClass
-                    .withName(item.getProperty(EntityType.TYPE_KEY)).getJavaClass();
-            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
-            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-
-                String relationName = entry.getKey();
-                Method method = entry.getValue();
-                if (shouldTraverse(relationName, method, depth, false)) {
-                    try {
-                        Object result = method.invoke(graph.frame(
-                                item.asVertex(), cls));
-                        if (result instanceof Iterable<?>) {
-                            int rnum = 0;
-                            for (Object d : (Iterable<?>) result) {
-                                cb.process((Entity) d, depth,
-                                        entry.getKey(), rnum);
-                                traverseSubtree((Entity) d, depth + 1, cb);
-                                rnum++;
-                            }
-                        } else {
-                            if (result != null) {
-                                cb.process((Entity) result, depth,
-                                        entry.getKey(), 0);
-                                traverseSubtree((Entity) result,
-                                        depth + 1, cb);
-                            }
+            String relationName = entry.getKey();
+            Method method = entry.getValue();
+            if (shouldTraverse(relationName, method, depth, false)) {
+                try {
+                    Object result = method.invoke(graph.frame(
+                            item.asVertex(), cls));
+                    if (result instanceof Iterable<?>) {
+                        int rnum = 0;
+                        for (Object d : (Iterable<?>) result) {
+                            cb.process((Entity) d, depth,
+                                    entry.getKey(), rnum);
+                            traverseSubtree((Entity) d, depth + 1, cb);
+                            rnum++;
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(
-                                "Unexpected error serializing Frame", e);
+                    } else {
+                        if (result != null) {
+                            cb.process((Entity) result, depth,
+                                    entry.getKey(), 0);
+                            traverseSubtree((Entity) result,
+                                    depth + 1, cb);
+                        }
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error serializing Frame", e);
                 }
             }
         }

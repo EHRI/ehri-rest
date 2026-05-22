@@ -22,11 +22,7 @@ package eu.ehri.project.importers.eac;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.Link;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.Concept;
@@ -39,13 +35,9 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-/**
- */
+
 public class PersonalitiesV2Test extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesV2Test.class);
@@ -64,6 +56,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(file)) {
             saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
                     .withScope(SystemScope.getInstance())
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, logMessage);
         }
         // After...
@@ -81,16 +74,16 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         assertEquals(count + 7, getNodeCount(graph));
         printGraph(graph);
         HistoricalAgent person = manager.getEntity("ehri_pers_000051", HistoricalAgent.class);
-        assertEquals(2, ((List) person.getProperty(Ontology.OTHER_IDENTIFIERS)).size());
+        assertEquals(2, (person.<List<?>>getProperty(Ontology.OTHER_IDENTIFIERS)).size());
 
         for (Description d : person.getDescriptions()) {
             assertFalse(d.getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
             assertEquals("deu", d.getLanguageOfDescription());
             assertEquals("Booooris the third", d.getName());
             assertTrue(d.getProperty("otherFormsOfName") instanceof List);
-            assertEquals(2, ((List) d.getProperty("otherFormsOfName")).size());
+            assertEquals(2, (d.<List<?>>getProperty("otherFormsOfName")).size());
             assertTrue(d.getProperty("place") instanceof List);
-            assertEquals(2, ((List) d.getProperty("place")).size());
+            assertEquals(2, (d.<List<?>>getProperty("place")).size());
         }
     }
 
@@ -106,6 +99,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC)) {
             saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
                     .withScope(SystemScope.getInstance())
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, logMessage);
         }
         // After...
@@ -126,9 +120,9 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         for (Description d : person.getDescriptions()) {
             assertEquals("deu", d.getLanguageOfDescription());
             assertTrue(d.getProperty("otherFormsOfName") instanceof List);
-            assertEquals(2, ((List) d.getProperty("otherFormsOfName")).size());
+            assertEquals(2, (d.<List<?>>getProperty("otherFormsOfName")).size());
             assertTrue(d.getProperty("place") instanceof List);
-            assertEquals(2, ((List) d.getProperty("place")).size());
+            assertEquals(2, (d.<List<?>>getProperty("place")).size());
         }
     }
 
@@ -136,9 +130,11 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
     public void newPersonalitiesWithReferredNodes() throws Exception {
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "FAST_keywords")
+                .withDataValue(Ontology.PID_KEY, "fast-1234")
                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
-                .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382")
+                .withDataValue(Ontology.PID_KEY, "pid-fst894382");
         Vocabulary vocabulary = api(adminUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
         Concept concept_716 = api(adminUser).create(conceptBundle, Concept.class);
@@ -159,6 +155,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC)) {
             saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
                     .withScope(SystemScope.getInstance())
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, logMessage);
         }
         // After...

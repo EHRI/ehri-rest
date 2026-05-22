@@ -30,9 +30,11 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
@@ -173,7 +175,8 @@ public class ImportResource extends AbstractResource {
             // from the query params...
             Actioner user = getCurrentActioner();
             Vocabulary scope = manager.getEntity(scopeId, Vocabulary.class);
-            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope);
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope)
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator));
 
             ImportLog log = importer
                     .setFormat(format)
@@ -304,7 +307,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -381,7 +384,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError, PermissionDenied {
 
         try (final Tx tx = beginTx()) {
             checkConfigFileReference(propertyFile);
@@ -414,7 +417,9 @@ public class ImportResource extends AbstractResource {
                     propertyFile,
                     version
             );
-            SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
+            SaxImportManager importManager = SaxImportManager
+                    .create(graph, scope, user, importer, handler, options)
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator));
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
             EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager);
@@ -473,7 +478,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, EagImporter.class.getName()),
                     getHandlerCls(handlerClass, EagHandler.class.getName()),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -525,7 +530,7 @@ public class ImportResource extends AbstractResource {
                     getImporterCls(importerClass, EacImporter.class.getName()),
                     getHandlerCls(handlerClass, EacHandler.class.getName()),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -595,7 +600,7 @@ public class ImportResource extends AbstractResource {
                     getCurrentActioner(),
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     options
-            );
+            ).withPreCallback(PreImportCallback.generatePid(idGenerator));
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {

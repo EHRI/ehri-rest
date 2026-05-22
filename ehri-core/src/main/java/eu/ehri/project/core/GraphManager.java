@@ -28,6 +28,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Entity;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * An abstraction over the basic {@link FramedGraph} class
@@ -101,6 +102,15 @@ public interface GraphManager {
     Vertex getVertex(String id) throws ItemNotFound;
 
     /**
+     * Get a node with the given key/value pair.
+     *
+     * @param key   The vertex's property
+     * @param value The vertex's property value
+     * @return The vertex, if found
+     */
+    Optional<Vertex> getVertex(String key, Object value);
+
+    /**
      * Get a node with the given ID, and frame it with the given interface
      * class.
      *
@@ -153,6 +163,17 @@ public interface GraphManager {
      * be null.
      */
     CloseableIterable<Vertex> getVertices(Iterable<String> ids);
+
+    /**
+     * Get a CloseableIterable of vertices where the given property has the
+     * provided values. If a vertex is not found with an input value the
+     * result in the returned iterable will be null.
+     *
+     * @param key    the property key
+     * @param values property values
+     * @return an iterable of vertices with the given values for the provided property
+     */
+    CloseableIterable<Vertex> getVertices(String key, Iterable<?> values);
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given

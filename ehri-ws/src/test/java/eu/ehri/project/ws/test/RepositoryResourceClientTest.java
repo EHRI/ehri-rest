@@ -20,11 +20,17 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableList;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.PermissionsResource;
+import com.sun.jersey.api.client.WebResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.tools.Migrator;
+import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.PermissionsResource;
+import eu.ehri.project.ws.ToolsResource;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -148,6 +154,40 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
             // There should be three top level items: c1, c4, and m19
             assertEquals(3, readZip(stream).size());
         }
+    }
+
+    @Test
+    public void testMigrate() throws Exception {
+        // Create a couple of new docs using the batch method
+        final String data = "[{\"type\": \"DocumentaryUnit\", \"data\": {\"identifier\":\"c3_new\"}}," +
+                "{\"type\": \"DocumentaryUnit\", \"data\": {\"identifier\":\"c4_new\"}}]";
+        ClientResponse createResponse = client.resource(entityUri(Entities.REPOSITORY, ID, "list"))
+                .queryParam("commit", "true")
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .type("application/json")
+                .entity(data)
+                .post(ClientResponse.class);
+        assertStatus(OK, createResponse);
+
+        // Now test the batch migrate method, and ensure PIDs are moved from old to new item.
+        WebResource resource = client.resource(entityUri(Entities.REPOSITORY, "r1", "migrate"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource
+                .accept("text/csv")
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .post(ClientResponse.class, Table.of(ImmutableList.of(
+                                ImmutableList.of("c4", "nl-r1-c4_new"),
+                                ImmutableList.of("c2", "nl-r1-c3_new"))));
+        assertStatus(OK, response);
+        Table out = response.getEntity(Table.class);
+        assertEquals(ImmutableList.of(
+                ImmutableList.of("nl-r1-c4_new"),
+                ImmutableList.of("nl-r1-c3_new")), out.rows());
+
+        Bundle oldC4 = getEntity(Entities.DOCUMENTARY_UNIT, "c4", getAdminUserProfileId());
+        Bundle newC4 = getEntity(Entities.DOCUMENTARY_UNIT, "nl-r1-c4_new", getAdminUserProfileId());
+        assertEquals(Migrator.PID_PREFIX + "c4-12345678", oldC4.getMetaData().get("pid"));
+        assertEquals("c4-12345678", newC4.getMetaData().get("pid"));
     }
 
     @Test

@@ -42,7 +42,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "single-ead.xml";
 
     // Depends on single-ead.xml
-    protected final String IMPORTED_ITEM_ID = "C00001";
+    protected final String IMPORTED_ITEM_ID = "F00001";
 
     @Test
     public void testImportItems() throws Exception {

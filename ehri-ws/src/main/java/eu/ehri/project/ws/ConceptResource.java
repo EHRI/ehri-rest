@@ -19,6 +19,7 @@
 
 package eu.ehri.project.ws;
 
+import com.google.common.collect.Lists;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -26,7 +27,6 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.base.*;
-import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -41,10 +41,10 @@ import java.util.List;
  * Vocabulary is not possible via this API.
  */
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_CONCEPT)
-public class CvocConceptResource extends AbstractAccessibleResource<Concept>
+public class ConceptResource extends AbstractAccessibleResource<Concept>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource, ChildResource {
 
-    public CvocConceptResource(@Context GraphDatabaseService database) {
+    public ConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
     }
 

@@ -258,8 +258,7 @@ public final class QueryApiImpl implements QueryApi {
             // can't re-use the iterator for counting and streaming.
             ArrayList<Vertex> userVerts = Lists.newArrayList(setFilters(pipeline).iterator());
             Iterable<E> iterable = graph.frameVertices(
-                    setPipelineRange(setOrder(new GremlinPipeline<>(
-                            userVerts))), cls);
+                    setPipelineRange(setOrder(new GremlinPipeline<>(userVerts))), cls);
             return new Page<>(iterable, offset, limit, userVerts.size());
         }
     }
@@ -293,7 +292,9 @@ public final class QueryApiImpl implements QueryApi {
 
     @Override
     public long count(EntityClass type) {
-        return count(manager.getVertices(type));
+        try (final CloseableIterable<Vertex> vertices = manager.getVertices(type)) {
+            return count(vertices);
+        }
     }
 
     // Helpers

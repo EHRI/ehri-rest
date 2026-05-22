@@ -66,9 +66,11 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                .withDataValue(Ontology.PID_KEY, "wp2")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
-                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716")
+                .withDataValue(Ontology.PID_KEY, "pid-KEYWORD.JMP.716");
         Vocabulary vocabulary = api(adminUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
         Concept concept_716 = api(adminUser).create(conceptBundle, Concept.class);
@@ -86,7 +88,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         try (final InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
              final InputStream iosVC2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
             SaxImportManager importManager = saxImportManager(
-                    EadImporter.class, EadHandler.class, "wp2ead.properties");
+                    EadImporter.class, EadHandler.class, "wp2ead.properties")
+                    .withPreCallback(getPidGeneratorCallback());
             ImportLog logVC = importManager.importInputStream(iosVC, logMessage);
 
             // After...
