@@ -215,6 +215,22 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     }
 
     @Test
+    public void testGetDocumentaryUnitWithCustomSerialization() throws Exception {
+        ClientResponse response = client.resource(
+                        entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
+                .queryParam(AbstractResource.NO_META_PARAM, "true")
+                .queryParam(AbstractResource.DEPENDENT_ONLY_PARAM, "true")
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .header(HttpHeaders.ACCEPT, "application/json")
+                .get(ClientResponse.class);
+        final String entity = response.getEntity(String.class);
+        System.out.println(entity);
+        Bundle doc = Bundle.fromString(entity);
+        assertFalse(doc.getMetaData().containsKey("gid"));
+        assertEquals(0, doc.getRelations("heldBy").size());
+    }
+
+    @Test
     public void testUpdateDocumentaryUnitByIdentifier() throws Exception {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id

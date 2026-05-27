@@ -19,11 +19,7 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.SerializationError;
@@ -52,6 +48,7 @@ public final class Serializer {
     private static final int DEFAULT_CACHE_SIZE = 100;
 
     private static class LruCache<A, B> extends LinkedHashMap<A, B> {
+        private static final long serialVersionUID = -5094946431180768722L;
         private final int maxEntries;
 
         public LruCache(int maxEntries) {
@@ -69,6 +66,7 @@ public final class Serializer {
     private final int maxTraversals;
     private final boolean dependentOnly;
     private final boolean liteMode;
+    private final boolean meta;
     private final List<String> includeProps;
     private final LruCache<String, Bundle> cache;
 
@@ -88,8 +86,9 @@ public final class Serializer {
     public static class Builder {
         private final FramedGraph<?> graph;
         private int maxTraversals = Fetch.DEFAULT_TRAVERSALS;
-        private boolean dependentOnly;
-        private boolean liteMode;
+        private boolean dependentOnly = false;
+        private boolean liteMode = false;
+        private boolean meta = true;
         private List<String> includeProps = Lists.newArrayList();
         private LruCache<String, Bundle> cache;
 
@@ -117,6 +116,11 @@ public final class Serializer {
             return this;
         }
 
+        public Builder withMeta(boolean meta) {
+            this.meta = meta;
+            return this;
+        }
+
         public Builder withCache() {
             return withCache(DEFAULT_CACHE_SIZE);
         }
@@ -139,7 +143,7 @@ public final class Serializer {
 
     public Serializer(Builder builder) {
         this(builder.graph, builder.dependentOnly,
-                builder.maxTraversals, builder.liteMode, builder.includeProps, builder.cache);
+                builder.maxTraversals, builder.liteMode, builder.meta, builder.includeProps, builder.cache);
     }
 
     /**
@@ -154,11 +158,12 @@ public final class Serializer {
      *                      with common attributes, and NOT for reusable serializers
      */
     private Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite,
-                       List<String> includeProps, LruCache<String, Bundle> cache) {
+                       boolean meta, List<String> includeProps, LruCache<String, Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
         this.liteMode = lite;
+        this.meta = meta;
         this.includeProps = includeProps;
         this.cache = cache;
     }
@@ -170,7 +175,7 @@ public final class Serializer {
      * @return a new serializer.
      */
     public Serializer withIncludedProperties(List<String> includeProps) {
-        return new Serializer(graph, dependentOnly, maxTraversals, liteMode,
+        return new Serializer(graph, dependentOnly, maxTraversals, liteMode, meta,
                 includeProps, cache);
     }
 
@@ -181,12 +186,30 @@ public final class Serializer {
      * @return a new serializer
      */
     public Serializer withDepth(int depth) {
-        return new Serializer(graph, dependentOnly, depth, liteMode,
+        return new Serializer(graph, dependentOnly, depth, liteMode, meta,
                 includeProps, cache);
     }
 
+    /**
+     * Create a new serializer from this one, with or without dependent items.
+     *
+     * @param dependentOnly only serialize relations which are subordinate
+     *                      to this item.
+     * @return a new serializer
+     */
     public Serializer withDependentOnly(boolean dependentOnly) {
-        return new Serializer(graph, dependentOnly, maxTraversals, liteMode,
+        return new Serializer(graph, dependentOnly, maxTraversals, liteMode, meta,
+                includeProps, cache);
+    }
+
+    /**
+     * Create a new serializer from this one, with or without metadata.
+     *
+     * @param meta conditionally include or exclude item metadata
+     * @return a new serializer
+     */
+    public Serializer withMeta(boolean meta) {
+        return new Serializer(graph, dependentOnly, maxTraversals, liteMode, meta,
                 includeProps, cache);
     }
 
@@ -208,6 +231,7 @@ public final class Serializer {
         return new Builder(graph)
                 .withIncludedProperties(includeProps)
                 .withLiteMode(liteMode)
+                .withMeta(meta)
                 .dependentOnly(dependentOnly)
                 .withDepth(maxTraversals)
                 .withCache().build();
@@ -246,7 +270,7 @@ public final class Serializer {
      * @throws SerializationError if the data cannot be serialized
      */
     public <T extends Entity> Bundle entityToBundle(T item) throws SerializationError {
-        return vertexToBundle(item.asVertex(), 0, maxTraversals, false);
+        return vertexToBundle(item.asVertex(), 0, maxTraversals, false, meta);
     }
 
     /**
@@ -258,7 +282,7 @@ public final class Serializer {
      * @throws SerializationError if the data cannot be serialized
      */
     public Bundle vertexToBundle(Vertex item) throws SerializationError {
-        return vertexToBundle(item, 0, maxTraversals, false);
+        return vertexToBundle(item, 0, maxTraversals, false, meta);
     }
 
     /**
@@ -305,7 +329,7 @@ public final class Serializer {
      * @return A data bundle
      * @throws SerializationError if the data cannot be serialized
      */
-    private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite) throws SerializationError {
+    private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite, boolean meta) throws SerializationError {
         try {
             EntityClass type = EntityClass.withName(item.getProperty(EntityType.TYPE_KEY));
             String id = item.getProperty(EntityType.ID_KEY);
@@ -315,11 +339,10 @@ public final class Serializer {
             Bundle.Builder builder = Bundle.Builder.withClass(type)
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
-                    .addRelations(getRelationData(item,
-                            depth, maxDepth, lite, cls))
-                    .addMetaData(getVertexMeta(item, cls));
-            if (!lite) {
-                builder.addMetaData(getVertexMeta(item, cls))
+                    .addRelations(getRelationData(item, depth, maxDepth, lite, meta, cls));
+            if (meta) {
+                builder = builder
+                        .addMetaData(getVertexMeta(item, cls))
                         .addMetaDataValue("gid", item.getId());
             }
             return builder.build();
@@ -329,25 +352,26 @@ public final class Serializer {
         }
     }
 
-    private Bundle fetch(Entity frame, int depth, int maxDepth, boolean isLite) throws SerializationError {
+    private Bundle fetch(Entity frame, int depth, int maxDepth, boolean isLite, boolean meta) throws SerializationError {
         if (cache != null) {
-            String key = frame.getId() + depth + isLite;
-            if (cache.containsKey(key))
+            String key = frame.getId() + depth + isLite + meta;
+            if (cache.containsKey(key)) {
                 return cache.get(key);
-            Bundle bundle = vertexToBundle(frame.asVertex(), depth, maxDepth, isLite);
+            }
+            Bundle bundle = vertexToBundle(frame.asVertex(), depth, maxDepth, isLite, meta);
             cache.put(key, bundle);
             return bundle;
         }
-        return vertexToBundle(frame.asVertex(), depth, maxDepth, isLite);
+        return vertexToBundle(frame.asVertex(), depth, maxDepth, isLite, meta);
     }
 
     // TODO: Profiling shows that (unsurprisingly) this method is a
     // performance hotspot. Rewrite it so that instead of using Frames
     // method invocations to do the traversal, we use regular traversals
-    // whereever possible. Unfortunately the use of @JavaHandler Frame
+    // wherever possible. Unfortunately the use of @JavaHandler Frame
     // annotations will make this difficult.
     private ListMultimap<String, Bundle> getRelationData(
-            Vertex item, int depth, int maxDepth, boolean lite, Class<?> cls) {
+            Vertex item, int depth, int maxDepth, boolean lite, boolean meta, Class<?> cls) {
         ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
         if (depth < maxDepth) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
@@ -356,8 +380,7 @@ public final class Serializer {
                 String relationName = entry.getKey();
                 Method method = entry.getValue();
 
-                boolean isLite = liteMode || lite
-                        || shouldSerializeLite(method);
+                boolean isLite = liteMode || lite || shouldSerializeLite(method);
 
                 if (shouldTraverse(relationName, method, depth, isLite)) {
                     int nextDepth = depth + 1;
@@ -371,17 +394,16 @@ public final class Serializer {
                         // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
-                                relations.put(relationName, fetch((Entity) d, nextDepth, nextMaxDepth, isLite));
+                                relations.put(relationName, fetch((Entity) d, nextDepth, nextMaxDepth, isLite, meta));
                             }
                         } else {
                             // This relationship could be NULL if, e.g. a
                             // collection has no holder.
                             if (result != null) {
-                                relations.put(relationName, fetch((Entity) result, nextDepth, nextMaxDepth, isLite));
+                                relations.put(relationName, fetch((Entity) result, nextDepth, nextMaxDepth, isLite, meta));
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
                         logger.error("Error serializing relationship for {} ({}): {}, depth {}, {}",
                                 item, item.getProperty(EntityType.TYPE_KEY),
                                 relationName, depth, method.getName());
@@ -527,42 +549,38 @@ public final class Serializer {
      * Run a callback every time a node in a subtree is encountered, excepting
      * the top-level node.
      */
-    private <T extends Entity> void traverseSubtree(T item, int depth,
-                                                    TraversalCallback cb) {
+    private <T extends Entity> void traverseSubtree(T item, int depth, TraversalCallback cb) {
+        if (depth >= maxTraversals) {
+            return;
+        }
+        Class<?> cls = EntityClass.withName(item.getProperty(EntityType.TYPE_KEY)).getJavaClass();
+        Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+        for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
-        if (depth < maxTraversals) {
-            Class<?> cls = EntityClass
-                    .withName(item.getProperty(EntityType.TYPE_KEY)).getJavaClass();
-            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
-            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-
-                String relationName = entry.getKey();
-                Method method = entry.getValue();
-                if (shouldTraverse(relationName, method, depth, false)) {
-                    try {
-                        Object result = method.invoke(graph.frame(
-                                item.asVertex(), cls));
-                        if (result instanceof Iterable<?>) {
-                            int rnum = 0;
-                            for (Object d : (Iterable<?>) result) {
-                                cb.process((Entity) d, depth,
-                                        entry.getKey(), rnum);
-                                traverseSubtree((Entity) d, depth + 1, cb);
-                                rnum++;
-                            }
-                        } else {
-                            if (result != null) {
-                                cb.process((Entity) result, depth,
-                                        entry.getKey(), 0);
-                                traverseSubtree((Entity) result,
-                                        depth + 1, cb);
-                            }
+            String relationName = entry.getKey();
+            Method method = entry.getValue();
+            if (shouldTraverse(relationName, method, depth, false)) {
+                try {
+                    Object result = method.invoke(graph.frame(
+                            item.asVertex(), cls));
+                    if (result instanceof Iterable<?>) {
+                        int rnum = 0;
+                        for (Object d : (Iterable<?>) result) {
+                            cb.process((Entity) d, depth,
+                                    entry.getKey(), rnum);
+                            traverseSubtree((Entity) d, depth + 1, cb);
+                            rnum++;
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(
-                                "Unexpected error serializing Frame", e);
+                    } else {
+                        if (result != null) {
+                            cb.process((Entity) result, depth,
+                                    entry.getKey(), 0);
+                            traverseSubtree((Entity) result,
+                                    depth + 1, cb);
+                        }
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error serializing Frame", e);
                 }
             }
         }
