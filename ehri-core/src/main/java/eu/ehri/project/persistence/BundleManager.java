@@ -214,8 +214,6 @@ public final class BundleManager {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Bundles differ: {}:{}", bundle.getType(), bundle.getId());
                     logger.trace(currentBundle.diff(newBundle, false));
-                    logger.trace(DataConverter.bundleToJson(currentBundle));
-                    logger.trace(DataConverter.bundleToJson(newBundle));
                 }
                 // Use getDataForUpdate() to exclude initialisation-only properties (e.g. PIDs) from updates.
                 vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getDataForUpdate());
