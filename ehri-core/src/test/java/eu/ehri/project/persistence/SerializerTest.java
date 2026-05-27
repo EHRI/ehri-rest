@@ -145,4 +145,17 @@ public class SerializerTest extends AbstractFixtureTest {
                 .entityToBundle(doc);
         assertNotNull(DataUtils.get(serialized3, "describes[0]/scopeAndContent"));
     }
+
+    @Test
+    public void testNoMeta() throws Exception {
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
+
+        Serializer serializer = new Serializer.Builder(graph).build();
+        Bundle serialized = serializer.entityToBundle(doc);
+        assertTrue(serialized.getMetaData().containsKey("gid"));
+
+        Serializer noMeta = serializer.withMeta(false);
+        Bundle serialized2 = noMeta.entityToBundle(doc);
+        assertFalse(serialized2.getMetaData().containsKey("gid"));
+    }
 }

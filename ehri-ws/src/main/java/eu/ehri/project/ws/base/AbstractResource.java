@@ -128,6 +128,8 @@ public abstract class AbstractResource implements TxCheckedResource {
      * Serialization config parameters.
      */
     public static final String INCLUDE_PROPS_PARAM = "_ip";
+    public static final String DEPENDENT_ONLY_PARAM = "_dep";
+    public static final String NO_META_PARAM = "_noMeta";
 
     /**
      * Header names
@@ -186,15 +188,27 @@ public abstract class AbstractResource implements TxCheckedResource {
     /**
      * Get a serializer according to passed-in serialization config.
      * <p>
-     * Currently the only parameter is <code>_ip=[propertyName]</code> which
-     * ensures a given property is always included in the output.
+     * There are various system parameters to control the output:
+     * <dl>
+     *     <dt>_ip</dt>
+     *     <dd>Include a property with name <&lt;value&gt;></dd>
+     *     <dt>_noMeta</dt>
+     *     <dd>If true, exclude metadata from the output</dd>
+     *     <dt>_dep</dt>
+     *     <dd>If true, only include dependent relations</dd>
+     * </dl>
      *
      * @return a vertex serializer
      */
     protected Serializer getSerializer() {
         Optional<List<String>> includeProps = Optional.ofNullable(uriInfo.getQueryParameters(true)
                 .get(INCLUDE_PROPS_PARAM));
-        return includeProps.map(serializer::withIncludedProperties).orElse(serializer);
+        boolean depOnly = getBoolQueryParam(DEPENDENT_ONLY_PARAM, false);
+        boolean noMeta = getBoolQueryParam(NO_META_PARAM, false);
+        return includeProps.map(serializer::withIncludedProperties).orElse(serializer)
+                .withDependentOnly(depOnly)
+                .withMeta(!noMeta);
+
     }
 
     /**
@@ -220,6 +234,23 @@ public abstract class AbstractResource implements TxCheckedResource {
         String value = uriInfo.getQueryParameters().getFirst(key);
         try {
             return Integer.parseInt(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Get a boolean value for a given query parameter, falling back
+     * on a default.
+     *
+     * @param key          the parameter name
+     * @param defaultValue the default value
+     * @return an integer value
+     */
+    protected boolean getBoolQueryParam(String key, boolean defaultValue) {
+        String value = uriInfo.getQueryParameters().getFirst(key);
+        try {
+            return Boolean.parseBoolean(value);
         } catch (Exception e) {
             return defaultValue;
         }
