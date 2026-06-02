@@ -31,7 +31,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.cypher.internal.compiler.v2_3.On;
 
 import java.util.Map;
 

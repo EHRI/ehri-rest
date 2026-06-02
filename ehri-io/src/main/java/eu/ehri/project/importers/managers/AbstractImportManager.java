@@ -69,8 +69,8 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final Actioner actioner;
     protected final ImportOptions options;
     protected final ImportResourceFetcher resourceFetcher;
-    protected final List<PostImportCallback> extraCallbacks;
     protected final List<PreImportCallback> preCallbacks;
+    protected final List<PostImportCallback> postCallbacks;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -87,6 +87,8 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param actioner      the user or group performing the action
      * @param importerClass the class of the item importer object
      * @param options       an import options instance
+     * @param preCallbacks  callbacks to run prior to import
+     * @param postCallbacks callbacks to run after import
      */
     public AbstractImportManager(
             FramedGraph<?> graph,
@@ -95,7 +97,7 @@ public abstract class AbstractImportManager implements ImportManager {
             Class<? extends ItemImporter<?, ?>> importerClass,
             ImportOptions options,
             List<PreImportCallback> preCallbacks,
-            List<PostImportCallback> callbacks) {
+            List<PostImportCallback> postCallbacks) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
@@ -110,7 +112,7 @@ public abstract class AbstractImportManager implements ImportManager {
             this.scopeFinder = new StaticPermissionScopeFinder(scope);
         }
         this.preCallbacks = Lists.newArrayList(preCallbacks);
-        this.extraCallbacks = Lists.newArrayList(callbacks);
+        this.postCallbacks = Lists.newArrayList(postCallbacks);
     }
 
     /**
@@ -366,7 +368,7 @@ public abstract class AbstractImportManager implements ImportManager {
             importer.addPreCallback(callback);
         }
 
-        for (PostImportCallback callback : extraCallbacks) {
+        for (PostImportCallback callback : postCallbacks) {
             importer.addPostCallback(callback);
         }
     }

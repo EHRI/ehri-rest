@@ -75,7 +75,7 @@ public class DublinCore11ExporterTest extends XmlExporterTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(item.as(Described.class), baos, lang);
         String xml = baos.toString("UTF-8");
-        System.out.println(xml);
+        // System.out.println(xml);
         isValidDc(xml);
         return xml;
     }

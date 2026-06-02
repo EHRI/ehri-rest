@@ -170,18 +170,18 @@ public class SaxImportManager extends AbstractImportManager {
     }
 
     public SaxImportManager withScope(PermissionScope scope) {
-        return create(framedGraph, scope, actioner, importerClass, handlerClass, options, preCallbacks, extraCallbacks);
+        return create(framedGraph, scope, actioner, importerClass, handlerClass, options, preCallbacks, postCallbacks);
     }
 
     public SaxImportManager withPreCallback(PreImportCallback callback) {
         List<PreImportCallback> newCbs = Lists.newArrayList(preCallbacks);
         newCbs.add(callback);
         return create(framedGraph, permissionScope, actioner,
-                importerClass, handlerClass, options, newCbs, extraCallbacks);
+                importerClass, handlerClass, options, newCbs, postCallbacks);
     }
 
     public SaxImportManager withCallback(PostImportCallback callback) {
-        List<PostImportCallback> newCbs = Lists.newArrayList(extraCallbacks);
+        List<PostImportCallback> newCbs = Lists.newArrayList(postCallbacks);
         newCbs.add(callback);
         return create(framedGraph, permissionScope, actioner,
                 importerClass, handlerClass, options, preCallbacks, newCbs);
@@ -189,6 +189,6 @@ public class SaxImportManager extends AbstractImportManager {
 
     public SaxImportManager withUpdates(boolean updates) {
         return create(framedGraph, permissionScope, actioner, importerClass, handlerClass,
-                options.withUpdates(updates),preCallbacks, extraCallbacks);
+                options.withUpdates(updates),preCallbacks, postCallbacks);
     }
 }

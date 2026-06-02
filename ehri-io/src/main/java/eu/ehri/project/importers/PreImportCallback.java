@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Data Archiving and Networked Services (an institute of
+ * Copyright 2026 Data Archiving and Networked Services (an institute of
  * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
  * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
  *

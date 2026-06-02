@@ -119,10 +119,7 @@ public class OaiPmhData {
                 List<String> sets = d.getSets();
                 if (specParts.size() == 1 && sets.get(0).equals(specParts.get(0))) {
                     return true;
-                } else if (specParts.size() == 2 && sets.get(1).equals(specParts.get(1))) {
-                    return true;
-                }
-                return false;
+                } else return specParts.size() == 2 && sets.get(1).equals(specParts.get(1));
             });
         }
     }

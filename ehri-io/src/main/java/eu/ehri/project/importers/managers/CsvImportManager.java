@@ -148,11 +148,11 @@ public class CsvImportManager extends AbstractImportManager {
         List<PreImportCallback> newCbs = com.google.common.collect.Lists.newArrayList(preCallbacks);
         newCbs.add(callback);
         return new CsvImportManager(framedGraph, permissionScope, actioner,
-                importerClass, options, newCbs, extraCallbacks);
+                importerClass, options, newCbs, postCallbacks);
     }
 
     public CsvImportManager withCallback(PostImportCallback callback) {
-        List<PostImportCallback> newCbs = com.google.common.collect.Lists.newArrayList(extraCallbacks);
+        List<PostImportCallback> newCbs = com.google.common.collect.Lists.newArrayList(postCallbacks);
         newCbs.add(callback);
         return new CsvImportManager(framedGraph, permissionScope, actioner,
                 importerClass, options, preCallbacks, newCbs);
