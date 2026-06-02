@@ -5,7 +5,7 @@
 
     <groupId>eu.ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
-    <version>0.16.0-pids</version>
+    <version>0.16.0</version>
     <packaging>pom</packaging>
 
     <name>EHRI Backend</name>
