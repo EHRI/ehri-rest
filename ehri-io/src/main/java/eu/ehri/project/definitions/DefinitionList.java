@@ -12,7 +12,7 @@ public interface DefinitionList {
     Boolean isMultiValued();
     String name();
 
-    static ResourceBundle bundle = ResourceBundle.getBundle("eu.ehri.project.definitions.messages");
+    ResourceBundle bundle = ResourceBundle.getBundle("eu.ehri.project.definitions.messages");
 
     static Map<String,String> getMap(DefinitionList[] items, Boolean multivalued) {
         return Lists.newArrayList(items).stream()

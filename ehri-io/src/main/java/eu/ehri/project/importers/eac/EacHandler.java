@@ -103,7 +103,7 @@ public class EacHandler extends SaxXmlHandler {
                     putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, langCode);
                 }
 
-                importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
+                importer.importItem(currentGraphPath.pop(), Lists.newArrayList());
 
             } catch (ValidationError ex) {
                 logger.error(ex.getMessage());

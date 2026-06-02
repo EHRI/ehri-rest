@@ -34,7 +34,7 @@ public class IndentingXMLStreamWriter implements XMLStreamWriter, AutoCloseable 
     }
 
     private State state = State.SEEN_NOTHING;
-    private Stack<State> stateStack = new Stack<>();
+    private final Stack<State> stateStack = new Stack<>();
 
     private final String indentStep;
     private int depth = 0;

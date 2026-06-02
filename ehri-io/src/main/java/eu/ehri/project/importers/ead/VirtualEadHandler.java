@@ -57,7 +57,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.<String, Class<? extends Entity>>of(
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
             Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
     );
 

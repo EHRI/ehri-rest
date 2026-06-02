@@ -99,7 +99,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String suffix;
     private final String defaultLang;
     private final URI conceptSchemeURI;
-    private List<PreImportCallback> preCallbacks;
+    private final List<PreImportCallback> preCallbacks;
 
     private static final String DEFAULT_LANG = Locale.ENGLISH.getISO3Language();
     private static final Bundle linkTemplate = Bundle.of(EntityClass.LINK)

@@ -96,7 +96,7 @@ public class EagHandler extends SaxXmlHandler {
                     logger.debug("no rulesAndConventions found");
                     putPropertyInCurrentGraph("rulesAndConventions", "ISDIAH");
                 }
-                importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
+                importer.importItem(currentGraphPath.pop(), Lists.newArrayList());
 
             } catch (ValidationError ex) {
                 logger.error(ex.getMessage());
