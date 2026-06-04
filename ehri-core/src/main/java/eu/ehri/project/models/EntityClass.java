@@ -34,6 +34,10 @@ import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Mapping of Entity type names to Frames interfaces classes and
  * their associated id generator classes.
@@ -126,5 +130,17 @@ public enum EntityClass {
     @Override
     public String toString() {
         return name;
+    }
+
+    /**
+     * Get entity classes implementing an given interface.
+     *
+     * @param iface an interface
+     * @return a set of entities
+     */
+    public static Set<EntityClass> implementing(Class<?> iface) {
+        return Arrays.stream(values())
+                .filter(c -> iface.isAssignableFrom(c.getJavaClass()))
+                .collect(Collectors.toSet());
     }
 }

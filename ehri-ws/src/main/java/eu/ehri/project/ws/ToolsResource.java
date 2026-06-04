@@ -39,7 +39,6 @@ import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
-import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
@@ -72,9 +71,6 @@ import java.util.stream.Collectors;
 public class ToolsResource extends AbstractResource {
 
     public static final String ENDPOINT = "tools";
-
-    private static final String SINGLE_PARAM = "single";
-    private static final String ACCESS_POINT_TYPE_PARAM = "apt";
 
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);
@@ -405,19 +401,9 @@ public class ToolsResource extends AbstractResource {
     public String generatePids(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
-        EntityClass[] types = {
-                EntityClass.COUNTRY,
-                EntityClass.REPOSITORY,
-                EntityClass.DOCUMENTARY_UNIT,
-                EntityClass.VIRTUAL_UNIT,
-                EntityClass.CVOC_VOCABULARY,
-                EntityClass.CVOC_CONCEPT,
-                EntityClass.AUTHORITATIVE_SET,
-                EntityClass.HISTORICAL_AGENT
-        };
         int done = 0;
         try (final Tx tx = beginTx()) {
-            for (EntityClass entityClass : types) {
+            for (EntityClass entityClass : EntityClass.implementing(PersistentIdentifiable.class)) {
                 try (CloseableIterable<Accessible> descriptions = manager.getEntities(entityClass, Accessible.class)) {
                     for (Accessible accessible : descriptions) {
                         Vertex vertex = accessible.asVertex();
@@ -457,13 +443,10 @@ public class ToolsResource extends AbstractResource {
     public String regenerateDescriptionIds(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
-        EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
-                .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
-                .REPOSITORY_DESCRIPTION};
         int done = 0;
         try (final Tx tx = beginTx()) {
             final Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
-            for (EntityClass entityClass : types) {
+            for (EntityClass entityClass : EntityClass.implementing(Description.class)) {
                 try (CloseableIterable<Description> descriptions = manager.getEntities(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
                         Described entity = desc.getEntity();
