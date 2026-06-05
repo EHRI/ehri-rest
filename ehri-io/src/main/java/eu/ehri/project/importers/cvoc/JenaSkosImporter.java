@@ -38,7 +38,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Accessor;
@@ -100,6 +99,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String defaultLang;
     private final URI conceptSchemeURI;
     private final List<PreImportCallback> preCallbacks;
+    private final PreImportCallback linkPreCallback;
 
     private static final String DEFAULT_LANG = Locale.ENGLISH.getISO3Language();
     private static final Bundle linkTemplate = Bundle.of(EntityClass.LINK)
@@ -123,7 +123,8 @@ public final class JenaSkosImporter implements SkosImporter {
                              Vocabulary vocabulary, boolean tolerant, boolean allowUpdates,
                              String baseURI, String suffix, String format, String defaultLang,
                              URI conceptSchemeURI,
-                             List<PreImportCallback> preCallbacks) {
+                             List<PreImportCallback> preCallbacks,
+                             PreImportCallback linkPreCallback) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
@@ -137,6 +138,7 @@ public final class JenaSkosImporter implements SkosImporter {
         this.defaultLang = defaultLang;
         this.conceptSchemeURI = conceptSchemeURI;
         this.preCallbacks = preCallbacks;
+        this.linkPreCallback = linkPreCallback;
         this.dao = new BundleManager(framedGraph, vocabulary.idPath());
     }
 
@@ -172,35 +174,35 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param vocabulary  The target vocabulary
      */
     public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner, Vocabulary vocabulary) {
-        this(framedGraph, actioner, vocabulary, false, false, null, null, null, DEFAULT_LANG, null, Collections.emptyList());
+        this(framedGraph, actioner, vocabulary, false, false, null, null, null, DEFAULT_LANG, null, Collections.emptyList(), PreImportCallback.noop());
     }
 
     @Override
     public JenaSkosImporter setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: {}", tolerant);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
     public JenaSkosImporter setBaseURI(String prefix) {
         logger.debug("Setting importer base URI: {}", prefix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, prefix, suffix, format, defaultLang, conceptSchemeURI, preCallbacks);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, prefix, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
     public JenaSkosImporter setURISuffix(String suffix) {
         logger.debug("Setting importer URI: suffix {}", suffix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
     public JenaSkosImporter setFormat(String format) {
         logger.debug("Setting importer format: {}", format);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
@@ -208,21 +210,21 @@ public final class JenaSkosImporter implements SkosImporter {
         logger.debug("Setting importer default language: {}", lang);
         return new JenaSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format,
-                LanguageHelpers.iso639DashTwoCode(lang), conceptSchemeURI, preCallbacks);
+                LanguageHelpers.iso639DashTwoCode(lang), conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
     public JenaSkosImporter allowUpdates(boolean allowUpdates) {
         logger.debug("Setting importer allow updates: {}", true);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
     public JenaSkosImporter setConceptScheme(URI conceptSchemeURI) {
         logger.debug("Setting importer concept scheme: {}", conceptSchemeURI);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkPreCallback);
     }
 
     @Override
@@ -230,7 +232,13 @@ public final class JenaSkosImporter implements SkosImporter {
         List<PreImportCallback> newCbs = Lists.newArrayList(preCallbacks);
         newCbs.add(callback);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, newCbs);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, newCbs, linkPreCallback);
+    }
+
+    @Override
+    public JenaSkosImporter withLinkPreCallback(PreImportCallback linkCallback) {
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang, conceptSchemeURI, preCallbacks, linkCallback);
     }
 
     /**
@@ -397,7 +405,8 @@ public final class JenaSkosImporter implements SkosImporter {
                 String relType = linkedConcepts.get(concept);
                 String typeKey = relType.substring(0, relType.indexOf(":"));
                 String typeValue = relType.substring(relType.indexOf(":") + 1);
-                Bundle data = linkTemplate.withDataValue(typeKey, typeValue);
+                Bundle raw = linkTemplate.withDataValue(typeKey, typeValue);
+                Bundle data = linkPreCallback.preImport(Lists.newArrayList(), raw);
                 Optional<Link> existing = findLink(unit, concept, data);
                 if (!existing.isPresent()) {
                     Link link = api.create(data, Link.class);

@@ -30,7 +30,7 @@ import eu.ehri.project.models.base.PersistentIdentifiable;
 /**
  * An item that belongs in some authoritative set.
  */
-public interface AuthoritativeItem extends Linkable, PersistentIdentifiable {
+public interface AuthoritativeItem extends Linkable, Identifiable, PersistentIdentifiable {
     @Mandatory
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)

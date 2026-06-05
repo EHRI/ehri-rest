@@ -169,6 +169,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
 
     private Bundle getLinkBundle(String linkDesc, String linkType) {
         return Bundle.Builder.withClass(EntityClass.LINK)
+                .addDataValue(Ontology.PID_KEY, "12345678")
                 .addDataValue(Ontology.LINK_HAS_TYPE, linkType)
                 .addDataValue(Ontology.LINK_HAS_DESCRIPTION, linkDesc)
                 .build();

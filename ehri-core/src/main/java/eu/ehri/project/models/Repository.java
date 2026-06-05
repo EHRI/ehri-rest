@@ -36,7 +36,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * items.
  */
 @EntityType(EntityClass.REPOSITORY)
-public interface Repository extends Described, ItemHolder, Watchable, Versioned, Annotatable, Promotable, PersistentIdentifiable {
+public interface Repository extends Described, ItemHolder, Watchable, Versioned, Annotatable, Promotable, Identifiable, PersistentIdentifiable {
 
     /**
      * Count the number of top-level documentary unit items within

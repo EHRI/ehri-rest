@@ -28,7 +28,7 @@ import eu.ehri.project.models.annotations.Unique;
  * Base interface for entities that have a persistent identifier property (other than the
  * internally assigned node ID).
  */
-public interface PersistentIdentifiable extends Accessible, Identifiable {
+public interface PersistentIdentifiable extends Accessible {
 
     @Unique
     @Mandatory

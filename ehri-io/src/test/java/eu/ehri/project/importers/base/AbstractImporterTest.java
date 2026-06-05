@@ -29,12 +29,14 @@ import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
+import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -43,12 +45,14 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.utils.Slugify;
 import org.junit.After;
 import org.junit.Before;
+import org.neo4j.cypher.internal.compiler.v2_3.commands.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public abstract class AbstractImporterTest extends AbstractFixtureTest {
@@ -72,9 +76,16 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * For testing, use a PID generator that just copies the ID.
      */
     protected PreImportCallback getPidGeneratorCallback() {
+        final AtomicInteger counter = new AtomicInteger();
         return (s, b) -> {
             if (PersistentIdentifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
-                return b.withDataValue(Ontology.PID_KEY, "pid-" + Slugify.slugify(b.getDataValue(Ontology.IDENTIFIER_KEY)));
+                if (Identifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
+                    return b.withDataValue(Ontology.PID_KEY, "pid-" + Slugify.slugify(b.getDataValue(Ontology.IDENTIFIER_KEY)));
+                } else {
+                    // Items which don't have to have a unique key don't have any particular way to
+                    // mark them out for testing purposes, so just using a counter here.
+                    return b.withDataValue(Ontology.PID_KEY, "pid-" + counter.incrementAndGet());
+                }
             } else {
                 return b;
             }
@@ -85,23 +96,23 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * Convenience method for creating a Sax import manager.
      */
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
-        SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, options);
+        SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass,
+                options.withLinkResolver(LinkResolver.create(graph, adminUser, getPidGeneratorCallback())));
         return importer.withPreCallback(getPidGeneratorCallback());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
-        SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, ImportOptions.basic());
-        return importer.withPreCallback(getPidGeneratorCallback());
+        return saxImportManager(importerClass, handlerClass, ImportOptions.basic());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {
-        SaxImportManager importer = saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
-        return importer.withPreCallback(getPidGeneratorCallback());
+        return saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
     }
 
     protected SkosImporter skosImporter(Vocabulary vocabulary) {
         return SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                .withPreCallback(getPidGeneratorCallback());
+                .withPreCallback(getPidGeneratorCallback())
+                .withLinkPreCallback(getPidGeneratorCallback());
     }
 
     /**
