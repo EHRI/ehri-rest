@@ -497,6 +497,7 @@
 - id: ann1
   type: Annotation
   data:
+    __pid: ann1-1234
     identifier: ann1
     body: Test Annotation
     isPromotable: !!bool true
@@ -507,6 +508,7 @@
 - id: ann2
   type: Annotation
   data:
+    __pid: ann2-1234
     identifier: ann2
     body: Test Annotation of Annotation
   relationships:
@@ -515,6 +517,7 @@
 - id: ann3
   type: Annotation
   data:
+    __pid: ann3-1234
     identifier: ann3
     body: Created by
   relationships:
@@ -528,6 +531,7 @@
 - id: ann4
   type: Annotation
   data:
+    __pid: ann4-1234
     identifier: ann4
     body: Created by
     isPromotable: !!bool true
@@ -544,6 +548,7 @@
 - id: ann5
   type: Annotation
   data:
+    __pid: ann5-1234
     identifier: ann5
     body: Created by
     isPromotable: !!bool true
@@ -560,6 +565,7 @@
 - id: ann6
   type: Annotation
   data:
+    __pid: ann6-1234
     identifier: ann6
     body: Created by
     isPromotable: !!bool true
@@ -575,6 +581,7 @@
 - id: ann7
   type: Annotation
   data:
+    __pid: ann7-1234
     identifier: ann7
     body: Created by
     isPromotable: !!bool true
@@ -588,6 +595,7 @@
 - id: ann8
   type: Annotation
   data:
+    __pid: ann8-1234
     identifier: ann8
     body: Note on scope content
     field: scopeAndContent
@@ -598,6 +606,7 @@
 - id: link1
   type: Link
   data:
+    __pid: link1-1234
     type: associative
     description: Test link
   relationships:
@@ -615,6 +624,7 @@
 - id: link2
   type: Link
   data:
+    __pid: link2-1234
     type: associative
     description: Test access point link
   relationships:
@@ -627,6 +637,7 @@
 - id: link3
   type: Link
   data:
+    __pid: link3-1234
     type: associative
     description: Test access point link
   relationships:
@@ -639,6 +650,7 @@
 - id: link4
   type: Link
   data:
+    __pid: link4-1234
     type: copy
     description: A link indicated that r4 is the original location of c4
   relationships:
@@ -650,6 +662,7 @@
 - id: link5
   type: Link
   data:
+    __pid: link5-1234
     type: copy
     description: A link indicating that cvocc2 is related to c4
   relationships:

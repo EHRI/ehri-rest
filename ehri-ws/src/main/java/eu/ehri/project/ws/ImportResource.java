@@ -52,9 +52,11 @@ import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.links.LinkImporter;
+import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -176,9 +178,6 @@ public class ImportResource extends AbstractResource {
             Actioner user = getCurrentActioner();
             Vocabulary scope = manager.getEntity(scopeId, Vocabulary.class);
             SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope)
-                    .withPreCallback(PreImportCallback.generatePid(idGenerator));
-
-            ImportLog log = importer
                     .setFormat(format)
                     .setTolerant(tolerant)
                     .allowUpdates(allowUpdates)
@@ -186,7 +185,10 @@ public class ImportResource extends AbstractResource {
                     .setBaseURI(baseURI)
                     .setURISuffix(uriSuffix)
                     .setConceptScheme(conceptScheme)
-                    .importFile(stream, getLogMessage(logMessage).orElse(null));
+                    .withPreCallback(PreImportCallback.generatePid(idGenerator))
+                    .withLinkPreCallback(PreImportCallback.generatePid(idGenerator));
+
+            ImportLog log = importer.importFile(stream, getLogMessage(logMessage).orElse(null));
             if (commit) {
                 logger.debug("Committing SKOS import transaction...");
                 tx.success();
@@ -290,6 +292,7 @@ public class ImportResource extends AbstractResource {
                     : null;
 
             // Run the import!
+            Actioner user = getCurrentActioner();
             String message = getLogMessage(logMessage).orElse(null);
             ImportOptions options = ImportOptions.create(
                     tolerant,
@@ -298,12 +301,17 @@ public class ImportResource extends AbstractResource {
                     defaultLang,
                     hierarchyMap,
                     propertyFile,
-                    version
+                    version,
+                    LinkResolver.create(
+                            graph,
+                            user.as(Accessor.class),
+                            PreImportCallback.generatePid(idGenerator)
+                    )
             );
             ImportManager importManager = SaxImportManager.create(
                     graph,
                     manager.getEntity(scopeId, PermissionScope.class),
-                    getCurrentActioner(),
+                    user,
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER),
                     options
@@ -415,7 +423,12 @@ public class ImportResource extends AbstractResource {
                     lang,
                     hierarchyMap,
                     propertyFile,
-                    version
+                    version,
+                    LinkResolver.create(
+                            graph,
+                            user.as(Accessor.class),
+                            PreImportCallback.generatePid(idGenerator)
+                    )
             );
             SaxImportManager importManager = SaxImportManager
                     .create(graph, scope, user, importer, handler, options)
@@ -469,7 +482,8 @@ public class ImportResource extends AbstractResource {
                     defaultLang,
                     null,
                     nameOrDefault(propertyFile, "eag.properties"),
-                    version
+                    version,
+                    null
             );
             ImportManager importManager = SaxImportManager.create(
                     graph,
@@ -513,6 +527,7 @@ public class ImportResource extends AbstractResource {
             checkConfigFileReference(propertyFile);
 
             // Run the import!
+            Actioner user = getCurrentActioner();
             String message = getLogMessage(logMessage).orElse(null);
             ImportOptions options = ImportOptions.create(
                     tolerant,
@@ -521,12 +536,17 @@ public class ImportResource extends AbstractResource {
                     defaultLang,
                     null,
                     nameOrDefault(propertyFile, "eac.properties"),
-                    version
+                    version,
+                    LinkResolver.create(
+                            graph,
+                            user.as(Accessor.class),
+                            PreImportCallback.generatePid(idGenerator)
+                    )
             );
             ImportManager importManager = SaxImportManager.create(
                     graph,
                     manager.getEntity(scopeId, PermissionScope.class),
-                    getCurrentActioner(),
+                    user,
                     getImporterCls(importerClass, EacImporter.class.getName()),
                     getHandlerCls(handlerClass, EacHandler.class.getName()),
                     options
@@ -582,6 +602,7 @@ public class ImportResource extends AbstractResource {
                     : null;
 
             // Run the import!
+            Actioner user = getCurrentActioner();
             String message = getLogMessage(logMessage).orElse(null);
             ImportOptions options = ImportOptions.csv(
                     tolerant,
@@ -592,12 +613,17 @@ public class ImportResource extends AbstractResource {
                     arraySep,
                     hierarchyMap,
                     propertyFile,
-                    version
+                    version,
+                    LinkResolver.create(
+                            graph,
+                            user.as(Accessor.class),
+                            PreImportCallback.generatePid(idGenerator)
+                    )
             );
             ImportManager importManager = CsvImportManager.create(
                     graph,
                     manager.getEntity(scopeId, PermissionScope.class),
-                    getCurrentActioner(),
+                    user,
                     getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
                     options
             ).withPreCallback(PreImportCallback.generatePid(idGenerator));
@@ -639,8 +665,12 @@ public class ImportResource extends AbstractResource {
                                         Table table) throws DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
-            ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
-                    .importCoreferences(scope, table, getLogMessage().orElse(null));
+            ImportLog log = new LinkImporter(
+                    graph,
+                    getCurrentActioner(),
+                    tolerant,
+                    PreImportCallback.generatePid(idGenerator)
+            ).importCoreferences(scope, table, getLogMessage().orElse(null));
             if (commit) {
                 logger.debug("Committing coreference import transaction...");
                 tx.success();
@@ -681,8 +711,12 @@ public class ImportResource extends AbstractResource {
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             Table table) throws DeserializationError {
         try (final Tx tx = beginTx()) {
-            ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
-                    .importLinks(table, getLogMessage().orElse(null));
+            ImportLog log = new LinkImporter(
+                    graph,
+                    getCurrentActioner(),
+                    tolerant,
+                    PreImportCallback.generatePid(idGenerator)
+            ).importLinks(table, getLogMessage().orElse(null));
             if (commit) {
                 logger.debug("Committing link import transaction...");
                 tx.success();

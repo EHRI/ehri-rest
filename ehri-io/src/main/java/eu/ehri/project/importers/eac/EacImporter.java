@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Import EAC for a given repository into the database.
@@ -57,8 +58,6 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     private static final String REL_TYPE = "type";
     private static final String REL_NAME = "name";
-
-    private final LinkResolver linkResolver;
 
     /**
      * Construct an EacImporter object.
@@ -71,7 +70,6 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
      */
     public EacImporter(FramedGraph<?> graph, PermissionScopeFinder permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
         super(graph, permissionScope, actioner, options, log);
-        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
     }
 
     @Override
@@ -131,7 +129,10 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         Bundle processed = handlePreCallbacks(permissionScope.idPath(), unit);
         Mutation<HistoricalAgent> mutation = bundleManager.createOrUpdate(processed, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
-        linkResolver.solveUndeterminedRelationships(frame);
+        Optional<LinkResolver> resolver = options.getLinkResolver();
+        if (resolver.isPresent()) {
+            resolver.get().solveUndeterminedRelationships(frame);
+        }
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())

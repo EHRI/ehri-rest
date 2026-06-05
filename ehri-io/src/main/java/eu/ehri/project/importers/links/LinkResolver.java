@@ -17,6 +17,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -28,6 +29,7 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
+import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +43,7 @@ public class LinkResolver {
     private final GraphManager manager;
     private final Api api;
     private final Serializer mergeSerializer;
+    private final PreImportCallback callback;
 
     private static final Logger logger = LoggerFactory.getLogger(LinkResolver.class);
     private static final Config config = ConfigFactory.load();
@@ -50,7 +53,6 @@ public class LinkResolver {
             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, config.getString("io.import.defaultLinkText"))
             .withDataValue(Ontology.LINK_HAS_TYPE, config.getString("io.import.defaultLinkType"));
 
-
     private final LoadingCache<String, AuthoritativeSet> setCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<String, AuthoritativeSet>() {
                 @Override
@@ -59,12 +61,16 @@ public class LinkResolver {
                 }
             });
 
-    public LinkResolver(FramedGraph<?> graph, Accessor accessor) {
+    public LinkResolver(FramedGraph<?> graph, Accessor accessor, PreImportCallback callback) {
         api = ApiFactory.noLogging(graph, accessor);
         manager = GraphManagerFactory.getInstance(graph);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
+        this.callback = callback;
     }
 
+    public static LinkResolver create(FramedGraph<?> graph, Accessor accessor, PreImportCallback callback) {
+        return new LinkResolver(graph, accessor, callback);
+    }
 
     public int solveUndeterminedRelationships(Described unit) throws ValidationError {
         logger.debug("Resolving relationships for {}", unit.getId());
@@ -94,7 +100,7 @@ public class LinkResolver {
                                 if (linkOpt.isPresent()) {
                                     logger.debug(" - found existing link created between {} and {}", targetId, target.getId());
                                 } else {
-                                    Link link = api.create(linkTemplate, Link.class);
+                                    Link link = api.create(callback.preImport(Lists.newArrayList(), linkTemplate), Link.class);
                                     unit.addLink(link);
                                     target.addLink(link);
                                     link.addLinkBody(rel);
@@ -115,7 +121,6 @@ public class LinkResolver {
         }
         return created;
     }
-
 
     private Optional<AuthoritativeItem> findTarget(AuthoritativeSet set, String itemId) {
         for (AuthoritativeItem item : set.getAuthoritativeItems()) {

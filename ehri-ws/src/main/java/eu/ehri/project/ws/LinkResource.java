@@ -111,7 +111,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
             }
             UserProfile user = getCurrentUser();
             Link link = api().createLink(
-                    source, target, bodies, bundle, directional,
+                    source, target, bodies, setPid(bundle), directional,
                     getAccessors(accessors, user), getLogMessage());
             Response response = creationResponse(link);
             tx.success();

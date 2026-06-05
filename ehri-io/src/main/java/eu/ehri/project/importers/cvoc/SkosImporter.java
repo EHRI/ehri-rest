@@ -125,4 +125,13 @@ public interface SkosImporter {
      * @return A new SKOS importer
      */
     SkosImporter withPreCallback(PreImportCallback callback);
+
+    /**
+     * Add a pre-creation callback for new links created in
+     * the import process.
+     *
+     * @param linkCallback a pre-callback function
+     * @return a new SKOS importer
+     */
+    SkosImporter withLinkPreCallback(PreImportCallback linkCallback);
 }

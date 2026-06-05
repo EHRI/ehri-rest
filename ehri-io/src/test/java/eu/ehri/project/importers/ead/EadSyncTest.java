@@ -100,7 +100,10 @@ public class EadSyncTest extends AbstractImporterTest {
         Annotation testAnnotation = api(adminUser).createAnnotation(
                 "nl-r1-ctop_level_fonds-c00001-c00002-2",
                 "nl-r1-ctop_level_fonds-c00001-c00002-2.eng-test_desc_id_eng",
-                Bundle.of(EntityClass.ANNOTATION, ImmutableMap.of("body", "Test annotation!")),
+                Bundle.of(EntityClass.ANNOTATION, ImmutableMap.of(
+                        "__pid", "al-1234",
+                        "body", "Test annotation!"
+                )),
                 Collections.emptyList(),
                 Optional.empty());
 

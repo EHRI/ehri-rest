@@ -13,6 +13,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -49,8 +50,9 @@ public class LinkImporter {
     private final BundleManager bundleManager;
     private final AclManager aclManager;
     private final boolean tolerant;
+    private final PreImportCallback callback;
 
-    public LinkImporter(FramedGraph<?> framedGraph, Actioner actioner, boolean tolerant) {
+    public LinkImporter(FramedGraph<?> framedGraph, Actioner actioner, boolean tolerant, PreImportCallback callback) {
         this.framedGraph = framedGraph;
         this.manager = GraphManagerFactory.getInstance(framedGraph);
         this.actioner = actioner;
@@ -58,6 +60,7 @@ public class LinkImporter {
         this.bundleManager = new BundleManager(framedGraph);
         this.aclManager = new AclManager(framedGraph);
         this.tolerant = tolerant;
+        this.callback = callback;
     }
 
     private boolean isConnected(AccessPoint ap, Linkable target) {
@@ -86,7 +89,8 @@ public class LinkImporter {
                 .addDataValue(Ontology.LINK_HAS_TYPE, "associative")
                 .build();
         try {
-            Link link = bundleManager.create(linkBundle, Link.class);
+            Bundle processed = callback.preImport(Lists.newArrayList(), linkBundle);
+            Link link = bundleManager.create(processed, Link.class);
             link.addLinkBody(ap);
             link.addLinkTarget(entity);
             link.addLinkTarget(target);
@@ -186,7 +190,8 @@ public class LinkImporter {
                 Linkable t1 = manager.getEntity(from, Linkable.class);
                 Linkable t2 = manager.getEntity(to, Linkable.class);
 
-                Link link = bundleManager.create(bundle, Link.class);
+                Bundle processed = callback.preImport(Lists.newArrayList(), bundle);
+                Link link = bundleManager.create(processed, Link.class);
                 link.addLinkTarget(t1);
                 link.addLinkTarget(t2);
                 link.setLinker(actioner.as(Accessor.class));

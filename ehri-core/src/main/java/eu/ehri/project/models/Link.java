@@ -30,7 +30,7 @@ import eu.ehri.project.models.base.*;
  * a text property or some other entity.
  */
 @EntityType(EntityClass.LINK)
-public interface Link extends Promotable, Temporal, Annotatable {
+public interface Link extends Promotable, Temporal, Annotatable, PersistentIdentifiable {
 
     @Fetch(value = Ontology.LINK_HAS_LINKER, numLevels = 0)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)

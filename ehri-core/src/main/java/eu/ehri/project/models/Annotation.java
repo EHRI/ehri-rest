@@ -27,13 +27,14 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Annotatable;
+import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.base.Promotable;
 
 /**
  * A frame class representing an annotation.
  */
 @EntityType(EntityClass.ANNOTATION)
-public interface Annotation extends Promotable {
+public interface Annotation extends Promotable, PersistentIdentifiable {
 
     /**
      * Fetch annotations that have been made <i>on this annotation.</i>

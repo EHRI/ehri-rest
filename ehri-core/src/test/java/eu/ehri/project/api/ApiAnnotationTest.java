@@ -63,6 +63,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
     public void testCreateForWithoutAccess() throws Exception {
         canAnnotate.addMember(user);
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
+                .withDataValue(Ontology.PID_KEY, "test-1234")
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c1", "cd1", ann,
@@ -74,6 +75,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
     public void testCreateForOutsideSubtree() throws Exception {
         canAnnotate.addMember(user);
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
+                .withDataValue(Ontology.PID_KEY, "test-1234")
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd1", ann,
@@ -85,6 +87,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
     public void testCreateFor() throws Exception {
         canAnnotate.addMember(user);
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
+                .withDataValue(Ontology.PID_KEY, "test-1234")
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd4", ann,

@@ -519,7 +519,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public String diff(
             @PathParam("id") String id,
             @PathParam("versionId") String versionId)
-            throws ItemNotFound, DeserializationError, JsonProcessingException, SerializationError {
+            throws ItemNotFound, DeserializationError, SerializationError {
         try (Tx tx = beginTx()) {
             Accessible item = api().get(id, Accessible.class);
             Version version = api().get(versionId, Version.class);

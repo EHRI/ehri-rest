@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementing classes do things after an item was imported and created
- * a mutation ('created', 'updated', 'unchanged').
+ * Implementing classes modify the bundle of data prior to
+ * creation of graph items.
  */
 public interface PreImportCallback {
     Bundle preImport(Collection<String> idPath, Bundle data);
@@ -66,5 +66,9 @@ public interface PreImportCallback {
                     .orElseGet(idGenerator::generateId);
             return b.withDataValue(Ontology.PID_KEY, pid);
         };
+    }
+
+    static PreImportCallback noop() {
+        return (s, b) -> b;
     }
 }

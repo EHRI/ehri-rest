@@ -4,21 +4,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.utils.Table;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class LinkImporterTest extends AbstractFixtureTest {
+public class LinkImporterTest extends AbstractImporterTest {
 
     private final Table goodData = Table.of(ImmutableList.of(
             ImmutableList.of("r1", "c1", "", "associative", "", "Test"),
@@ -33,7 +34,7 @@ public class LinkImporterTest extends AbstractFixtureTest {
     @Test
     public void importLinks() throws Exception {
 
-        ImportLog log = new LinkImporter(graph, adminUser, false)
+        ImportLog log = new LinkImporter(graph, adminUser, false, getPidGeneratorCallback())
                 .importLinks(goodData, "testing");
         assertEquals(3, log.getCreated());
         assertTrue("Link exists",
@@ -44,13 +45,13 @@ public class LinkImporterTest extends AbstractFixtureTest {
 
     @Test(expected = DeserializationError.class)
     public void importLinksWithMissingTarget() throws Exception {
-        new LinkImporter(graph, adminUser, false)
+        new LinkImporter(graph, adminUser, false, getPidGeneratorCallback())
                 .importLinks(badData, "testing");
     }
 
     @Test
     public void importLinkWithAccessPoint() throws Exception {
-        new LinkImporter(graph, adminUser, false)
+        new LinkImporter(graph, adminUser, false, getPidGeneratorCallback())
                 .importLinks(goodData, "testing");
         assertTrue("Link exists",
                 linkExists("r1", "c1", "ur1", "Test 2"));
@@ -58,7 +59,7 @@ public class LinkImporterTest extends AbstractFixtureTest {
 
     @Test
     public void importLinksWithMissingTargetInTolerantMode() throws Exception {
-        ImportLog log = new LinkImporter(graph, adminUser, true)
+        ImportLog log = new LinkImporter(graph, adminUser, true, getPidGeneratorCallback())
                 .importLinks(badData, "testing");
         assertEquals(3, log.getCreated());
     }
@@ -72,7 +73,7 @@ public class LinkImporterTest extends AbstractFixtureTest {
                         ImmutableList.of("Disconnected Access 1", "r4") // Updated
 
         ));
-        ImportLog log = new LinkImporter(graph, adminUser, false)
+        ImportLog log = new LinkImporter(graph, adminUser, false, getPidGeneratorCallback())
                 .importCoreferences(r1, data, "Testing");
         assertEquals(1, log.getCreated());
         assertEquals(1, log.getUpdated());
