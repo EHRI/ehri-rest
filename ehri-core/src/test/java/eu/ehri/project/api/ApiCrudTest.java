@@ -31,11 +31,13 @@ import eu.ehri.project.exceptions.InvalidIdentifierError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
+import javassist.NotFoundException;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -60,7 +62,21 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test(expected = InvalidIdentifierError.class)
     public void testGetByPidInvalid() throws Exception {
-        api(adminUser).getByPid("foo", UserProfile.class);
+        // We want the test to fail in the right way: e.g. if it finds an item
+        // with a given PID, but it's not a PersistentIdentifiable Item
+        manager.getVertex("mike").setProperty(Ontology.PID_KEY, "mike-pid");
+        api(adminUser).getByPid("mike-pid", UserProfile.class);
+    }
+
+    @Test
+    public void testGetAny() throws Exception {
+        Accessible user = api(adminUser).getAny("mike", false);
+        assertEquals("mike", user.getId());
+    }
+
+    @Test(expected = ItemNotFound.class)
+    public void testGetAnyNotAccessible() throws Exception {
+        api(adminUser).getAny("ar1", false);
     }
 
     @Test

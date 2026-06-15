@@ -135,32 +135,52 @@ public class ApiImpl implements Api {
             }
             return item;
         } catch (ItemNotFound e) {
-            // If the item has been deleted, augment the exception with a deletion time...
-            Optional<Version> versionOpt = versionManager.versionAtDeletion(id);
-            throw versionOpt.map(v -> addTimestamp(e, v)).orElse(e);
+            throw augmentNotFoundInfo(id, false, e);
         }
     }
 
     @Override
     public <E extends Accessible> E getByPid(String pid, Class<E> cls) throws ItemNotFound, InvalidIdentifierError {
         try {
-            if (!PersistentIdentifiable.class.isAssignableFrom(cls)) {
-                throw new InvalidIdentifierError(pid);
-            }
             Optional<Vertex> opt = manager.getVertex(Ontology.PID_KEY, pid);
             if (!opt.isPresent()) {
                 throw new ItemNotFound(pid);
             }
             E item = graph.frame(opt.get(), cls);
+            if (!PersistentIdentifiable.class.isAssignableFrom(manager.getEntityClass(item).getJavaClass())) {
+                throw new InvalidIdentifierError(pid);
+            }
             if (!aclManager.canAccess(item, accessor)) {
                 throw new ItemNotFound(pid);
             }
             return item;
         } catch (ItemNotFound e) {
-            // If the item has been deleted, augment the exception with a deletion time...
-            Optional<Version> versionOpt = versionManager.versionAtDeletion(pid, true);
-            throw versionOpt.map(v -> addTimestamp(e, v)).orElse(e);
+            throw augmentNotFoundInfo(pid, true, e);
         }
+    }
+
+    @Override
+    public Accessible getAny(String id, boolean usePid) throws ItemNotFound, InvalidIdentifierError {
+        try {
+            Accessible item = usePid ? getByPid(id, Accessible.class) : get(id, Accessible.class);
+            if (!Accessible.class.isAssignableFrom(manager.getEntityClass(item).getJavaClass())) {
+                throw new ItemNotFound(id);
+            } else if (!aclManager.getContentTypeFilterFunction().compute(item.asVertex())) {
+                throw new ItemNotFound(id);
+            } else if (!aclManager.canAccess(item, accessor)) {
+                throw new ItemNotFound(id);
+            }
+            return item;
+        } catch (ItemNotFound e) {
+            throw augmentNotFoundInfo(id, usePid, e);
+        }
+
+    }
+
+    private ItemNotFound augmentNotFoundInfo(String id, boolean usePid, ItemNotFound e) {
+        // If the item has been deleted, augment the exception with a deletion time...
+        Optional<Version> versionOpt = versionManager.versionAtDeletion(id, usePid);
+        return versionOpt.map(v -> addTimestamp(e, v)).orElse(e);
     }
 
     @Override

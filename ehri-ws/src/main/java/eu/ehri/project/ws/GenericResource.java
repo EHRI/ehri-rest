@@ -19,10 +19,8 @@
 
 package eu.ehri.project.ws;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -44,8 +42,8 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.VersionManager;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
-import org.apache.jena.atlas.iterator.Iter;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -54,7 +52,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -70,8 +70,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public static final String GID_PARAM = "gid";
     public static final String PID_PARAM = "pid";
 
+    VersionManager versionManager;
+
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
+        versionManager = new VersionManager(graph);
     }
 
     /**
@@ -145,26 +148,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("pid:{pid:[^/]+}")
-    public Response getByPid(@PathParam("pid") String pid) throws ItemNotFound, AccessDenied {
+    public Response getByPid(@PathParam("pid") String pid) throws ItemNotFound, AccessDenied, InvalidIdentifierError {
         try (final Tx tx = beginTx()) {
-            Optional<Vertex> itemOpt = manager.getVertex(Ontology.PID_KEY, pid);
-
-            if (itemOpt.isPresent()) {
-                Vertex item = itemOpt.get();
-                // If the item doesn't exist or isn't a content type throw 404
-                Accessor currentUser = getRequesterUserProfile();
-                if (!aclManager.getContentTypeFilterFunction().compute(item)) {
-                    throw new ItemNotFound(pid);
-                } else if (!AclManager.getAclFilterFunction(currentUser).compute(item)) {
-                    throw new AccessDenied(currentUser.getId(), pid);
-                }
-
-                Response response = single(graph.frame(item, Accessible.class));
-                tx.success();
-                return response;
-            } else {
-                throw new ItemNotFound(pid);
-            }
+            Response response = single(api().getByPid(pid, Accessible.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -179,19 +167,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
-    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
+    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied, InvalidIdentifierError {
         try (final Tx tx = beginTx()) {
-            Vertex item = manager.getVertex(id);
-
-            // If the item doesn't exist or isn't a content type throw 404
-            Accessor currentUser = getRequesterUserProfile();
-            if (item == null || !aclManager.getContentTypeFilterFunction().compute(item)) {
-                throw new ItemNotFound(id);
-            } else if (!AclManager.getAclFilterFunction(currentUser).compute(item)) {
-                throw new AccessDenied(currentUser.getId(), id);
-            }
-
-            Response response = single(graph.frame(item, Accessible.class));
+            Response response = single(api().getAny(id, false));
             tx.success();
             return response;
         }
@@ -590,14 +568,14 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                 } else if (js instanceof String) {
                     ids.add((String) js);
                 } else if (js instanceof Map) {
-                    for (Map.Entry<?,?> entry : ((Map<?, ?>) js).entrySet()) {
+                    for (Map.Entry<?, ?> entry : ((Map<?, ?>) js).entrySet()) {
                         Object key = entry.getKey();
                         Object value = entry.getValue();
                         if (key instanceof String && value instanceof String) {
                             if (kvs.containsKey((String) key)) {
                                 kvs.get((String) key).add((String) value);
                             } else {
-                                kvs.put((String) key, Lists.newArrayList((String)value));
+                                kvs.put((String) key, Lists.newArrayList((String) value));
                             }
                         }
                     }
