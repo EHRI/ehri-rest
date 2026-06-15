@@ -70,6 +70,17 @@ public interface Api {
     }
 
     /**
+     * Get any item by ID or PID.
+     *
+     * @param id the item's ID
+     * @param usePid if the ID is a PID
+     * @return an {@link Accessible} item
+     * @throws ItemNotFound if the item is not found
+     * @throws InvalidIdentifierError if the item is not a PID type
+     */
+    Accessible getAny(String id, boolean usePid) throws ItemNotFound, InvalidIdentifierError;
+
+    /**
      * Fetch an item, as a user. This only provides access control.
      *
      * @param id  the item id
