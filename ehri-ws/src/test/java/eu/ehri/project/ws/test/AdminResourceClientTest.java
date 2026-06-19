@@ -19,6 +19,7 @@
 
 package eu.ehri.project.ws.test;
 
+import com.google.common.base.Splitter;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.project.ws.AdminResource;
@@ -29,6 +30,8 @@ import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+
+import java.util.List;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
@@ -82,6 +85,17 @@ public class AdminResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
                 .get(ClientResponse.class);
         assertStatus(OK, response);
+    }
+
+    @Test
+    public void testExportPids() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-pids"));
+        ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        List<String> csv = Splitter.on('\n').splitToList(resource.get(String.class));
+        assertTrue(csv.size() > 1);
+        assertTrue(csv.contains("r4,r4-1234"));
     }
 
     @Test
