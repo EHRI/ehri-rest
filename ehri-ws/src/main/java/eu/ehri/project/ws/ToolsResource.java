@@ -404,14 +404,14 @@ public class ToolsResource extends AbstractResource {
         int done = 0;
         try (final Tx tx = beginTx()) {
             for (EntityClass entityClass : EntityClass.implementing(PersistentIdentifiable.class)) {
-                try (CloseableIterable<Accessible> descriptions = manager.getEntities(entityClass, Accessible.class)) {
-                    for (Accessible accessible : descriptions) {
-                        Vertex vertex = accessible.asVertex();
+                try (CloseableIterable<PersistentIdentifiable> items = manager.getEntities(entityClass, PersistentIdentifiable.class)) {
+                    for (PersistentIdentifiable item : items) {
+                        Vertex vertex = item.asVertex();
                         String existing = vertex.getProperty(Ontology.PID_KEY);
                         if (existing == null) {
                             String pid = idGenerator.generateId();
                             vertex.setProperty(Ontology.PID_KEY, pid);
-                            for (Version version : accessible.as(Versioned.class).getAllPriorVersions()) {
+                            for (Version version : item.as(Versioned.class).getAllPriorVersions()) {
                                 Vertex versionVertex = version.asVertex();
                                 versionVertex.setProperty(Ontology.VERSION_ENTITY_PID, pid);
                             }
