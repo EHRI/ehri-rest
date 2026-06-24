@@ -215,7 +215,7 @@ public class ToolsResource extends AbstractResource {
      *                   regenerated ID would cause collisions
      * @param tolerant   skip items that could cause collisions rather
      *                   then throwing an error
-     * @param commit     whether or not to rename the item
+     * @param commit     whether to rename the item
      * @param data       the data table
      * @return a tab old-to-new mapping, or an empty
      * body if nothing was changed

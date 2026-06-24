@@ -196,10 +196,9 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data) throws IntegrityError {
-        Preconditions
-                .checkNotNull(id, "null vertex ID given for item creation");
+        Preconditions.checkNotNull(id, "null vertex ID given for item creation");
         Map<String, ?> indexData = getVertexData(id, type, data);
-        checkExists(id);
+        assertDoesNotExist(id);
         Vertex node = graph.addVertex(null);
         for (Map.Entry<String, ?> entry : indexData.entrySet()) {
             if (entry.getValue() == null)
@@ -280,7 +279,7 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
         }
     }
 
-    private void checkExists(String id) throws IntegrityError {
+    private void assertDoesNotExist(String id) throws IntegrityError {
         if (exists(id)) {
             throw new IntegrityError(id);
         }
