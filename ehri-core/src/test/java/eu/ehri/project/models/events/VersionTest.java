@@ -55,6 +55,8 @@ public class VersionTest extends AbstractFixtureTest {
                 EventTypes.creation).commit();
         assertEquals(1, Iterables.size(first.getSubjects()));
 
+        assertFalse(user.isVersioned());
+
         // Change the user twice in succession, with the data from userBundle2
         // and userBundle3
         SystemEvent second = actionManager.newEventContext(user,
@@ -72,6 +74,9 @@ public class VersionTest extends AbstractFixtureTest {
                 .createVersion(user).commit();
         Mutation<UserProfile> update2 = bundleManager.update(userBundle3, UserProfile.class);
         assertEquals(MutationState.UPDATED, update2.getState());
+
+        // Ensure isVersioned works
+        assertTrue(user.isVersioned());
 
         // Now compare the values in the versions
         Version firstVersion = second.getPriorVersions().iterator().next();

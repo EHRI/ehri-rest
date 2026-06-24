@@ -25,13 +25,28 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+
+import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
 
 /**
  * An entity that may have prior versions.
  */
 public interface Versioned extends Accessible {
+    String IS_VERSIONED = "isVersioned";
+
+
+    /**
+     * Determine if this item has a prior version.
+     *
+     * @return true, if a prior version exists.
+     */
+    @Meta(IS_VERSIONED)
+    @JavaHandler
+    boolean isVersioned();
+
     /**
      * Get the most recent version for this item, if one exists.
      *
@@ -53,6 +68,11 @@ public interface Versioned extends Accessible {
         public Iterable<Version> getAllPriorVersions() {
             return frameVertices(gremlin().as("n").out(Ontology.ENTITY_HAS_PRIOR_VERSION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc));
+        }
+
+        @Override
+        public boolean isVersioned() {
+            return hasEdge(it(), Direction.OUT, Ontology.ENTITY_HAS_PRIOR_VERSION);
         }
     }
 }
