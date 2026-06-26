@@ -29,8 +29,11 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 public class ModeViolationMapper implements ExceptionMapper<ModeViolation> {
+
+    public static final String code = "MODE_VIOLATION";
+
     @Override
     public Response toResponse(ModeViolation e) {
-        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, code, e);
     }
 }

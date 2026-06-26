@@ -34,10 +34,14 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class AccessDeniedMapper implements ExceptionMapper<AccessDenied> {
+
+    public static final String code = "ACCESS_DENIED";
+
     @Override
     public Response toResponse(final AccessDenied e) {
         return WebDeserializationError.errorToJson(
                 Status.FORBIDDEN,
+                code,
                 ImmutableMap.of(
                         "message", e.getMessage(),
                         "item", e.getEntity(),

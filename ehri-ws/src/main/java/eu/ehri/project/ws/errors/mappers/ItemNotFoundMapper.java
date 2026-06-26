@@ -33,11 +33,15 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
+
+    public static final String code = "ITEM_NOT_FOUND";
+
     @Override
     public Response toResponse(final ItemNotFound e) {
         if (!e.getDeletedAt().isPresent()) {
             return WebDeserializationError.errorToJson(
                     Status.NOT_FOUND,
+                    code,
                     ImmutableMap.of(
                             "message", e.getMessage(),
                             "key", "id",
@@ -47,6 +51,7 @@ public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
         } else {
             return WebDeserializationError.errorToJson(
                     Status.GONE,
+                    code,
                     ImmutableMap.of(
                             "message", e.getMessage(),
                             "key", "id",
