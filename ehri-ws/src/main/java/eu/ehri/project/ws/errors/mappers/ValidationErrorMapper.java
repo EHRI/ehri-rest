@@ -33,10 +33,14 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
+
+    public static final String code = "VALIDATION_ERROR";
+
     @Override
     public Response toResponse(ValidationError e) {
         return WebDeserializationError.errorToJson(
                 Status.BAD_REQUEST,
+                code,
                 e.getMessage(),
                 e.getErrorSet().toData());
     }

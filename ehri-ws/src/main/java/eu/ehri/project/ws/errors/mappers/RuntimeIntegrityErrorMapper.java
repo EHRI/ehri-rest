@@ -34,12 +34,18 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class RuntimeIntegrityErrorMapper implements ExceptionMapper<RuntimeIntegrityError> {
+
+    public final static String code = "INTEGRITY_ERROR";
+
     @Override
     public Response toResponse(RuntimeIntegrityError e) {
         return WebDeserializationError.errorToJson(
-                Status.INTERNAL_SERVER_ERROR,
+                Status.CONFLICT,
+                code,
                 e.getMessage(),
                 "This can occur when attempting to import, patch, or update items that have been " +
-                        "renamed (local identifiers changed).");
+                        "renamed (local identifiers changed), or for very unlikely random string collisions. " +
+                        "If you encounter this error retrying the operation may succeed; otherwise contact a " +
+                        "member of technical staff.");
     }
 }

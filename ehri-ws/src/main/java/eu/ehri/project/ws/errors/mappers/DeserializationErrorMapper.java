@@ -32,8 +32,10 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class DeserializationErrorMapper implements ExceptionMapper<DeserializationError> {
+    public static final String code = "DESERIALIZATION_ERROR";
+
     @Override
     public Response toResponse(DeserializationError e) {
-        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, code, e);
     }
 }

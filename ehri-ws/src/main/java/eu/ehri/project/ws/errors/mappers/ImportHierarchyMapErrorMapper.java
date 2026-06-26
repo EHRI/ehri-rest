@@ -29,8 +29,11 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 public class ImportHierarchyMapErrorMapper implements ExceptionMapper<ImportHierarchyMapError> {
+
+    public static final String code = "IMPORT_HIERARCHY_MAP_ERROR";
+
     @Override
     public Response toResponse(ImportHierarchyMapError e) {
-        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, code, e);
     }
 }

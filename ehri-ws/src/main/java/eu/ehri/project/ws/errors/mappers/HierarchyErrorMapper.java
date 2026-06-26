@@ -33,10 +33,14 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class HierarchyErrorMapper implements ExceptionMapper<HierarchyError> {
+
+    public static final String code = "HIERARCHY_ERROR";
+
     @Override
     public Response toResponse(final HierarchyError e) {
         return WebDeserializationError.errorToJson(
                 Status.CONFLICT,
+                code,
                 ImmutableMap.of(
                         "message", e.getMessage(),
                         "id", e.id(),
