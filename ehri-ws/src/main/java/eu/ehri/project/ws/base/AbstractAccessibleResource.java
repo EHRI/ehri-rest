@@ -26,7 +26,6 @@ import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.EntityClass;
@@ -390,9 +389,5 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             accessors.add(current);
         }
         return accessors;
-    }
-
-    protected Bundle setPid(Bundle bundle) {
-        return bundle.withDataValue(Ontology.PID_KEY, idGenerator.generateId());
     }
 }
