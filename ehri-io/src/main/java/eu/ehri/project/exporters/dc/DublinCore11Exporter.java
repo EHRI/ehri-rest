@@ -27,6 +27,7 @@ import eu.ehri.project.api.Api;
 import eu.ehri.project.definitions.Isaar;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Isdiah;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
@@ -90,19 +91,21 @@ public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described
                     "schemaLocation", OAI_NS + " http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
 
             tag(sw, "dc:identifier", item.getIdentifier());
+
+            Optional.ofNullable(item.getProperty(Ontology.PID_KEY)).ifPresent(pid -> tag(sw, "dc:identifier",
+                    String.format("%s%s", config.getString("io.pids.prefix"), pid)));
+
             Optional<Description> descOpt = LanguageHelpers
-                    .getBestDescription(item, Optional.<Description>empty(), langCode);
+                    .getBestDescription(item, Optional.empty(), langCode);
 
             descOpt.ifPresent(desc -> {
                 String langCode639_1 = LanguageHelpers.iso639DashOneCode(desc.getLanguageOfDescription());
 
                 tag(sw, "dc:title", desc.getName());
 
-                Optional.ofNullable(item.as(DocumentaryUnit.class).getRepository()).ifPresent(repository -> {
-                    LanguageHelpers.getBestDescription(repository, langCode).ifPresent(d ->
-                            tag(sw, "dc:publisher", d.getName())
-                    );
-                });
+                Optional.ofNullable(item.as(DocumentaryUnit.class).getRepository())
+                        .flatMap(repository -> LanguageHelpers.getBestDescription(repository, langCode))
+                        .ifPresent(d -> tag(sw, "dc:publisher", d.getName()));
 
                 for (DatePeriod datePeriod : desc.as(Temporal.class).getDatePeriods()) {
                     String start = datePeriod.getStartDate();

@@ -33,10 +33,14 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class ImportValidationErrorMapper implements ExceptionMapper<ImportValidationError> {
+
+    public static final String code = "IMPORT_VALIDATION_ERROR";
+
     @Override
     public Response toResponse(ImportValidationError e) {
         return WebDeserializationError.errorToJson(
                 Status.BAD_REQUEST,
+                code,
                 e.getContext(),
                 e.getError().getErrorSet().toData());
     }

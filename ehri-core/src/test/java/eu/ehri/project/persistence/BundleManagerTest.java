@@ -19,7 +19,10 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -92,6 +95,58 @@ public class BundleManagerTest extends ModelTestBase {
 
         assertEquals(toList(c1.getDescriptions()),
                 toList(c1redux.getNode().getDescriptions()));
+    }
+
+    @Test
+    public void testSavingWithNoOpInitialisationData() throws Exception {
+        Bundle bundle = Bundle.of("t1",
+                EntityClass.DOCUMENTARY_UNIT,
+                ImmutableMap.of("identifier", "t1", "__pid", "1234"),
+                ImmutableMultimap.of(),
+                ImmutableMap.of()
+        );
+        BundleManager bundleManager = new BundleManager(graph);
+        DocumentaryUnit t1 = bundleManager.create(bundle, DocumentaryUnit.class);
+        assertEquals("1234", t1.getProperty("__pid"));
+
+        // Changing the pid should not be possible here because it is not included
+        // in the comparison data and so the node is never updated.
+        Bundle bundle2 = bundle
+                .withDataValue("__pid", "5678");
+        Mutation<DocumentaryUnit> op = bundleManager.createOrUpdate(bundle2, DocumentaryUnit.class);
+        assertEquals(MutationState.UNCHANGED, op.getState());
+        assertEquals("1234", op.getNode().getPid());
+
+        Bundle out = serializer.entityToBundle(op.getNode());
+        assertEquals(bundle, out);
+    }
+
+    @Test
+    public void testSavingWithReservedInitialisationData() throws Exception {
+        Bundle bundle = Bundle.of("t1",
+                EntityClass.DOCUMENTARY_UNIT,
+                ImmutableMap.of(
+                        Ontology.IDENTIFIER_KEY, "t1",
+                        Ontology.PID_KEY, "1234",
+                        EntityType.TYPE_KEY, "Repository", // Reserved!
+                        EntityType.ID_KEY, "foo"               // Reserved!
+                ),
+                ImmutableMultimap.of(),
+                ImmutableMap.of()
+        );
+        BundleManager bundleManager = new BundleManager(graph);
+        DocumentaryUnit t1 = bundleManager.create(bundle, DocumentaryUnit.class);
+        assertEquals(Entities.DOCUMENTARY_UNIT, t1.getProperty(EntityType.TYPE_KEY));
+        assertEquals("t1", t1.getProperty(EntityType.ID_KEY));
+
+        // Changing the pid should not be possible
+        Bundle bundle2 = bundle.withDataValue("__pid", "5678");
+        Mutation<DocumentaryUnit> op = bundleManager.createOrUpdate(bundle2, DocumentaryUnit.class);
+        assertEquals(MutationState.UNCHANGED, op.getState());
+        assertEquals("1234", op.getNode().getPid());
+
+        Bundle out = serializer.entityToBundle(op.getNode());
+        assertEquals(bundle, out);
     }
 
     @Test
@@ -176,8 +231,7 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test(expected = ItemNotFound.class)
-    public void testDeletingWholeBundle() throws SerializationError,
-            ValidationError, ItemNotFound {
+    public void testDeletingWholeBundle() throws Exception {
         DocumentaryUnit c1 = manager.getEntity(ID, DocumentaryUnit.class);
         DocumentaryUnitDescription cd1 = manager.getEntity("cd1", DocumentaryUnitDescription.class);
         Bundle bundle = serializer.entityToBundle(c1);
@@ -186,7 +240,7 @@ public class BundleManagerTest extends ModelTestBase {
                 EntityClass.DATE_PERIOD, DatePeriod.class));
 
         BundleManager bundleManager = new BundleManager(graph);
-        Integer numDeleted = bundleManager.delete(bundle);
+        int numDeleted = bundleManager.delete(bundle);
         assertTrue(numDeleted > 0);
         assertEquals(
                 dates.size() - 2,
@@ -198,8 +252,7 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test(expected = ValidationError.class)
-    public void testValidationError() throws SerializationError,
-            ValidationError, ItemNotFound, IntegrityError {
+    public void testValidationError() throws Exception {
         DocumentaryUnit c1 = manager.getEntity(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.entityToBundle(c1);
         Bundle desc = DataUtils.getItem(bundle, "describes[0]");
@@ -211,8 +264,7 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test(expected = ValidationError.class)
-    public void testUpdateWithNoIdentifier() throws SerializationError,
-            ValidationError, ItemNotFound, IntegrityError, DeserializationError {
+    public void testUpdateWithNoIdentifier() throws Exception {
         Bundle b1 = Bundle.fromData(TestData.getTestAgentBundle())
                 .removeDataValue(Ontology.IDENTIFIER_KEY);
 
@@ -224,7 +276,8 @@ public class BundleManagerTest extends ModelTestBase {
     @Test
     public void testCreationWithUnicodeIdentifier() throws Exception {
         Bundle b1 = Bundle.fromData(TestData.getTestDocBundle())
-                .withDataValue(Ontology.IDENTIFIER_KEY, "foo /?&% ארכיו bar");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foo /?&% ארכיו bar")
+                .withDataValue(Ontology.PID_KEY, "1234");
         DocumentaryUnit doc = new BundleManager(graph).create(b1, DocumentaryUnit.class);
         assertEquals("foo_ארכיו_bar", doc.getId());
     }

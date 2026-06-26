@@ -1,16 +1,12 @@
 package eu.ehri.project.exporters.ead;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.*;
@@ -38,7 +34,6 @@ import static eu.ehri.project.exporters.ead.EadExporter.getEventDescription;
 public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Ead3Exporter.class);
-    private static final Config config = ConfigFactory.load();
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYY-MM-dd");
 
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead3Exporter.class.getName());
@@ -230,6 +225,9 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
     private void addDataSection(XMLStreamWriter sw, DocumentaryUnit subUnit, Description desc, String langCode, Optional<Repository> repoOpt) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
+            tag(sw, "unitid",
+                    String.format("%s%s", config.getString("io.pids.prefix"), subUnit.getPid()),
+                    attrs("label", config.getString("io.pids.label"), "localtype", "ark"));
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
             addOrigination(sw, desc, langCode);
             addDatePeriods(sw, desc);

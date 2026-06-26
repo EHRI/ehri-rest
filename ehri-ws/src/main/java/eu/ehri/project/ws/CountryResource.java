@@ -87,7 +87,7 @@ public class CountryResource
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = beginTx()) {
-            Response item = createItem(bundle, accessors);
+            Response item = createItem(setPid(bundle), accessors);
             tx.success();
             return item;
         }
@@ -158,7 +158,7 @@ public class CountryResource
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
             final Country country = api().get(id, cls);
-            Response item = createItem(bundle, accessors,
+            Response item = createItem(setPid(bundle), accessors,
                     repository -> repository.setCountry(country),
                     api().withScope(country), Repository.class);
             tx.success();

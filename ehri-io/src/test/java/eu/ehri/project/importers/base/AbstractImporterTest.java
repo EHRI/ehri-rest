@@ -26,23 +26,33 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportOptions;
+import eu.ehri.project.importers.PreImportCallback;
+import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosImporterFactory;
+import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Identifiable;
+import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.utils.Slugify;
 import org.junit.After;
 import org.junit.Before;
+import org.neo4j.cypher.internal.compiler.v2_3.commands.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public abstract class AbstractImporterTest extends AbstractFixtureTest {
@@ -63,18 +73,46 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     protected final String TEST_REPO = "r1";
 
     /**
+     * For testing, use a PID generator that just copies the ID.
+     */
+    protected PreImportCallback getPidGeneratorCallback() {
+        final AtomicInteger counter = new AtomicInteger();
+        return (s, b) -> {
+            if (PersistentIdentifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
+                if (Identifiable.class.isAssignableFrom(b.getType().getJavaClass())) {
+                    return b.withDataValue(Ontology.PID_KEY, "pid-" + Slugify.slugify(b.getDataValue(Ontology.IDENTIFIER_KEY)));
+                } else {
+                    // Items which don't have to have a unique key don't have any particular way to
+                    // mark them out for testing purposes, so just using a counter here.
+                    return b.withDataValue(Ontology.PID_KEY, "pid-" + counter.incrementAndGet());
+                }
+            } else {
+                return b;
+            }
+        };
+    }
+
+    /**
      * Convenience method for creating a Sax import manager.
      */
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
-        return SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, options);
+        SaxImportManager importer = SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass,
+                options.withLinkResolver(LinkResolver.create(graph, adminUser, getPidGeneratorCallback())));
+        return importer.withPreCallback(getPidGeneratorCallback());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
-        return SaxImportManager.create(graph, repository, adminUser, importerClass, handlerClass, ImportOptions.basic());
+        return saxImportManager(importerClass, handlerClass, ImportOptions.basic());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {
         return saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
+    }
+
+    protected SkosImporter skosImporter(Vocabulary vocabulary) {
+        return SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+                .withPreCallback(getPidGeneratorCallback())
+                .withLinkPreCallback(getPidGeneratorCallback());
     }
 
     /**
@@ -149,7 +187,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
             out.print("[" + relatedBy.getIdentifier() + "]");
         }
 
-        out.println("");// end of concept
+        out.println();// end of concept
 
         indent += ".   ";// the '.' improves readability, but the whole printing could be improved
         for (Concept nc : c.getNarrowerConcepts()) {
@@ -166,7 +204,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
             for (String key : propertyKeys) {
                 out.printf("%s%-20s : %s%n", pad, key, d.getProperty(key));
             }
-            out.println("");
+            out.println();
         }
         for (DocumentaryUnit child : unit.getChildren()) {
             printProps(out, child, pad + "    ");
@@ -177,7 +215,7 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * Get a Vertex from the FramedGraph using its unit ID.
      *
      * @param graph      the graph to search
-     * @param identifier the Vertex's 'human readable' identifier
+     * @param identifier the Vertex's 'human-readable' identifier
      * @return the first Vertex with the given identifier
      * @throws NoSuchElementException when there are no vertices with this identifier
      */

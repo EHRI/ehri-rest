@@ -123,6 +123,7 @@ public class Ontology {
     public static final String VERSION_HAS_EVENT = "triggeredByEvent";
     public static final String VERSION_ENTITY_CLASS = "entityType";
     public static final String VERSION_ENTITY_ID = "entityId";
+    public static final String VERSION_ENTITY_PID = "entityPid";
     public static final String VERSION_ENTITY_DATA = "entityData";
 
     // Virtual collections
@@ -140,4 +141,7 @@ public class Ontology {
     // Maintenance events
     public static final String MAINTENANCE_EVENT_TYPE = "eventType";
     public static final String MAINTENANCE_EVENT_AGENT_TYPE = "agentType";
+
+    // Special initialisation-only values.
+    public static final String PID_KEY = "__pid";
 }

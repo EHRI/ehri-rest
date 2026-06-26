@@ -31,7 +31,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.project.ws.errors.MissingOrInvalidUser;
+import eu.ehri.project.IdGeneratorFactory;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
@@ -42,15 +42,20 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.TxGraph;
 import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.ws.errors.MissingOrInvalidUser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,10 +83,14 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = jsonMapper.getFactory();
+    protected static final RandomIdGenerator idGenerator = IdGeneratorFactory.getIdGenerator();
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
+    /**
+     * CSV media type.
+     */
     public static final String CSV_MEDIA_TYPE = "text/csv";
 
     /**
@@ -139,6 +148,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     public static final String AUTH_HEADER_NAME = "X-User";
     public static final String LOG_MESSAGE_HEADER_NAME = "X-LogMessage";
     public static final String STREAM_HEADER_NAME = "X-Stream";
+    public static final String USER_PID_HEADER_NAME = "X-UserPid";
 
 
     /**
@@ -203,8 +213,8 @@ public abstract class AbstractResource implements TxCheckedResource {
     protected Serializer getSerializer() {
         Optional<List<String>> includeProps = Optional.ofNullable(uriInfo.getQueryParameters(true)
                 .get(INCLUDE_PROPS_PARAM));
-        boolean depOnly = getBoolQueryParam(DEPENDENT_ONLY_PARAM, false);
-        boolean noMeta = getBoolQueryParam(NO_META_PARAM, false);
+        boolean depOnly = getBoolQueryParam(DEPENDENT_ONLY_PARAM);
+        boolean noMeta = getBoolQueryParam(NO_META_PARAM);
         return includeProps.map(serializer::withIncludedProperties).orElse(serializer)
                 .withDependentOnly(depOnly)
                 .withMeta(!noMeta);
@@ -244,16 +254,24 @@ public abstract class AbstractResource implements TxCheckedResource {
      * on a default.
      *
      * @param key          the parameter name
-     * @param defaultValue the default value
      * @return an integer value
      */
-    protected boolean getBoolQueryParam(String key, boolean defaultValue) {
+    protected boolean getBoolQueryParam(String key) {
         String value = uriInfo.getQueryParameters().getFirst(key);
         try {
             return Boolean.parseBoolean(value);
         } catch (Exception e) {
-            return defaultValue;
+            return false;
         }
+    }
+
+    protected boolean getBoolHeader(String key) {
+        final List<String> requestHeader = requestHeaders.getRequestHeader(key);
+        if (requestHeader == null || requestHeader.isEmpty()) {
+            return false;
+        }
+        String value = requestHeader.get(0);
+        return Boolean.parseBoolean(value);
     }
 
     /**
@@ -394,11 +412,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @return Patch is given
      */
     protected boolean isStreaming() {
-        List<String> list = requestHeaders.getRequestHeader(STREAM_HEADER_NAME);
-        if (list != null && !list.isEmpty()) {
-            return Boolean.parseBoolean(list.get(0));
-        }
-        return false;
+        return getBoolHeader(STREAM_HEADER_NAME);
     }
 
     /**
@@ -530,6 +544,26 @@ public abstract class AbstractResource implements TxCheckedResource {
     }
 
     /**
+     * Conditionally set an items PID if the ${USER_PID_HEADER_NAME} is set.
+     */
+    protected PreImportCallback conditionalSetPid = (s, b) -> setPid(b);
+
+    /**
+     * Set a PID in a bundle, allowing existing data to take precedent if the
+     * ${USER_PID_HEADER_NAME} is set.
+     *
+     * @param bundle a bundle.
+     * @return a new bundle with the PID_KEY set.
+     */
+    protected Bundle setPid(Bundle bundle) {
+        boolean userPid = getBoolHeader(USER_PID_HEADER_NAME);
+        String pid = Optional
+                .ofNullable(userPid ? bundle.<String>getDataValue(Ontology.PID_KEY) : null)
+                .orElse(idGenerator.generateId());
+        return bundle.withDataValue(Ontology.PID_KEY, pid);
+    }
+
+    /**
      * Return a response from a new item with a 201 CREATED status.
      *
      * @param frame A newly-created item
@@ -625,7 +659,6 @@ public abstract class AbstractResource implements TxCheckedResource {
                 g.writeEndArray();
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -643,7 +676,6 @@ public abstract class AbstractResource implements TxCheckedResource {
                 g.writeEndArray();
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -666,7 +698,6 @@ public abstract class AbstractResource implements TxCheckedResource {
 
                 tx.success();
             } catch (SerializationError e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();

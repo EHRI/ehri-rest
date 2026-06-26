@@ -13,17 +13,20 @@
   type: Country
   data:
     identifier: gb
+    __pid: gb-1234
 
 - id: nl
   type: Country
   data:
     identifier: nl
+    __pid: nl-1234
 
 # Institutions
 - id: repo-gb
   type: Repository
   data:
     identifier: repo-gb
+    __pid: repo-gb-1234
     name: Repository
   relationships:
     hasCountry: gb
@@ -40,6 +43,7 @@
   type: Repository
   data:
     identifier: repo-nl
+    __pid: repo-nl-1234
     name: Repository
   relationships:
     hasCountry: gb

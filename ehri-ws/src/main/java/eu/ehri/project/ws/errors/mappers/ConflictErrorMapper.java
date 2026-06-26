@@ -32,8 +32,11 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class ConflictErrorMapper implements ExceptionMapper<ConflictError> {
+
+    public static final String code = "CONFLICT";
+
     @Override
     public Response toResponse(ConflictError e) {
-        return WebDeserializationError.errorToJson(Status.CONFLICT, e);
+        return WebDeserializationError.errorToJson(Status.CONFLICT, code, e);
     }
 }

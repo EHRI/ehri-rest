@@ -13,12 +13,14 @@
   type: Country
   data:
     identifier: gb
+    __pid: gb-1234
 
 # Institution
 - id: repo
   type: Repository
   data:
     identifier: repo
+    __pid: repo-1234
     name: Repository
   relationships:
     hasCountry: gb

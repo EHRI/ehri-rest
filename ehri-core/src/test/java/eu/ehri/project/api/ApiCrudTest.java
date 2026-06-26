@@ -27,14 +27,17 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.HierarchyError;
+import eu.ehri.project.exceptions.InvalidIdentifierError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
+import javassist.NotFoundException;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -46,9 +49,34 @@ import static org.junit.Assert.*;
 public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test
-    public void testDetail() throws ItemNotFound {
+    public void testGet() throws ItemNotFound {
         DocumentaryUnit unit = api(adminUser).get(item.getId(), DocumentaryUnit.class);
         assertEquals(item.asVertex(), unit.asVertex());
+    }
+
+    @Test
+    public void testGetByPid() throws Exception {
+        DocumentaryUnit unit = api(adminUser).getByPid(item.getPid(), DocumentaryUnit.class);
+        assertEquals(item.asVertex(), unit.asVertex());
+    }
+
+    @Test(expected = InvalidIdentifierError.class)
+    public void testGetByPidInvalid() throws Exception {
+        // We want the test to fail in the right way: e.g. if it finds an item
+        // with a given PID, but it's not a PersistentIdentifiable Item
+        manager.getVertex("mike").setProperty(Ontology.PID_KEY, "mike-pid");
+        api(adminUser).getByPid("mike-pid", UserProfile.class);
+    }
+
+    @Test
+    public void testGetAny() throws Exception {
+        Accessible user = api(adminUser).getAny("mike", false);
+        assertEquals("mike", user.getId());
+    }
+
+    @Test(expected = ItemNotFound.class)
+    public void testGetAnyNotAccessible() throws Exception {
+        api(adminUser).getAny("ar1", false);
     }
 
     @Test
@@ -58,12 +86,12 @@ public class ApiCrudTest extends AbstractFixtureTest {
     }
 
     @Test(expected = ItemNotFound.class)
-    public void testDetailAnonymous() throws ItemNotFound {
+    public void testGetAnonymous() throws ItemNotFound {
         anonApi().get(item.getId(), DocumentaryUnit.class);
     }
 
     @Test(expected = ItemNotFound.class)
-    public void testDetailPermissionDenied() throws ItemNotFound {
+    public void testGetPermissionDenied() throws ItemNotFound {
         api(basicUser).get(item.getId(), DocumentaryUnit.class);
     }
 
@@ -114,7 +142,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testUserDetailAccessDenied() throws ItemNotFound {
+    public void testUserGetAccessDenied() throws ItemNotFound {
         api(basicUser).get(adminUser.getId(), UserProfile.class);
     }
 

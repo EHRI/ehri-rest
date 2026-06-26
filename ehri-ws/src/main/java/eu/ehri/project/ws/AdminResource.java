@@ -20,14 +20,17 @@
 package eu.ehri.project.ws;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
-import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.wrapper.AclGraph;
 import eu.ehri.project.core.Tx;
@@ -36,16 +39,13 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PersistentIdentifiable;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.JsonDataExporter;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -100,6 +100,36 @@ public class AdminResource extends AbstractResource {
                 Accessor accessor = getRequesterUserProfile();
                 AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
                 JsonDataExporter.outputGraph(aclGraph, stream);
+                tx.success();
+            }
+        }).build();
+    }
+
+
+    /**
+     * Export a CSV of item IDs and PIDs.
+     * @return
+     */
+    @GET
+    @Produces(CSV_MEDIA_TYPE)
+    @Path("export-pids")
+    public Response exportPids() {
+        return Response.ok((StreamingOutput) stream -> {
+            try (final Tx tx = beginTx()) {
+                final CsvMapper mapper = new CsvMapper();
+                final CsvSchema schema = mapper.schemaFor(List.class).withoutQuoteChar();
+                try (SequenceWriter writer = mapper.writer(schema).writeValues(stream)) {
+                    for (EntityClass entityClass : EntityClass.implementing(PersistentIdentifiable.class)) {
+                        try (CloseableIterable<PersistentIdentifiable> items =
+                                     manager.getEntities(entityClass, PersistentIdentifiable.class)) {
+                            for (PersistentIdentifiable item : items) {
+                                List<String> row = Lists.newArrayList(item.getId(), item.getPid());
+                                writer.write(row);
+                            }
+                        }
+                    }
+                }
+
                 tx.success();
             }
         }).build();

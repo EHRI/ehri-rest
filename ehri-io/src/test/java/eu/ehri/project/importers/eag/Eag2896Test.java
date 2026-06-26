@@ -59,8 +59,14 @@ public class Eag2896Test extends AbstractImporterTest {
         int count = getNodeCount(graph);
         logger.info("count of nodes before importing: " + count);
 
-        SaxImportManager importManager = SaxImportManager.create(graph, country, adminUser,
-                EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
+        SaxImportManager importManager = SaxImportManager.create(
+                        graph,
+                        country,
+                        adminUser,
+                        EagImporter.class,
+                        EagHandler.class,
+                        ImportOptions.properties("eag.properties")
+                ).withPreCallback(getPidGeneratorCallback());
         try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT)) {
             ImportLog log = importManager.importInputStream(ios, logMessage);
 

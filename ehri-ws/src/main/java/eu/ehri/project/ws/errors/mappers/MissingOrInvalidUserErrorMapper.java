@@ -34,8 +34,11 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class MissingOrInvalidUserErrorMapper implements ExceptionMapper<MissingOrInvalidUser> {
+
+    public static final String code = "MISSING_OR_INVALID_USER";
+
     @Override
     public Response toResponse(MissingOrInvalidUser e) {
-        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, code, e);
     }
 }

@@ -20,11 +20,16 @@
 package eu.ehri.project.ws.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableList;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.project.ws.PermissionsResource;
+import com.sun.jersey.api.client.WebResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.tools.Migrator;
+import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.PermissionsResource;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,8 +37,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 
 public class RepositoryResourceClientTest extends AbstractResourceClientTest {
@@ -43,12 +47,12 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     private static final String LIMITED_USER_NAME = "reto";
     private static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String agentTestData;
+    private String repositoryTestData;
     private String docTestData;
 
     @Before
     public void setUp() throws Exception {
-        agentTestData = readResourceFileAsString("Repository.json");
+        repositoryTestData = readResourceFileAsString("Repository.json");
         docTestData = readResourceFileAsString("DocumentaryUnit.json");
     }
 
@@ -57,7 +61,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(agentTestData)
+                .entity(repositoryTestData)
                 .post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -69,7 +73,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testCreateRepositoryWithExistingIdentifier() throws Exception {
-        String json = Bundle.fromString(agentTestData)
+        String json = Bundle.fromString(repositoryTestData)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
         URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
@@ -85,16 +89,43 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
+    public void testCreateRepositoryWithExistingPidIgnoredWithoutUserPidHeader() throws Exception {
+        String json = Bundle.fromString(repositoryTestData)
+                .withDataValue(Ontology.PID_KEY, "hello-world").toJson();
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                uri).entity(json)
+                .post(ClientResponse.class);
+        assertStatus(CREATED, response);
+
+        assertNull(getEntityByPid("hello-world", getAdminUserProfileId()));
+    }
+
+    @Test
+    public void testCreateRepositoryWithExistingPid() throws Exception {
+        String json = Bundle.fromString(repositoryTestData)
+                .withDataValue(Ontology.PID_KEY, "hello-world").toJson();
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                uri).entity(json)
+                .header(AbstractResource.USER_PID_HEADER_NAME, "true")
+                .post(ClientResponse.class);
+        assertStatus(CREATED, response);
+
+        assertNotNull(getEntityByPid("hello-world", getAdminUserProfileId()));
+    }
+
+    @Test
     public void testUpdateRepositoryByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(agentTestData)
+                .entity(repositoryTestData)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
 
         // Obtain some update data.
-        String updateData = Bundle.fromString(agentTestData)
+        String updateData = Bundle.fromString(repositoryTestData)
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         response = jsonCallAs(getAdminUserProfileId(),
@@ -148,6 +179,40 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
             // There should be three top level items: c1, c4, and m19
             assertEquals(3, readZip(stream).size());
         }
+    }
+
+    @Test
+    public void testMigrate() throws Exception {
+        // Create a couple of new docs using the batch method
+        final String data = "[{\"type\": \"DocumentaryUnit\", \"data\": {\"identifier\":\"c3_new\"}}," +
+                "{\"type\": \"DocumentaryUnit\", \"data\": {\"identifier\":\"c4_new\"}}]";
+        ClientResponse createResponse = client.resource(entityUri(Entities.REPOSITORY, ID, "list"))
+                .queryParam("commit", "true")
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .type("application/json")
+                .entity(data)
+                .post(ClientResponse.class);
+        assertStatus(OK, createResponse);
+
+        // Now test the batch migrate method, and ensure PIDs are moved from old to new item.
+        WebResource resource = client.resource(entityUri(Entities.REPOSITORY, "r1", "migrate"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource
+                .accept("text/csv")
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .post(ClientResponse.class, Table.of(ImmutableList.of(
+                                ImmutableList.of("c4", "nl-r1-c4_new"),
+                                ImmutableList.of("c2", "nl-r1-c3_new"))));
+        assertStatus(OK, response);
+        Table out = response.getEntity(Table.class);
+        assertEquals(ImmutableList.of(
+                ImmutableList.of("nl-r1-c4_new"),
+                ImmutableList.of("nl-r1-c3_new")), out.rows());
+
+        Bundle oldC4 = getEntity(Entities.DOCUMENTARY_UNIT, "c4", getAdminUserProfileId());
+        Bundle newC4 = getEntity(Entities.DOCUMENTARY_UNIT, "nl-r1-c4_new", getAdminUserProfileId());
+        assertEquals(Migrator.PID_PREFIX + "c4-12345678", oldC4.getMetaData().get("pid"));
+        assertEquals("c4-12345678", newC4.getMetaData().get("pid"));
     }
 
     @Test

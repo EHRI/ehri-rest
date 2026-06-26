@@ -38,15 +38,18 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.*;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleManager;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.function.BiPredicate;
 
@@ -64,7 +67,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private final EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
     private final Serializer mergeSerializer;
-    private final LinkResolver linkResolver;
 
     public static final String ACCESS_POINT = "AccessPoint";
 
@@ -80,8 +82,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     public EadImporter(FramedGraph<?> graph, PermissionScopeFinder scopeFinder, Actioner actioner, ImportOptions options, ImportLog log) {
         super(graph, scopeFinder, actioner, options, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
-        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
-
     }
 
     /**
@@ -109,8 +109,9 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
 
         BundleManager bundleManager = getBundleManager(localScope, idPath);
 
-        Mutation<DocumentaryUnit> mutation =
-                bundleManager.createOrUpdate(mergeDescriptions(localScope, unit, description, idPath), DocumentaryUnit.class);
+        final Bundle merged = mergeDescriptions(localScope, unit, description, idPath);
+        Bundle processed = handlePreCallbacks(idPath, merged);
+        Mutation<DocumentaryUnit> mutation = bundleManager.createOrUpdate(processed, DocumentaryUnit.class);
         logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 
@@ -130,8 +131,11 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             }
         }
 
+        Optional<LinkResolver> resolver = options.getLinkResolver();
+        if (resolver.isPresent()) {
+            resolver.get().solveUndeterminedRelationships(frame);
+        }
         handleCallbacks(mutation);
-        linkResolver.solveUndeterminedRelationships(frame);
 
         return frame;
     }
@@ -279,7 +283,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                     list.add(relationNode);
                 }
             } else if (key.endsWith(ACCESS_POINT)) {
-
                 if (data.get(key) instanceof List) {
                     //type, targetUrl, targetName, notes
                     for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
@@ -306,8 +309,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                     }
                 } else {
                     Map<String, Object> relationNode = Maps.newHashMap();
-                    relationNode.put(Ontology.ACCESS_POINT_TYPE,
-                            key.substring(0, key.indexOf(ACCESS_POINT)));
+                    relationNode.put(Ontology.ACCESS_POINT_TYPE, key.substring(0, key.indexOf(ACCESS_POINT)));
                     relationNode.put(Ontology.NAME_KEY, data.get(key));
                     list.add(relationNode);
                 }

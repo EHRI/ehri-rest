@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
  * This generic handler does not do tricks to get data from any CHI-custom use of EAD - you
  * should extend this class for that.
  * If there is no language, it does set the language of the description to English.
- * makes use of icaatom.properties with format: part/of/path/=attribute
+ * makes use of ead2002.properties with format: part/of/path/=attribute
  */
 public class EadHandler extends SaxXmlHandler {
 
@@ -75,8 +75,6 @@ public class EadHandler extends SaxXmlHandler {
             "maintenanceevent" // EAD 3
     );
 
-    private static final String DEFAULT_PROPERTIES = "ead2002.properties";
-
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
     private final Map<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
@@ -96,7 +94,7 @@ public class EadHandler extends SaxXmlHandler {
     private final Stack<String> scopeIds = new Stack<>();
 
     // Pattern for EAD nodes that represent a child item
-    private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
+    private final static Pattern childItemPattern = Pattern.compile("^/*c\\d*$");
 
     /**
      * Default language to use in units without language
@@ -107,8 +105,7 @@ public class EadHandler extends SaxXmlHandler {
      * Set a custom resolver so EAD DTDs are never looked up online.
      */
     @Override
-    public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
-            throws org.xml.sax.SAXException, java.io.IOException {
+    public org.xml.sax.InputSource resolveEntity(String publicId, String systemId) {
         // This is the equivalent of returning a null dtd.
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
@@ -420,7 +417,7 @@ public class EadHandler extends SaxXmlHandler {
      * Determine if the element represents a unit delimiter
      *
      * @param elementName The XML element name
-     * @return Whether or not we're moved to a new item
+     * @return Whether we're moved to a new item
      */
     private static boolean isUnitDelimiter(String elementName) {
         return childItemPattern.matcher(elementName).matches() || elementName.equals(ARCHDESC);

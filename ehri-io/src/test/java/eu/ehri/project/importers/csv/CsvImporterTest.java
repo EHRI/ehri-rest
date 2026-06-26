@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 
 
-public class CsvDossinImporterTest extends AbstractImporterTest {
+public class CsvImporterTest extends AbstractImporterTest {
 
     protected final String TEST_REPO = "r1";
 
@@ -56,6 +56,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
                             ImportOptions.basic()
                                     .withFieldSeparator(',')
                                     .withArraySeparator("||"))
+                    .withPreCallback(getPidGeneratorCallback())
                     .importInputStream(ios, logMessage);
             System.out.println(importLog);
             // After...

@@ -97,7 +97,7 @@ public class DocumentaryUnitResource
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id,
-            Bundle bundle) throws PermissionDenied,
+                           Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response response = updateItem(id, bundle);
@@ -117,20 +117,31 @@ public class DocumentaryUnitResource
         }
     }
 
+    /**
+     * Rename a documentary unit (and all it's children).
+     *
+     * @param id            the item ID
+     * @param checkOnly     whether to only check for collisions
+     * @param newIdentifier the item's new local identifier
+     * @return a table of renamed items
+     * @throws PermissionDenied if the user cannot update the item(s)
+     * @throws ItemNotFound     if the item is not found
+     * @throws ValidationError  if the provided data is invalid
+     */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("{id:[^/]+}/rename")
     public Table rename(
             @PathParam("id") String id,
-            @QueryParam("check") @DefaultValue("false") boolean check,
+            @QueryParam("check") @DefaultValue("false") boolean checkOnly,
             String newIdentifier)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError,
             DeserializationError, ConflictError {
         try (final Tx tx = beginTx()) {
             IdRegenerator idGen = new IdRegenerator(graph)
-                    .withActualRename(!check)
-                    .collisionMode(check);
+                    .withActualRename(!checkOnly)
+                    .collisionMode(checkOnly);
             DocumentaryUnit entity = api().get(id, DocumentaryUnit.class);
             Bundle newBundle = getSerializer()
                     .withDependentOnly(true)
@@ -142,7 +153,12 @@ public class DocumentaryUnitResource
                 todo.add(child);
             }
             List<List<String>> done = idGen.reGenerateIds(todo);
-            tx.success();
+            if (!checkOnly) {
+                tx.success();
+            } else {
+                logger.info("Not committing rename transaction in check mode.");
+                tx.failure();
+            }
             return Table.of(done);
         } catch (IdRegenerator.IdCollisionError e) {
             throw new ConflictError(e);
@@ -158,7 +174,7 @@ public class DocumentaryUnitResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all,
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam("batch") @DefaultValue("-1") int batchSize)
-                throws ItemNotFound, PermissionDenied, HierarchyError {
+            throws ItemNotFound, PermissionDenied, HierarchyError {
         try (final Tx tx = beginTx()) {
             Table out = deleteContents(id, all, version, batchSize);
             tx.success();
@@ -177,7 +193,7 @@ public class DocumentaryUnitResource
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final DocumentaryUnit parent = api().get(id, cls);
-            Response resource = createItem(bundle, accessors,
+            Response resource = createItem(setPid(bundle), accessors,
                     parent::addChild,
                     api().withScope(parent), cls);
             tx.success();

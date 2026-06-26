@@ -19,6 +19,7 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -40,10 +41,137 @@ public final class BundleValidator {
     private final GraphManager manager;
     private final List<String> scopes;
 
+    private enum ValidationType {
+        create,
+        update
+    }
+
     public BundleValidator(GraphManager manager, Collection<String> scopes) {
         this.manager = manager;
         this.scopes = Lists.newArrayList(Optional.ofNullable(scopes)
-                .orElse(Lists.newArrayList()));
+                .orElse(Collections.emptyList()));
+    }
+
+    private static void combineErrorSets(
+            Bundle bundle,
+            ErrorSet.Builder builder,
+            Map.Entry<String, Bundle> entry,
+            ErrorSet errorSet, Bundle child, Set<String> ids
+    ) {
+        if (errorSet.isEmpty() && child.getId() != null) {
+            if (ids.contains(child.getId())) {
+                ListMultimap<String, String> errs = child.getType().getIdGen()
+                        .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
+                for (Map.Entry<String, String> err : errs.entries()) {
+                    errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
+                }
+            } else {
+                ids.add(child.getId());
+            }
+        }
+        builder.addRelation(entry.getKey(), errorSet);
+    }
+
+    private static void checkDuplicateIds(Bundle bundle, ErrorSet.Builder builder) {
+        final Set<String> ids = Sets.newHashSet();
+        bundle.dependentsOnly().forEach(b -> {
+            if (ids.contains(b.getId())) {
+                builder.addError(Bundle.ID_KEY, MessageFormat.format(
+                        Messages.getString("BundleValidator.duplicateId"), b.getId()));
+            }
+            ids.add(b.getId());
+        });
+    }
+
+    /**
+     * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
+     */
+    private static void checkFields(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
+        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
+            if (Bundle.isInitialisationKey(key) && op == ValidationType.update) {
+                // Initialisation-only keys are mandatory only on creation, not update.
+                continue;
+            }
+            checkMandatoryField(bundle, builder, key, op);
+        }
+        Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
+        for (Map.Entry<String, Set<String>> entry : enumPropertyKeys.entrySet()) {
+            checkValueInRange(bundle, builder, entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void checkValueInRange(Bundle bundle, ErrorSet.Builder builder, String key, Collection<String> values) {
+        Object dataValue = bundle.getDataValue(key);
+        if (dataValue != null) {
+            if (!values.contains(dataValue.toString())) {
+                builder.addError(key,
+                        MessageFormat.format(Messages.getString("BundleValidator.invalidFieldValue"), values, dataValue));
+            }
+        }
+    }
+
+    /**
+     * Check the data holds a given field and that the field is not empty.
+     *
+     * @param  propertyName The field name
+     * @param op the validation operation type
+     */
+    private static void checkMandatoryField(Bundle bundle, ErrorSet.Builder builder, String propertyName, ValidationType op) {
+        Map<String, Object> bundleData = op == ValidationType.create
+                ? bundle.getData()
+                : bundle.getDataForUpdate();
+        if (!bundleData.containsKey(propertyName)) {
+            builder.addError(propertyName, Messages.getString("BundleValidator.missingField"));
+        } else {
+            Object value = bundleData.get(propertyName);
+            if (value == null) {
+                builder.addError(propertyName, Messages.getString("BundleValidator.emptyField"));
+            } else if (value instanceof String) {
+                if (((String) value).trim().isEmpty()) {
+                    builder.addError(propertyName, Messages.getString("BundleValidator.emptyField"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Check that the entity type annotation is present in the bundle's class.
+     */
+    private static void checkEntityType(Bundle bundle, ErrorSet.Builder builder) {
+        EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
+        if (annotation == null) {
+            builder.addError(Bundle.TYPE_KEY,
+                    MessageFormat.format(Messages.getString("BundleValidator.missingTypeAnnotation"),
+                    bundle.getBundleJavaClass().getName()));
+        }
+    }
+
+    /**
+     * Validate data for either creation or update.
+     *
+     * @param bundle the given Bundle
+     * @return a bundle for generated identifiers
+     * @throws ValidationError if data is missing or malformed.
+     */
+    Bundle validateForCreateOrUpdate(Bundle bundle) throws ValidationError {
+        // This is slightly tricky because to check existence we need
+        // to generate a global ID, and that depends on having a local
+        // identifier, so we need to check the data for updating first,
+        // generate the global ID, check existence, and if it doesn't
+        // exist, validate the data for creation.
+        validateData(bundle, ValidationType.update);
+        Bundle withIds = bundle.generateIds(scopes);
+        boolean exists = manager.exists(withIds.getId());
+        if (!exists) {
+            validateData(withIds, ValidationType.create);
+        }
+        ErrorSet errorSet = exists
+                ? validateTreeForUpdate(withIds)
+                : validateTreeForCreate(withIds);
+        if (!errorSet.isEmpty()) {
+            throw new ValidationError(withIds, errorSet);
+        }
+        return withIds;
     }
 
     /**
@@ -53,7 +181,7 @@ public final class BundleValidator {
      * @return A new bundle with generated IDs.
      */
     Bundle validateForCreate(Bundle bundle) throws ValidationError {
-        validateData(bundle);
+        validateData(bundle, ValidationType.create);
         Bundle withIds = bundle.generateIds(scopes);
         ErrorSet createErrors = validateTreeForCreate(withIds);
         if (!createErrors.isEmpty()) {
@@ -69,7 +197,7 @@ public final class BundleValidator {
      * @return A new bundle with generated IDs.
      */
     Bundle validateForUpdate(Bundle bundle) throws ValidationError {
-        validateData(bundle);
+        validateData(bundle, ValidationType.update);
         Bundle withIds = bundle.generateIds(scopes);
         ErrorSet updateErrors = validateTreeForUpdate(withIds);
         if (!updateErrors.isEmpty()) {
@@ -85,15 +213,11 @@ public final class BundleValidator {
      * @param bundle a Bundle to validate
      * @throws ValidationError if any errors were found during validation of the bundle
      */
-    private void validateData(Bundle bundle) throws ValidationError {
-        ErrorSet es = validateTreeData(bundle);
+    private void validateData(Bundle bundle, ValidationType op) throws ValidationError {
+        ErrorSet es = validateTreeData(bundle, op);
         if (!es.isEmpty()) {
             throw new ValidationError(bundle, es);
         }
-    }
-
-    private enum ValidationType {
-        data, create, update
     }
 
     /**
@@ -124,6 +248,7 @@ public final class BundleValidator {
      * or containing found errors
      */
     private ErrorSet validateTreeForCreate(Bundle bundle) {
+        Preconditions.checkNotNull(bundle.getId());
         ErrorSet.Builder builder = new ErrorSet.Builder();
         checkIntegrity(bundle, builder);
         checkUniqueness(bundle, builder);
@@ -139,102 +264,31 @@ public final class BundleValidator {
      * @return errors an ErrorSet that may contain errors for missing/empty mandatory fields
      * and missing entity types
      */
-    private ErrorSet validateTreeData(Bundle bundle) {
+    private ErrorSet validateTreeData(Bundle bundle, ValidationType op) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
-        checkFields(bundle, builder);
+        checkFields(bundle, builder, op);
         checkEntityType(bundle, builder);
-        checkChildren(bundle, builder, ValidationType.data);
+        checkChildData(bundle, builder, op);
         return builder.build();
     }
 
-    private void checkChildren(Bundle bundle,
-            ErrorSet.Builder builder, ValidationType type) {
+    private void checkChildData(Bundle bundle, ErrorSet.Builder builder, ValidationType op) {
         final Set<String> ids = Sets.newHashSet();
         for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
             Bundle child = entry.getValue();
-            ErrorSet errorSet = type == ValidationType.data
-                    ? validateTreeData(child)
-                    : (type == ValidationType.create
-                        ? validateTreeForCreate(child)
-                        : validateTreeForUpdate(child));
-            if (errorSet.isEmpty() && child.getId() != null) {
-                if (ids.contains(child.getId())) {
-                    ListMultimap<String, String> errs = child.getType().getIdGen()
-                            .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
-                    for (Map.Entry<String, String> err : errs.entries()) {
-                        errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
-                    }
-                } else {
-                    ids.add(child.getId());
-                }
-            }
-            builder.addRelation(entry.getKey(), errorSet);
+            ErrorSet errorSet = validateTreeData(child, op);
+            combineErrorSets(bundle, builder, entry, errorSet, child, ids);
         }
     }
 
-    private static void checkDuplicateIds(Bundle bundle, ErrorSet.Builder builder) {
+    private void checkChildren(Bundle bundle, ErrorSet.Builder builder, ValidationType type) {
         final Set<String> ids = Sets.newHashSet();
-        bundle.dependentsOnly().forEach(b -> {
-            if (ids.contains(b.getId())) {
-                builder.addError(Bundle.ID_KEY, MessageFormat.format(
-                        Messages.getString("BundleValidator.duplicateId"), b.getId()));
-            }
-            ids.add(b.getId());
-        });
-    }
-
-    /**
-     * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
-     */
-    private static void checkFields(Bundle bundle, ErrorSet.Builder builder) {
-        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
-            checkField(bundle, builder, key);
-        }
-        Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
-        for (Map.Entry<String, Set<String>> entry : enumPropertyKeys.entrySet()) {
-            checkValueInRange(bundle, builder, entry.getKey(), entry.getValue());
-        }
-    }
-
-    private static void checkValueInRange(Bundle bundle, ErrorSet.Builder builder, String key, Collection<String> values) {
-        Object dataValue = bundle.getDataValue(key);
-        if (dataValue != null) {
-            if (!values.contains(dataValue.toString())) {
-                builder.addError(key,
-                        MessageFormat.format(Messages.getString("BundleValidator.invalidFieldValue"), values, dataValue));
-            }
-        }
-    }
-
-    /**
-     * Check the data holds a given field and that the field is not empty.
-     *
-     * @param name The field name
-     */
-    private static void checkField(Bundle bundle, ErrorSet.Builder builder, String name) {
-        if (!bundle.getData().containsKey(name)) {
-            builder.addError(name, Messages.getString("BundleValidator.missingField"));
-        } else {
-            Object value = bundle.getData().get(name);
-            if (value == null) {
-                builder.addError(name, Messages.getString("BundleValidator.emptyField"));
-            } else if (value instanceof String) {
-                if (((String) value).trim().isEmpty()) {
-                    builder.addError(name, Messages.getString("BundleValidator.emptyField"));
-                }
-            }
-        }
-    }
-
-    /**
-     * Check that the entity type annotation is present in the bundle's class.
-     */
-    private static void checkEntityType(Bundle bundle, ErrorSet.Builder builder) {
-        EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
-        if (annotation == null) {
-            builder.addError(Bundle.TYPE_KEY,
-                    MessageFormat.format(Messages.getString("BundleValidator.missingTypeAnnotation"),
-                    bundle.getBundleJavaClass().getName()));
+        for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
+            Bundle child = entry.getValue();
+            ErrorSet errorSet = type == ValidationType.create
+                        ? validateTreeForCreate(child)
+                        : validateTreeForUpdate(child);
+            combineErrorSets(bundle, builder, entry, errorSet, child, ids);
         }
     }
 
@@ -259,13 +313,13 @@ public final class BundleValidator {
      * Check uniqueness constraints for a bundle's fields.
      */
     private void checkUniqueness(Bundle bundle, ErrorSet.Builder builder) {
-        for (String ukey : bundle.getUniquePropertyKeys()) {
-            Object uval = bundle.getDataValue(ukey);
-            if (uval != null) {
-                try (CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType())) {
+        for (String uniqueKey : bundle.getUniquePropertyKeys()) {
+            Object uniqueValue = bundle.getDataValue(uniqueKey);
+            if (uniqueValue != null) {
+                try (CloseableIterable<Vertex> vertices = manager.getVertices(uniqueKey, uniqueValue, bundle.getType())) {
                     if (vertices.iterator().hasNext()) {
-                        builder.addError(ukey, MessageFormat.format(Messages
-                                .getString("BundleValidator.uniquenessError"), uval));
+                        builder.addError(uniqueKey, MessageFormat.format(Messages
+                                .getString("BundleValidator.uniquenessError"), uniqueValue));
                     }
                 }
             }
@@ -277,16 +331,17 @@ public final class BundleValidator {
      * not already in the graph.
      */
     private void checkUniquenessOnUpdate(Bundle bundle, ErrorSet.Builder builder) {
-        for (String ukey : bundle.getUniquePropertyKeys()) {
-            Object uval = bundle.getDataValue(ukey);
-            if (uval != null) {
-                try (CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType())) {
-                    if (vertices.iterator().hasNext()) {
-                        Vertex v = vertices.iterator().next();
+        for (String uniqueKey : bundle.getUniquePropertyKeys()) {
+            Object uniqueValue = bundle.getDataValue(uniqueKey);
+            if (uniqueValue != null) {
+                try (CloseableIterable<Vertex> vertices = manager.getVertices(uniqueKey, uniqueValue, bundle.getType())) {
+                    final Iterator<Vertex> iterator = vertices.iterator();
+                    if (iterator.hasNext()) {
+                        Vertex v = iterator.next();
                         // If it's the same vertex, we don't have a problem...
                         if (!manager.getId(v).equals(bundle.getId())) {
-                            builder.addError(ukey, MessageFormat.format(Messages
-                                    .getString("BundleValidator.uniquenessError"), uval));
+                            builder.addError(uniqueKey, MessageFormat.format(Messages
+                                    .getString("BundleValidator.uniquenessError"), uniqueValue));
 
                         }
                     }

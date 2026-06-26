@@ -70,6 +70,17 @@ public interface Api {
     }
 
     /**
+     * Get any item by ID or PID.
+     *
+     * @param id the item's ID
+     * @param usePid if the ID is a PID
+     * @return an {@link Accessible} item
+     * @throws ItemNotFound if the item is not found
+     * @throws InvalidIdentifierError if the item is not a PID type
+     */
+    Accessible getAny(String id, boolean usePid) throws ItemNotFound, InvalidIdentifierError;
+
+    /**
      * Fetch an item, as a user. This only provides access control.
      *
      * @param id  the item id
@@ -79,6 +90,17 @@ public interface Api {
      * @throws ItemNotFound if the item does not exist
      */
     <E extends Accessible> E get(String id, Class<E> cls) throws ItemNotFound;
+
+    /**
+     * Fetch an item by PID, as a user. This only provides access control.
+     *
+     * @param pid the item persistent ID
+     * @param cls the item's class
+     * @param <E> the type of entity
+     * @return the given framed vertex
+     * @throws ItemNotFound if the item does not exist
+     */
+    <E extends Accessible> E getByPid(String pid, Class<E> cls) throws ItemNotFound, InvalidIdentifierError;
 
     /**
      * Update an object bundle, also updating dependent items.
@@ -456,7 +478,7 @@ public interface Api {
         /**
          * Set members of a given group, removing existing members not in this set.
          *
-         * @param group the group
+         * @param group         the group
          * @param usersOrGroups the users or groups to add
          * @throws PermissionDenied if the grant action is not available to the user
          */

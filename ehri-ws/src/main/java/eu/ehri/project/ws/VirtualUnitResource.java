@@ -165,7 +165,7 @@ public final class VirtualUnitResource extends
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);
 
-            Response item = createItem(bundle, accessors, virtualUnit -> {
+            Response item = createItem(setPid(bundle), accessors, virtualUnit -> {
                 virtualUnit.setAuthor(currentUser);
                 for (DocumentaryUnit include : includedUnits) {
                     virtualUnit.addIncludedUnit(include);
@@ -220,7 +220,7 @@ public final class VirtualUnitResource extends
             // NB: Unlike most other items created in another context, virtual
             // units do not inherit the permission scope of their 'parent',
             // because they make have many parents.
-            Response item = createItem(bundle, accessors, virtualUnit -> {
+            Response item = createItem(setPid(bundle), accessors, virtualUnit -> {
                 parent.addChild(virtualUnit);
                 for (DocumentaryUnit included : includedUnits) {
                     virtualUnit.addIncludedUnit(included);

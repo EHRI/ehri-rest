@@ -1,6 +1,8 @@
 package eu.ehri.project.importers.links;
 
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.models.base.Described;
+import eu.ehri.project.models.idgen.ArkIdGenerator;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +19,7 @@ public class LinkResolverTest extends AbstractFixtureTest {
     @Test
     public void solveUndeterminedRelationships() throws Exception {
         Described unit = manager.getEntity("c5", Described.class);
-        LinkResolver linkResolver = new LinkResolver(graph, adminUser);
+        LinkResolver linkResolver = LinkResolver.create(graph, adminUser, PreImportCallback.generatePid(ArkIdGenerator.create(12)));
         int created = linkResolver.solveUndeterminedRelationships(unit);
         assertEquals(2, created);
 

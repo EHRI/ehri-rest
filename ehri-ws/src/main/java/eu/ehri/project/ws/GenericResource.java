@@ -19,19 +19,19 @@
 
 package eu.ehri.project.ws;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.impl.ApiImpl;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.dc.DublinCore11Exporter;
 import eu.ehri.project.exporters.dc.DublinCoreExporter;
@@ -42,6 +42,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.VersionManager;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
@@ -52,6 +53,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -64,8 +66,15 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "entities";
 
+    public static final String ID_PARAM = "id";
+    public static final String GID_PARAM = "gid";
+    public static final String PID_PARAM = "pid";
+
+    VersionManager versionManager;
+
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
+        versionManager = new VersionManager(graph);
     }
 
     /**
@@ -81,7 +90,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(@QueryParam("id") List<String> ids, @QueryParam("gid") List<Long> gids) {
+    public Response list(
+            @QueryParam(ID_PARAM) List<String> ids,
+            @QueryParam(GID_PARAM) List<Long> gids,
+            @QueryParam(PID_PARAM) List<String> pids
+    ) {
         try (Tx tx = beginTx()) {
             // Check auth...
             checkUser();
@@ -93,7 +106,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
                 Iterable<Vertex> byGid = Iterables.transform(gids, graph::getVertex);
                 Iterable<Vertex> byId = manager.getVertices(ids);
-                Iterable<Vertex> all = Iterables.concat(byGid, byId);
+                Iterable<Vertex> byPid = manager.getVertices(Ontology.PID_KEY, pids);
+                Iterable<Vertex> all = Iterables.concat(byGid, byId, byPid);
                 return Iterables.transform(all, filter::apply);
             });
             tx.success();
@@ -119,7 +133,27 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listFromJson(String json) throws DeserializationError, IOException {
         IdSet set = parseGraphIds(json);
-        return this.list(set.ids, set.gids);
+        List<String> pids = set.kvs.getOrDefault("pid", Lists.newArrayList());
+        return this.list(set.ids, set.gids, pids);
+    }
+
+    /**
+     * Fetch an item of any type by PID.
+     *
+     * @param pid the item's persistent ID.
+     * @return A serialized representation.
+     * @throws ItemNotFound if the item does not exist
+     * @throws AccessDenied if the user cannot access the item
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("pid:{pid:[^/]+}")
+    public Response getByPid(@PathParam("pid") String pid) throws ItemNotFound, AccessDenied, InvalidIdentifierError {
+        try (final Tx tx = beginTx()) {
+            Response response = single(api().getByPid(pid, Accessible.class));
+            tx.success();
+            return response;
+        }
     }
 
     /**
@@ -133,19 +167,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
-    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
+    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied, InvalidIdentifierError {
         try (final Tx tx = beginTx()) {
-            Vertex item = manager.getVertex(id);
-
-            // If the item doesn't exist or isn't a content type throw 404
-            Accessor currentUser = getRequesterUserProfile();
-            if (item == null || !aclManager.getContentTypeFilterFunction().compute(item)) {
-                throw new ItemNotFound(id);
-            } else if (!AclManager.getAclFilterFunction(currentUser).compute(item)) {
-                throw new AccessDenied(currentUser.getId(), id);
-            }
-
-            Response response = single(graph.frame(item, Accessible.class));
+            Response response = single(api().getAny(id, false));
             tx.success();
             return response;
         }
@@ -413,8 +437,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             Described item = api().get(id, Described.class);
             Description desc = api().get(did, Description.class);
-            AccessPoint rel = api().createDependent(id, bundle,
-                    AccessPoint.class, getLogMessage());
+            AccessPoint rel = api().createDependent(id, bundle, AccessPoint.class, getLogMessage());
             desc.addAccessPoint(rel);
             Response response = buildResponse(item, rel, Response.Status.CREATED);
             tx.success();
@@ -474,7 +497,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public String diff(
             @PathParam("id") String id,
             @PathParam("versionId") String versionId)
-            throws ItemNotFound, DeserializationError, JsonProcessingException, SerializationError {
+            throws ItemNotFound, DeserializationError, SerializationError {
         try (Tx tx = beginTx()) {
             Accessible item = api().get(id, Accessible.class);
             Version version = api().get(versionId, Version.class);
@@ -482,8 +505,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                 throw new ItemNotFound(versionId);
             }
 
-            Bundle b1 = getSerializer().withDependentOnly(true).entityToBundle(item);
-            Bundle b2 = Bundle.fromString(version.getEntityData());
+            Bundle b1 = getSerializer().withDependentOnly(true).entityToBundle(item).withoutMeta();
+            Bundle b2 = Bundle.fromString(version.getEntityData()).withoutMeta();
             final String diff = b2.diff(b1);
             tx.success();
             return diff;
@@ -519,10 +542,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     private static class IdSet {
         final List<String> ids;
         final List<Long> gids;
+        final Map<String, List<String>> kvs;
 
-        IdSet(List<String> ids, List<Long> gids) {
+        IdSet(List<String> ids, List<Long> gids, Map<String, List<String>> kvs) {
             this.ids = ids;
             this.gids = gids;
+            this.kvs = kvs;
         }
     }
 
@@ -533,6 +558,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             List<Object> jsonValues = jsonMapper.readValue(json, typeRef);
             List<String> ids = Lists.newArrayList();
             List<Long> gids = Lists.newArrayList();
+            Map<String, List<String>> kvs = Maps.newHashMap();
 
             for (Object js : jsonValues) {
                 if (js instanceof Integer) {
@@ -541,9 +567,21 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                     gids.add((Long) js);
                 } else if (js instanceof String) {
                     ids.add((String) js);
+                } else if (js instanceof Map) {
+                    for (Map.Entry<?, ?> entry : ((Map<?, ?>) js).entrySet()) {
+                        Object key = entry.getKey();
+                        Object value = entry.getValue();
+                        if (key instanceof String && value instanceof String) {
+                            if (kvs.containsKey((String) key)) {
+                                kvs.get((String) key).add((String) value);
+                            } else {
+                                kvs.put((String) key, Lists.newArrayList((String) value));
+                            }
+                        }
+                    }
                 }
             }
-            return new IdSet(ids, gids);
+            return new IdSet(ids, gids, kvs);
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
         }

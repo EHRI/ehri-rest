@@ -36,7 +36,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * items.
  */
 @EntityType(EntityClass.REPOSITORY)
-public interface Repository extends Described, ItemHolder, Watchable, Versioned, Annotatable, Promotable {
+public interface Repository extends Described, ItemHolder, Watchable, Versioned, Annotatable, Promotable, Identifiable, PersistentIdentifiable {
 
     /**
      * Count the number of top-level documentary unit items within
@@ -86,7 +86,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
     Country getCountry();
 
     /**
-     * The the country in which this repository resides.
+     * The country in which this repository resides.
      *
      * @param country a country frame
      */
@@ -107,7 +107,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
             return frameVertices(gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY)
-                    .cast(Vertex.class).copySplit(gremlin(), otherPipe)
+                    .copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
         }
     }

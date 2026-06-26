@@ -17,15 +17,14 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
-
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.persistence.Mutation;
+package eu.ehri.project.exceptions;
 
 /**
- * Implementing classes do things after an item was imported and created
- * a mutation ('created', 'updated', 'unchanged').
+ * Checked error similar to {@link IllegalArgumentException}
  */
-public interface ImportCallback {
-    void itemImported(Mutation<? extends Accessible> mutation);
+public class InvalidIdentifierError extends Exception {
+
+    public InvalidIdentifierError(String message) {
+        super(message);
+    }
 }

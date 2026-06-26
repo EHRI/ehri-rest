@@ -60,6 +60,7 @@ public class CsvAuthoritativeItemImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = CsvImportManager.create(graph, authoritativeSet, adminUser, CsvAuthoritativeItemImporter.class,
                 ImportOptions.basic().withFieldSeparator(';'))
+                .withPreCallback(getPidGeneratorCallback())
                 .importInputStream(ios, logMessage);
         assertEquals(9, log.getCreated());
         printGraph(graph);

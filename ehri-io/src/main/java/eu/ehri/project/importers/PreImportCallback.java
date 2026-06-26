@@ -1,0 +1,74 @@
+/*
+ * Copyright 2022 Data Archiving and Networked Services (an institute of
+ * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
+ * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
+package eu.ehri.project.importers;
+
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.idgen.RandomIdGenerator;
+import eu.ehri.project.persistence.Bundle;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Implementing classes modify the bundle of data prior to
+ * creation of graph items.
+ */
+public interface PreImportCallback {
+    Bundle preImport(Collection<String> idPath, Bundle data);
+
+    /**
+     * Generate a new bundle by running it through a set of callbacks.
+     *
+     * @param idPath IDs of scope items
+     * @param data   the Bundle instance
+     * @param todo   a list of PreImportCallbacks
+     * @return a new Bundle
+     */
+    static Bundle handlePreCallbacks(Collection<String> idPath, Bundle data, List<PreImportCallback> todo) {
+        if (todo.isEmpty()) {
+            return data;
+        } else {
+            PreImportCallback callback = todo.get(0);
+            return handlePreCallbacks(idPath, callback.preImport(idPath, data), todo.subList(1, todo.size()));
+        }
+    }
+
+    /**
+     * Pre-import callback that ensures a Bundle has a random
+     * persistent identifier, if it doesn't already.
+     *
+     * @param idGenerator the ID generator
+     * @return a pre-import callback that populates a Bundle with a PID
+     * if it doesn't have one already
+     */
+    static PreImportCallback generatePid(RandomIdGenerator idGenerator) {
+        return (s, b) -> {
+            String pid = Optional
+                    .ofNullable(b.<String>getDataValue(Ontology.PID_KEY))
+                    .orElseGet(idGenerator::generateId);
+            return b.withDataValue(Ontology.PID_KEY, pid);
+        };
+    }
+
+    static PreImportCallback noop() {
+        return (s, b) -> b;
+    }
+}

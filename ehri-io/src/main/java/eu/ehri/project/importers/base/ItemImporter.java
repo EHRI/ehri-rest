@@ -2,7 +2,8 @@ package eu.ehri.project.importers.base;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ErrorCallback;
-import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
+import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.models.base.Accessible;
 
 import java.util.List;
@@ -45,11 +46,19 @@ public interface ItemImporter<I, T extends Accessible> {
     void handleError(Exception ex);
 
     /**
+     * Add a callback to optionally modify an item's
+     * data prior to import.
+     *
+     * @param callback a pre-import callback function object
+     */
+    void addPreCallback(PreImportCallback callback);
+
+    /**
      * Add a callback to run when an item is created.
      *
-     * @param callback a callback function object
+     * @param callback a post-import callback function object
      */
-    void addCallback(ImportCallback callback);
+    void addPostCallback(PostImportCallback callback);
 
     /**
      * Add a callback to run when an item errors.

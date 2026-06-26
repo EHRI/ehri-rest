@@ -24,28 +24,30 @@ import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.ws.errors.ConflictError;
 import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
-import eu.ehri.project.tools.Linker;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
+import eu.ehri.project.ws.base.AbstractResource;
+import eu.ehri.project.ws.errors.ConflictError;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -57,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -69,16 +70,10 @@ import java.util.stream.Collectors;
 @Path(ToolsResource.ENDPOINT)
 public class ToolsResource extends AbstractResource {
 
-    private final Linker linker;
-
     public static final String ENDPOINT = "tools";
-
-    private static final String SINGLE_PARAM = "single";
-    private static final String ACCESS_POINT_TYPE_PARAM = "apt";
 
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);
-        linker = new Linker(graph);
     }
 
     @GET
@@ -205,52 +200,6 @@ public class ToolsResource extends AbstractResource {
     }
 
     /**
-     * Create concepts and links derived from the access points
-     * on a repository's documentary units.
-     *
-     * @param repositoryId     the repository id
-     * @param vocabularyId     the target vocabulary
-     * @param languageCode     the language code of created concepts
-     * @param accessPointTypes the access point types to process
-     * @param tolerant         proceed even if there are integrity errors due
-     *                         to slug collisions in the created concepts
-     * @param excludeSingle    don't create concepts/links for access points that
-     *                         are unique to a single item
-     * @return the number of links created
-     * @throws ItemNotFound     if the repository or vocabulary do not exist
-     * @throws ValidationError  if data constraints are not met
-     * @throws PermissionDenied if the user cannot perform the action
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("generate-concepts/{repositoryId:[^/]+}/{vocabularyId:[^/]+}")
-    public long autoLinkRepositoryDocs(
-            @PathParam("repositoryId") String repositoryId,
-            @PathParam("vocabularyId") String vocabularyId,
-            @QueryParam(ACCESS_POINT_TYPE_PARAM) Set<AccessPointType> accessPointTypes,
-            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String languageCode,
-            @QueryParam(SINGLE_PARAM) @DefaultValue("true") boolean excludeSingle,
-            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
-            throws ItemNotFound, ValidationError, PermissionDenied {
-        try (final Tx tx = beginTx()) {
-            Actioner user = getCurrentActioner();
-            Repository repository = manager.getEntity(repositoryId, Repository.class);
-            Vocabulary vocabulary = manager.getEntity(vocabularyId, Vocabulary.class);
-
-            long linkCount = linker
-                    .withAccessPointTypes(accessPointTypes)
-                    .withTolerant(tolerant)
-                    .withExcludeSingles(excludeSingle)
-                    .withDefaultLanguage(languageCode)
-                    .withLogMessage(getLogMessage())
-                    .createAndLinkRepositoryVocabulary(repository, vocabulary, user);
-
-            tx.success();
-            return linkCount;
-        }
-    }
-
-    /**
      * Regenerate the hierarchical graph ID for a set of items, optionally
      * renaming them.
      * <p>
@@ -266,7 +215,7 @@ public class ToolsResource extends AbstractResource {
      *                   regenerated ID would cause collisions
      * @param tolerant   skip items that could cause collisions rather
      *                   then throwing an error
-     * @param commit     whether or not to rename the item
+     * @param commit     whether to rename the item
      * @param data       the data table
      * @return a tab old-to-new mapping, or an empty
      * body if nothing was changed
@@ -448,17 +397,56 @@ public class ToolsResource extends AbstractResource {
      */
     @POST
     @Produces("text/plain")
+    @Path("generate-pids")
+    public String generatePids(
+            @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
+        int done = 0;
+        try (final Tx tx = beginTx()) {
+            for (EntityClass entityClass : EntityClass.implementing(PersistentIdentifiable.class)) {
+                try (CloseableIterable<PersistentIdentifiable> items = manager.getEntities(entityClass, PersistentIdentifiable.class)) {
+                    for (PersistentIdentifiable item : items) {
+                        Vertex vertex = item.asVertex();
+                        String existing = vertex.getProperty(Ontology.PID_KEY);
+                        if (existing == null) {
+                            String pid = idGenerator.generateId();
+                            vertex.setProperty(Ontology.PID_KEY, pid);
+                            for (Version version : item.as(Versioned.class).getAllPriorVersions()) {
+                                Vertex versionVertex = version.asVertex();
+                                versionVertex.setProperty(Ontology.VERSION_ENTITY_PID, pid);
+                            }
+                            done++;
+
+                            if (bufferSize > 0 && done % bufferSize == 0) {
+                                tx.success();
+                            }
+                        }
+                    }
+                }
+            }
+            if (commit && done > 0) {
+                tx.success();
+            }
+            return String.valueOf(done);
+        }
+    }
+
+    /**
+     * Regenerate description IDs.
+     *
+     * @param bufferSize the transaction buffer size
+     * @param commit     actually commit the changes
+     */
+    @POST
+    @Produces("text/plain")
     @Path("regenerate-description-ids")
     public String regenerateDescriptionIds(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
-        EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
-                .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
-                .REPOSITORY_DESCRIPTION};
         int done = 0;
         try (final Tx tx = beginTx()) {
             final Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
-            for (EntityClass entityClass : types) {
+            for (EntityClass entityClass : EntityClass.implementing(Description.class)) {
                 try (CloseableIterable<Description> descriptions = manager.getEntities(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
                         Described entity = desc.getEntity();

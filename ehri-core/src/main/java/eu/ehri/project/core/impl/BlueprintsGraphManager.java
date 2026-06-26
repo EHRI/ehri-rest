@@ -39,6 +39,7 @@ import eu.ehri.project.models.base.Entity;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -146,6 +147,16 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
+    public Optional<Vertex> getVertex(String key, Object value) {
+        Preconditions.checkNotNull(key, "attempt to fetch vertex with a null property key");
+        try {
+            return Optional.of(graph.getVertices(key, value).iterator().next());
+        } catch (NoSuchElementException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
         return new WrappingCloseableIterable<>(
                 graph.getVertices(EntityType.TYPE_KEY, type.getName()));
@@ -164,6 +175,13 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
+    public CloseableIterable<Vertex> getVertices(String key, Iterable<?> values) {
+        Iterable<Vertex> verts = Iterables
+                .transform(values, value -> getVertex(key, value).orElse(null));
+        return new WrappingCloseableIterable<>(verts);
+    }
+
+    @Override
     public CloseableIterable<Vertex> getVertices(String key, Object value, EntityClass type) {
         // NB: This is rather annoying.
         List<Vertex> elems = Lists.newArrayList();
@@ -178,10 +196,9 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data) throws IntegrityError {
-        Preconditions
-                .checkNotNull(id, "null vertex ID given for item creation");
+        Preconditions.checkNotNull(id, "null vertex ID given for item creation");
         Map<String, ?> indexData = getVertexData(id, type, data);
-        checkExists(id);
+        assertDoesNotExist(id);
         Vertex node = graph.addVertex(null);
         for (Map.Entry<String, ?> entry : indexData.entrySet()) {
             if (entry.getValue() == null)
@@ -262,9 +279,9 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
         }
     }
 
-    private void checkExists(String id) throws IntegrityError {
+    private void assertDoesNotExist(String id) throws IntegrityError {
         if (exists(id)) {
-            throw new IntegrityError(id);
+            throw new IntegrityError("Integrity error for id value: " + id);
         }
     }
 

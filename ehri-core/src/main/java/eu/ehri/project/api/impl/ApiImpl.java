@@ -2,6 +2,7 @@ package eu.ehri.project.api.impl;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.*;
 import eu.ehri.project.api.*;
@@ -134,16 +135,52 @@ public class ApiImpl implements Api {
             }
             return item;
         } catch (ItemNotFound e) {
-            // If the item has been deleted, augment the exception with a deletion time...
-            Optional<Version> versionOpt = versionManager.versionAtDeletion(id);
-            if (versionOpt.isPresent()) {
-                Version version = versionOpt.get();
-                SystemEvent event = version.getTriggeringEvent();
-                throw e.withDeletedAt(event.getTimestamp());
-            } else {
-                throw e;
-            }
+            throw augmentNotFoundInfo(id, false, e);
         }
+    }
+
+    @Override
+    public <E extends Accessible> E getByPid(String pid, Class<E> cls) throws ItemNotFound, InvalidIdentifierError {
+        try {
+            Optional<Vertex> opt = manager.getVertex(Ontology.PID_KEY, pid);
+            if (!opt.isPresent()) {
+                throw new ItemNotFound(pid);
+            }
+            E item = graph.frame(opt.get(), cls);
+            if (!PersistentIdentifiable.class.isAssignableFrom(manager.getEntityClass(item).getJavaClass())) {
+                throw new InvalidIdentifierError(pid);
+            }
+            if (!aclManager.canAccess(item, accessor)) {
+                throw new ItemNotFound(pid);
+            }
+            return item;
+        } catch (ItemNotFound e) {
+            throw augmentNotFoundInfo(pid, true, e);
+        }
+    }
+
+    @Override
+    public Accessible getAny(String id, boolean usePid) throws ItemNotFound, InvalidIdentifierError {
+        try {
+            Accessible item = usePid ? getByPid(id, Accessible.class) : get(id, Accessible.class);
+            if (!Accessible.class.isAssignableFrom(manager.getEntityClass(item).getJavaClass())) {
+                throw new ItemNotFound(id);
+            } else if (!aclManager.getContentTypeFilterFunction().compute(item.asVertex())) {
+                throw new ItemNotFound(id);
+            } else if (!aclManager.canAccess(item, accessor)) {
+                throw new ItemNotFound(id);
+            }
+            return item;
+        } catch (ItemNotFound e) {
+            throw augmentNotFoundInfo(id, usePid, e);
+        }
+
+    }
+
+    private ItemNotFound augmentNotFoundInfo(String id, boolean usePid, ItemNotFound e) {
+        // If the item has been deleted, augment the exception with a deletion time...
+        Optional<Version> versionOpt = versionManager.versionAtDeletion(id, usePid);
+        return versionOpt.map(v -> addTimestamp(e, v)).orElse(e);
     }
 
     @Override
@@ -511,7 +548,7 @@ public class ApiImpl implements Api {
         Iterable<Accessible> children = all
                 ? scope.getAllContainedItems()
                 : scope.getContainedItems();
-        List<String> ids = StreamSupport
+        final List<String> ids = StreamSupport
                 .stream(children.spliterator(), false)
                 .map(Entity::getId)
                 .sorted()
@@ -661,5 +698,10 @@ public class ApiImpl implements Api {
                     grantee, PermissionType.GRANT);
             helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
         }
+    }
+
+    private ItemNotFound addTimestamp(ItemNotFound e, Version version) {
+        SystemEvent event = version.getTriggeringEvent();
+        return e.withDeletedAt(event.getTimestamp());
     }
 }

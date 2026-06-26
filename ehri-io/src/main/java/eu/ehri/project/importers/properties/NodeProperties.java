@@ -70,7 +70,7 @@ public class NodeProperties {
         String nodetype = row.split(SEP)[0];
         allKnownNodes.add(nodetype);
         if (!p.containsKey(nodetype)) {
-            p.put(nodetype, Lists.<PropertiesRow>newArrayList());
+            p.put(nodetype, Lists.newArrayList());
         }
         p.get(nodetype).add(createPropertiesCheck(row));
     }

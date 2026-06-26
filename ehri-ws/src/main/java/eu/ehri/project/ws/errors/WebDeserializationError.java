@@ -21,6 +21,8 @@ package eu.ehri.project.ws.errors;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.ws.errors.mappers.DeserializationErrorMapper;
 import eu.ehri.project.ws.providers.JsonMessageBodyHandler;
 
 import javax.ws.rs.WebApplicationException;
@@ -29,24 +31,28 @@ import javax.ws.rs.core.Response.Status;
 
 
 public class WebDeserializationError extends WebApplicationException implements JsonMessageBodyHandler {
+    private static final long serialVersionUID = -630345657900834684L;
+
     public WebDeserializationError(Throwable e) {
-        super(errorToJson(Status.BAD_REQUEST, e));
+        super(errorToJson(Status.BAD_REQUEST, DeserializationErrorMapper.code, e));
     }
 
-    public static Response errorToJson(Status status, Throwable e) {
-        return errorToJson(status, e.getMessage());
+    public static Response errorToJson(Status status, String code, Throwable e) {
+        return errorToJson(status, code, e.getMessage());
     }
 
-    public static Response errorToJson(Status status, Object details) {
+    public static Response errorToJson(Status status, String code, Object details) {
         return response(status, ImmutableMap.of(
+                "code", code,
                 "status", status.getStatusCode(),
                 "error", status.getReasonPhrase(),
                 "details", details
         ));
     }
 
-    public static Response errorToJson(Status status, String context, Object details) {
+    public static Response errorToJson(Status status, String code, String context, Object details) {
         return response(status, ImmutableMap.of(
+                "code", code,
                 "status", status.getStatusCode(),
                 "error", status.getReasonPhrase(),
                 "context", context,
