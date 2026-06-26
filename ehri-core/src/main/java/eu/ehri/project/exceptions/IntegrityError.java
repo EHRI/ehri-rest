@@ -28,7 +28,10 @@ package eu.ehri.project.exceptions;
 public class IntegrityError extends Exception {
     private static final long serialVersionUID = -1058375533465199120L;
 
-    public IntegrityError(String idValue) {
-        super("Integrity error for id value: " + idValue);
+    /**
+     * Construct an IntegrityError exception instance.
+     */
+    public IntegrityError(String msg) {
+        super(msg);
     }
 }

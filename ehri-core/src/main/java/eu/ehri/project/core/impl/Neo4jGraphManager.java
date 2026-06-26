@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.neo4j.graphdb.ConstraintViolationException;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
@@ -93,14 +94,16 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     }
 
     @Override
-    public Vertex createVertex(String id, EntityClass type,
-                               Map<String, ?> data) throws IntegrityError {
-        return setLabels(super.createVertex(id, type, data));
+    public Vertex createVertex(String id, EntityClass type, Map<String, ?> data) throws IntegrityError {
+        try {
+            return setLabels(super.createVertex(id, type, data));
+        } catch (ConstraintViolationException e) {
+            throw new IntegrityError(e.getMessage());
+        }
     }
 
     @Override
-    public Vertex updateVertex(String id, EntityClass type,
-                               Map<String, ?> data) throws ItemNotFound {
+    public Vertex updateVertex(String id, EntityClass type, Map<String, ?> data) throws ItemNotFound {
         return setLabels(super.updateVertex(id, type, data));
     }
 

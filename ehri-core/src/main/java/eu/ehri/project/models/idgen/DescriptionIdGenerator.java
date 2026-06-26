@@ -26,6 +26,8 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Slugify;
 
 import java.util.Collection;
+import java.util.List;
+
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 
@@ -46,9 +48,12 @@ public enum DescriptionIdGenerator implements IdGenerator {
     public static final Joiner descriptionJoiner = Joiner.on(DESCRIPTION_SEPARATOR);
 
     public ListMultimap<String,String> handleIdCollision(Collection<String> scopeIds, Bundle bundle) {
-        return IdGeneratorUtils.handleIdCollision(scopeIds,
-                Lists.newArrayList(LANGUAGE_OF_DESCRIPTION, IDENTIFIER_KEY),
-                getIdBase(bundle));
+        List<String> keys = Lists.newArrayList(LANGUAGE_OF_DESCRIPTION);
+        if (bundle.getDataValue(IDENTIFIER_KEY) != null) {
+            keys.add(IDENTIFIER_KEY);
+        }
+
+        return IdGeneratorUtils.handleIdCollision(scopeIds, keys, getIdBase(bundle));
     }
 
     /**

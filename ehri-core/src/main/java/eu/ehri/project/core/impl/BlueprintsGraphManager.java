@@ -281,7 +281,7 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
 
     private void assertDoesNotExist(String id) throws IntegrityError {
         if (exists(id)) {
-            throw new IntegrityError(id);
+            throw new IntegrityError("Integrity error for id value: " + id);
         }
     }
 
