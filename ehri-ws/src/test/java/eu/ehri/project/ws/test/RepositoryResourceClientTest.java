@@ -29,7 +29,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.Migrator;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.PermissionsResource;
-import eu.ehri.project.ws.ToolsResource;
 import eu.ehri.project.ws.base.AbstractResource;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,8 +37,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 
 public class RepositoryResourceClientTest extends AbstractResourceClientTest {
@@ -49,12 +47,12 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     private static final String LIMITED_USER_NAME = "reto";
     private static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String agentTestData;
+    private String repositoryTestData;
     private String docTestData;
 
     @Before
     public void setUp() throws Exception {
-        agentTestData = readResourceFileAsString("Repository.json");
+        repositoryTestData = readResourceFileAsString("Repository.json");
         docTestData = readResourceFileAsString("DocumentaryUnit.json");
     }
 
@@ -63,7 +61,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(agentTestData)
+                .entity(repositoryTestData)
                 .post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -75,7 +73,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testCreateRepositoryWithExistingIdentifier() throws Exception {
-        String json = Bundle.fromString(agentTestData)
+        String json = Bundle.fromString(repositoryTestData)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
         URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
@@ -91,16 +89,43 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
+    public void testCreateRepositoryWithExistingPidIgnoredWithoutUserPidHeader() throws Exception {
+        String json = Bundle.fromString(repositoryTestData)
+                .withDataValue(Ontology.PID_KEY, "hello-world").toJson();
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                uri).entity(json)
+                .post(ClientResponse.class);
+        assertStatus(CREATED, response);
+
+        assertNull(getEntityByPid("hello-world", getAdminUserProfileId()));
+    }
+
+    @Test
+    public void testCreateRepositoryWithExistingPid() throws Exception {
+        String json = Bundle.fromString(repositoryTestData)
+                .withDataValue(Ontology.PID_KEY, "hello-world").toJson();
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                uri).entity(json)
+                .header(AbstractResource.USER_PID_HEADER_NAME, "true")
+                .post(ClientResponse.class);
+        assertStatus(CREATED, response);
+
+        assertNotNull(getEntityByPid("hello-world", getAdminUserProfileId()));
+    }
+
+    @Test
     public void testUpdateRepositoryByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.COUNTRY, COUNTRY_CODE))
-                .entity(agentTestData)
+                .entity(repositoryTestData)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
 
         // Obtain some update data.
-        String updateData = Bundle.fromString(agentTestData)
+        String updateData = Bundle.fromString(repositoryTestData)
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         response = jsonCallAs(getAdminUserProfileId(),

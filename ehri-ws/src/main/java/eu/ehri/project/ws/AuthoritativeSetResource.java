@@ -25,9 +25,8 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
-import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.PreImportCallback;
+import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
@@ -194,7 +193,7 @@ public class AuthoritativeSetResource extends
                     set,
                     version,
                     tolerant,
-                    Lists.newArrayList(PreImportCallback.generatePid(idGenerator)),
+                    Lists.newArrayList(conditionalSetPid),
                     Lists.newArrayList(cb)
             ).batchImport(data, user, getLogMessage());
             if (commit) {

@@ -44,8 +44,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 
 public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTest {
@@ -346,6 +345,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUriBuilder("classes", Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, "list")
                         .queryParam("commit", "true").build())
+                .header(AbstractResource.USER_PID_HEADER_NAME, "true")
                 .entity(listJson).post(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -353,7 +353,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         assertEquals(1, log.getCreated());
 
         Bundle item = getEntityByPid(pid, getAdminUserProfileId());
-        System.out.println(item.getMetaData());
+        assertNotNull(item);
         assertEquals(pid, item.getMetaData().get("pid"));
     }
 
