@@ -27,7 +27,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
-import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.base.Actioner;
@@ -127,13 +126,7 @@ public class SaxImportManager extends AbstractImportManager {
     protected void importInputStream(final InputStream stream, final String tag, final ActionManager.EventContext context,
                                      final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
-            ItemImporter<?, ?> importer = importerClass
-                    .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
-                    .newInstance(framedGraph, scopeFinder, actioner, options, log);
-
-            registerCallbacks(importer);
-            importer.addPostCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
-            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
+            ItemImporter<?, ?> importer = initImporter(tag, context, log);
 
             SaxXmlHandler handler = handlerClass.getConstructor(ItemImporter.class, ImportOptions.class)
                     .newInstance(importer, options);

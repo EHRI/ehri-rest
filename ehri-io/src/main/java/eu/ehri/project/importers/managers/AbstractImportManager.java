@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -370,6 +371,33 @@ public abstract class AbstractImportManager implements ImportManager {
 
         for (PostImportCallback callback : postCallbacks) {
             importer.addPostCallback(callback);
+        }
+    }
+
+    /**
+     * Reflectively instantiate the configured importer class and wire up the
+     * default pre/post/error callbacks. Shared by all concrete import managers.
+     *
+     * @param tag     an identifier for the import source
+     * @param context the event context for this import operation
+     * @param log     an import log to which results are written
+     * @return a configured item importer
+     */
+    protected ItemImporter<?, ?> initImporter(String tag, ActionManager.EventContext context, ImportLog log) {
+        try {
+            ItemImporter<?, ?> importer = importerClass
+                    .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
+                    .newInstance(framedGraph, scopeFinder, actioner, options, log);
+            logger.trace("importer of class {}", importer.getClass());
+
+            registerCallbacks(importer);
+            importer.addPostCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
+            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
+            return importer;
+        } catch (IllegalAccessException | InvocationTargetException |
+                 InstantiationException | NoSuchMethodException e) {
+            // In normal operation these should not be thrown
+            throw new RuntimeException(e);
         }
     }
 }

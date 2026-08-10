@@ -34,20 +34,16 @@ import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.PostImportCallback;
 import eu.ehri.project.importers.PreImportCallback;
 import eu.ehri.project.importers.base.ItemImporter;
-import eu.ehri.project.importers.base.PermissionScopeFinder;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import org.apache.commons.compress.utils.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -55,9 +51,7 @@ import java.util.Map;
  * Import manager to use with CSV files.
  * When used to import DocumentaryUnits, make sure to have a 'sourceFileId' column as well.
  */
-public class CsvImportManager extends AbstractImportManager {
-
-    private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
+public class CsvImportManager extends MapImportManager {
 
     private CsvImportManager(FramedGraph<?> framedGraph,
                              PermissionScope permissionScope,
@@ -86,64 +80,40 @@ public class CsvImportManager extends AbstractImportManager {
     protected void importInputStream(InputStream stream, String tag, final ActionManager.EventContext context, final ImportLog log)
             throws IOException, ValidationError, InputParseError {
 
-        try {
-            ItemImporter<?, ?> importer = importerClass
-                    .getConstructor(FramedGraph.class, PermissionScopeFinder.class, Actioner.class, ImportOptions.class, ImportLog.class)
-                    .newInstance(framedGraph, scopeFinder, actioner, options, log);
-            logger.trace("importer of class {}", importer.getClass());
+        ItemImporter<?, ?> importer = initImporter(tag, context, log);
 
-            registerCallbacks(importer);
-            importer.addPostCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
-            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
+        CsvSchema schema = CsvSchema.emptySchema()
+                .withColumnSeparator(options.defaultFieldSep)
+                .withHeader();
+        ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
+        // Despite Jackson having support for array elements in the CsvSchema, we're only
+        // parsing as a simple map, so we need to do the splitting ourselves.
+        final Splitter arraySplitter = Splitter.on(options.defaultArraySep).trimResults().omitEmptyStrings();
 
-            CsvSchema schema = CsvSchema.emptySchema()
-                    .withColumnSeparator(options.defaultFieldSep)
-                    .withHeader();
-            ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
-            // Despite Jackson having support for array elements in the CsvSchema, we're only
-            // parsing as a simple map, so we need to do the splitting ourselves.
-            final Splitter arraySplitter = Splitter.on(options.defaultArraySep).trimResults().omitEmptyStrings();
+        try (InputStreamReader s = new InputStreamReader(stream, Charsets.UTF_8);
+             MappingIterator<Map<String, String>> valueIterator = reader.readValues(s)) {
+            while (valueIterator.hasNext()) {
+                Map<String, String> rawData = valueIterator.next();
+                Map<String, Object> dataMap = Maps.newHashMap();
+                for (Map.Entry<String, String> entry : rawData.entrySet()) {
+                    final String property = entry.getKey().replaceAll("\\s", "");
+                    final String value = entry.getValue();
 
-            try (InputStreamReader s = new InputStreamReader(stream, Charsets.UTF_8);
-                 MappingIterator<Map<String, String>> valueIterator = reader.readValues(s)) {
-                while (valueIterator.hasNext()) {
-                    Map<String, String> rawData = valueIterator.next();
-                    Map<String, Object> dataMap = Maps.newHashMap();
-                    for (Map.Entry<String, String> entry : rawData.entrySet()) {
-                        final String property = entry.getKey().replaceAll("\\s", "");
-                        final String value = entry.getValue();
-
-                        // FIXME: ideally we'd know for sure if the field is multi-valued?
-                        // For now just assume if the array separator is present, it's an array.
-                        if (value.contains(options.defaultArraySep)) {
-                            arraySplitter.split(value)
-                                    .forEach(v -> ImportHelpers.putPropertyInGraph(dataMap, property, v));
-                        } else {
-                            ImportHelpers.putPropertyInGraph(dataMap, property, value);
-                        }
-                    }
-                    try {
-                        ((ItemImporter<Map<String, Object>, ?>) importer).importItem(dataMap);
-                    } catch (ValidationError e) {
-                        // Record the failure in the log so it's reflected in the errored count,
-                        // then either continue (tolerant) or re-throw (strict).
-                        log.addError(e.getBundle().getId(), e.getErrorSet().toString());
-                        if (isTolerant()) {
-                            logger.error(String.format("Validation error importing item: '%s'", tag), e);
-                        } else {
-                            throw e;
-                        }
+                    // FIXME: ideally we'd know for sure if the field is multi-valued?
+                    // For now just assume if the array separator is present, it's an array.
+                    if (value.contains(options.defaultArraySep)) {
+                        arraySplitter.split(value)
+                                .forEach(v -> ImportHelpers.putPropertyInGraph(dataMap, property, v));
+                    } else {
+                        ImportHelpers.putPropertyInGraph(dataMap, property, value);
                     }
                 }
-                // When an error reading CSV data is thrown it is -- counterintuitively --
-                // a JSON mapping exception wrapping a CsvMappingException.
-            } catch (RuntimeJsonMappingException e) {
-                throw new InputParseError(e.getCause().getMessage());
+                importDataMap(importer, dataMap, tag, log);
             }
-        } catch (IllegalAccessException | InvocationTargetException |
-                 InstantiationException | NoSuchMethodException |
-                 ClassCastException e) {
-            throw new RuntimeException(e);
+            // When an error reading CSV data is thrown it is -- counterintuitively --
+            // a JSON mapping exception wrapping a CsvMappingException.
+        } catch (RuntimeJsonMappingException e) {
+            throw new InputParseError(e.getCause().getMessage());
         }
     }
 
