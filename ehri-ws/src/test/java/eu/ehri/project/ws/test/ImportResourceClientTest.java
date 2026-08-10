@@ -36,6 +36,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.ws.ImportResource;
+import eu.ehri.project.ws.base.AbstractResource;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -573,6 +574,28 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertStatus(ClientResponse.Status.OK, response);
         ImportLog log = response.getEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
+    }
+
+    @Test
+    public void testImportJson() {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("simple.json");
+        String logText = "Testing JSON import";
+        URI uri = getImportUrl("json", "r1", logText, false)
+                .queryParam(COMMIT_PARAM, true)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(AbstractResource.JSON_IMPORT_MEDIA_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        assertStatus(ClientResponse.Status.OK, response);
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(4, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));

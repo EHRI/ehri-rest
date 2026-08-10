@@ -74,7 +74,7 @@ public class SaxImportManagerTest extends AbstractImporterTest {
 
         SaxImportManager importer = saxImportManager(EadImporter.class, EadHandler.class,
                 ImportOptions.basic().withHierarchyMap(hierarchyMap));
-        ImportLog log = importer.importJson(stream, "Testing Hierarchy Import");
+        ImportLog log = importer.importJsonUrlMap(stream, "Testing Hierarchy Import");
         assertEquals(4, log.getCreated());
 
         String[] ids = {"nl-r1-1c", "nl-r1-1c-1s", "nl-r1-1c-1s-1f", "nl-r1-2c"};
@@ -101,7 +101,7 @@ public class SaxImportManagerTest extends AbstractImporterTest {
         SaxImportManager importer = saxImportManager(EadImporter.class, EadHandler.class,
                 ImportOptions.basic().withHierarchyMap(hierarchyMap));
         try {
-            importer.importJson(stream, "Testing Hierarchy Import");
+            importer.importJsonUrlMap(stream, "Testing Hierarchy Import");
             fail("Importing a hierarchy w/ incomplete map should throw an exception");
         } catch (ImportHierarchyMapError e) {
             assertThat(e.getMessage(), containsString("Hierarchy map does not contain unit local identifier"));

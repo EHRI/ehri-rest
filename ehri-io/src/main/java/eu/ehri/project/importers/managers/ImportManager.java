@@ -88,7 +88,7 @@ public interface ImportManager {
      * @throws InputParseError       when parsing the stream data fails
      * @throws ImportValidationError when the content of the file is invalid
      */
-    ImportLog importJson(InputStream json, String logMessage)
+    ImportLog importJsonUrlMap(InputStream json, String logMessage)
             throws IOException, InputParseError, ImportValidationError;
 
     /**

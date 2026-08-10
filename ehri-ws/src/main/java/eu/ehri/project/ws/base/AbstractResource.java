@@ -94,6 +94,11 @@ public abstract class AbstractResource implements TxCheckedResource {
     public static final String CSV_MEDIA_TYPE = "text/csv";
 
     /**
+     * Custom hack JSON format media type.
+     */
+    public static final String JSON_IMPORT_MEDIA_TYPE = "application/x-ehri-import+json";
+
+    /**
      * RDF Mimetypes and formatting mappings
      */
     public final static String TURTLE_MIMETYPE = "text/turtle";

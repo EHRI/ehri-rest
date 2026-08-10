@@ -54,6 +54,7 @@ import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
+import eu.ehri.project.importers.managers.JsonImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
@@ -563,6 +564,80 @@ public class ImportResource extends AbstractResource {
     }
 
     @POST
+    @Consumes({
+            MediaType.TEXT_PLAIN,               // File list
+            MediaType.APPLICATION_JSON,         // Name/URL pairs
+            MediaType.APPLICATION_OCTET_STREAM, // Zip
+            JSON_IMPORT_MEDIA_TYPE              // JSON data files
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("json")
+    public ImportLog importJson(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+            @QueryParam(ALLOW_UPDATES_PARAM) @DefaultValue("false") Boolean allowUpdates,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(USE_SOURCE_ID_PARAM) @DefaultValue("false") Boolean useSourceId,
+            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
+            @QueryParam(HIERARCHY_FILE) String hierarchyFile,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
+            InputStream data)
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
+        try (final Tx tx = beginTx()) {
+            checkConfigFileReference(propertyFile);
+            checkConfigFileReference(hierarchyFile);
+
+            // Read the hierarchy map, if given
+            Map<String, String> hierarchyMap = hierarchyFile != null
+                    ? readHierarchyTsv(readFile(hierarchyFile))
+                    : null;
+
+            // Run the import!
+            Actioner user = getCurrentActioner();
+            String message = getLogMessage(logMessage).orElse(null);
+            ImportOptions options = ImportOptions.csv(
+                    tolerant,
+                    allowUpdates,
+                    useSourceId,
+                    lang,
+                    null,
+                    null,
+                    hierarchyMap,
+                    propertyFile,
+                    version,
+                    LinkResolver.create(
+                            graph,
+                            user.as(Accessor.class),
+                            conditionalSetPid
+                    )
+            );
+            ImportManager importManager = JsonImportManager.create(
+                    graph,
+                    manager.getEntity(scopeId, PermissionScope.class),
+                    user,
+                    getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
+                    options
+            ).withPreCallback(conditionalSetPid);
+            ImportLog log = importDataStream(
+                    importManager,
+                    message,
+                    tag,
+                    data,
+                    MediaType.valueOf(JSON_IMPORT_MEDIA_TYPE)
+            );
+            if (commit) {
+                logger.debug("Committing JSON import transaction...");
+                tx.success();
+            }
+            return log;
+        }
+    }
+
+    @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE,
             MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
@@ -736,7 +811,7 @@ public class ImportResource extends AbstractResource {
                 List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
                 return importManager.importFiles(paths, message);
             } else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType)) {
-                return importManager.importJson(data, message);
+                return importManager.importJsonUrlMap(data, message);
             } else if (isCompatibleType(mediaType, accepts)) {
                 return importManager.importInputStream(data, tag, message);
             } else {

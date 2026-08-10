@@ -62,7 +62,7 @@ import java.util.Optional;
 public abstract class AbstractImportManager implements ImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
-    private static final JsonFactory factory = new JsonFactory();
+    protected static final JsonFactory factory = new JsonFactory();
 
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
@@ -155,7 +155,7 @@ public abstract class AbstractImportManager implements ImportManager {
     }
 
     @Override
-    public ImportLog importJson(InputStream json, String logMessage) throws ImportValidationError, InputParseError {
+    public ImportLog importJsonUrlMap(InputStream json, String logMessage) throws ImportValidationError, InputParseError {
         Preconditions.checkNotNull(json);
         try (final JsonParser parser = factory.createParser(new InputStreamReader(json, Charsets.UTF_8))) {
 
