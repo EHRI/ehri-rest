@@ -125,6 +125,9 @@ public class CsvImportManager extends AbstractImportManager {
                     try {
                         ((ItemImporter<Map<String, Object>, ?>) importer).importItem(dataMap);
                     } catch (ValidationError e) {
+                        // Record the failure in the log so it's reflected in the errored count,
+                        // then either continue (tolerant) or re-throw (strict).
+                        log.addError(e.getBundle().getId(), e.getErrorSet().toString());
                         if (isTolerant()) {
                             logger.error(String.format("Validation error importing item: '%s'", tag), e);
                         } else {

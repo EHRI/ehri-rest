@@ -98,10 +98,10 @@ public class JsonImportManager extends AbstractImportManager {
 
                 if (root.isArray()) {
                     List<Map<String, Object>> list = mapper.convertValue(root, new TypeReference<List<Map<String, Object>>>() {});
-                    importMultipleMaps(importer, list, tag);
+                    importMultipleMaps(importer, list, tag, log);
                 } else if (root.isObject()) {
                     Map<String, Object> map = mapper.convertValue(root, new TypeReference<Map<String, Object>>() {});
-                    importSingleMap(importer, map, tag);
+                    importSingleMap(importer, map, tag, log);
                 } else {
                     throw new IllegalArgumentException("Expected a JSON object or array, got: " + root.getNodeType());
                 }
@@ -115,7 +115,10 @@ public class JsonImportManager extends AbstractImportManager {
         }
     }
 
-    private void handleError(String tag, ValidationError error) throws ValidationError {
+    private void handleError(ImportLog log, String tag, ValidationError error) throws ValidationError {
+        // Record the failure in the log so it's reflected in the errored count,
+        // then either continue (tolerant) or re-throw (strict).
+        log.addError(error.getBundle().getId(), error.getErrorSet().toString());
         if (isTolerant()) {
             logger.error(String.format("Validation error importing item: '%s'", tag), error);
         } else {
@@ -123,7 +126,7 @@ public class JsonImportManager extends AbstractImportManager {
         }
     }
 
-    private void importSingleMap(ItemImporter<?, ?> importer, Map<String, Object> itemData, String tag) throws ValidationError {
+    private void importSingleMap(ItemImporter<?, ?> importer, Map<String, Object> itemData, String tag, ImportLog log) throws ValidationError {
         try {
             Map<String, Object> importData = Maps.newHashMap();
             for (Map.Entry<String, Object> entry : itemData.entrySet()) {
@@ -138,13 +141,13 @@ public class JsonImportManager extends AbstractImportManager {
             }
             ((ItemImporter<Map<String, Object>, ?>) importer).importItem(importData);
         } catch (ValidationError e) {
-            handleError(tag, e);
+            handleError(log, tag, e);
         }
     }
 
-    private void importMultipleMaps(ItemImporter<?, ?> importer, List<Map<String, Object>> listData, String tag) throws ValidationError {
+    private void importMultipleMaps(ItemImporter<?, ?> importer, List<Map<String, Object>> listData, String tag, ImportLog log) throws ValidationError {
         for (Map<String, Object> itemData : listData) {
-            importSingleMap(importer, itemData, tag);
+            importSingleMap(importer, itemData, tag, log);
         }
     }
 
