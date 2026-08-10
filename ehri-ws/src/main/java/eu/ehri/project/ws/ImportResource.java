@@ -208,7 +208,7 @@ public class ImportResource extends AbstractResource {
      * <ul>
      * <li>a single EAD file</li>
      * <li>multiple EAD files in an archive such as tar, tar.gz, or zip</li>
-     * <li>a plain test file containing local file paths</li>
+     * <li>a plain text file containing local file paths</li>
      * <li>a JSON object consisting of file-name/URL pairs</li>
      * </ul>
      * The Content-Type header is used to distinguish the contents.
@@ -239,6 +239,9 @@ public class ImportResource extends AbstractResource {
      *                      its contents will be used.
      * @param handlerClass  the fully-qualified handler class name (defaults to EadHandler)
      * @param importerClass the fully-qualified import class name (defaults to EadImporter)
+     * @param hierarchyFile a local file path or URL pointing to a TSV file mapping each
+     *                      item's local identifier to that of its parent, allowing a
+     *                      hierarchy to be reconstructed from otherwise flat data.
      * @param propertyFile  a local file path or URL pointing to an import properties configuration file.
      * @param defaultLang   the default description language, if not inferrable from the data
      * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
@@ -250,6 +253,8 @@ public class ImportResource extends AbstractResource {
      *                      attempts to do so without this option enabled an error will
      *                      be thrown
      * @param tolerant      whether to die on the first validation error
+     * @param version       whether to create a version record when an existing item is
+     *                      updated (enabled by default)
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
@@ -348,6 +353,9 @@ public class ImportResource extends AbstractResource {
      *                      its contents will be used.
      * @param handlerClass  the fully-qualified handler class name (defaults to EadHandler)
      * @param importerClass the fully-qualified import class name (defaults to EadImporter)
+     * @param hierarchyFile a local file path or URL pointing to a TSV file mapping each
+     *                      item's local identifier to that of its parent, allowing a
+     *                      hierarchy to be reconstructed from otherwise flat data.
      * @param propertyFile  a local file path or URL pointing to an import properties configuration file.
      * @param lang          the default description language, if not inferrable from the data
      * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
@@ -359,6 +367,8 @@ public class ImportResource extends AbstractResource {
      *                      attempts to do so without this option enabled an error will
      *                      be thrown
      * @param tolerant      whether to die on the first validation error
+     * @param version       whether to create a version record when an existing item is
+     *                      updated (enabled by default)
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
@@ -370,6 +380,7 @@ public class ImportResource extends AbstractResource {
      * @throws ImportValidationError if data constraints are not met
      * @throws IOException           if an error occurs reading the input data
      * @throws DeserializationError  if the input data is not well-formed
+     * @throws PermissionDenied      if the user cannot perform the sync operation
      */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -452,6 +463,42 @@ public class ImportResource extends AbstractResource {
         }
     }
 
+    /**
+     * Import a set of EAG (institution description) files. As with the EAD
+     * endpoint, the POST body can be a single EAG file, multiple EAG files in an
+     * archive (tar, tar.gz, or zip), a plain text file of local file paths, or a
+     * JSON object of file-name/URL pairs. The Content-Type header is used to
+     * distinguish the contents.
+     *
+     * @param scopeId       the id of the import scope (i.e. country)
+     * @param tolerant      whether to die on the first validation error
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
+     * @param logMessage    log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param defaultLang   the default description language, if not inferrable from the data
+     * @param propertyFile  a local file path or URL pointing to an import properties
+     *                      configuration file (defaults to eag.properties)
+     * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
+     *                      provided to identify the source, e.g. the name of the file from
+     *                      which the stream derives. If a tag is not provided, or the
+     *                      input data is not an XML stream, the default value of
+     *                      &quot;-&quot; will be used
+     * @param handlerClass  the fully-qualified handler class name (defaults to EagHandler)
+     * @param importerClass the fully-qualified import class name (defaults to EagImporter)
+     * @param version       whether to create a version record when an existing item is
+     *                      updated (enabled by default)
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
+     * @param data          the import data, as described above. The Content-Type
+     *                      header is used to distinguish the contents.
+     * @return a JSON object showing how many records were created, updated, or unchanged.
+     * @throws ItemNotFound          if the scope does not exist
+     * @throws ImportValidationError if data constraints are not met
+     * @throws IOException           if an error occurs reading the input data
+     * @throws DeserializationError  if the input data is not well-formed
+     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
@@ -505,6 +552,42 @@ public class ImportResource extends AbstractResource {
         }
     }
 
+    /**
+     * Import a set of EAC (authority record) files. As with the EAD endpoint,
+     * the POST body can be a single EAC file, multiple EAC files in an archive
+     * (tar, tar.gz, or zip), a plain text file of local file paths, or a JSON
+     * object of file-name/URL pairs. The Content-Type header is used to
+     * distinguish the contents.
+     *
+     * @param scopeId       the id of the import scope (i.e. authoritative set)
+     * @param tolerant      whether to die on the first validation error
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
+     * @param logMessage    log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param defaultLang   the default description language, if not inferrable from the data
+     * @param propertyFile  a local file path or URL pointing to an import properties
+     *                      configuration file (defaults to eac.properties)
+     * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
+     *                      provided to identify the source, e.g. the name of the file from
+     *                      which the stream derives. If a tag is not provided, or the
+     *                      input data is not an XML stream, the default value of
+     *                      &quot;-&quot; will be used
+     * @param handlerClass  the fully-qualified handler class name (defaults to EacHandler)
+     * @param importerClass the fully-qualified import class name (defaults to EacImporter)
+     * @param version       whether to create a version record when an existing item is
+     *                      updated (enabled by default)
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
+     * @param data          the import data, as described above. The Content-Type
+     *                      header is used to distinguish the contents.
+     * @return a JSON object showing how many records were created, updated, or unchanged.
+     * @throws ItemNotFound          if the scope does not exist
+     * @throws ImportValidationError if data constraints are not met
+     * @throws IOException           if an error occurs reading the input data
+     * @throws DeserializationError  if the input data is not well-formed
+     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
@@ -563,6 +646,52 @@ public class ImportResource extends AbstractResource {
         }
     }
 
+    /**
+     * Import items from JSON data consisting of flat field maps. The meaning of
+     * the POST body depends on its Content-Type:
+     * <ul>
+     * <li>{@code application/x-ehri-import+json}: a JSON data file, either a
+     * single object of fields or an array of such objects, each imported as one
+     * item. To import DocumentaryUnits include a {@code sourceFileId} field.</li>
+     * <li>{@code application/json}: a JSON object of file-name/URL pairs, whose
+     * referenced files are fetched and imported</li>
+     * <li>{@code text/plain}: a plain text file of local file paths</li>
+     * <li>{@code application/octet-stream}: an archive (tar, tar.gz, or zip)</li>
+     * </ul>
+     * Array (list) values within an object are imported as multi-valued properties.
+     *
+     * @param scopeId       the id of the import scope (i.e. repository)
+     * @param tolerant      whether to die on the first validation error
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
+     * @param logMessage    log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param useSourceId   by default a description will update an existing description if it
+     *                      has the same language code. Setting this option to 'true' allows adding
+     *                      multiple descriptions in the same language by taking into account the
+     *                      value of the source file ID.
+     * @param lang          the default description language, if not inferrable from the data
+     * @param hierarchyFile a local file path or URL pointing to a TSV file mapping each
+     *                      item's local identifier to that of its parent, allowing a
+     *                      hierarchy to be reconstructed from otherwise flat data.
+     * @param propertyFile  a local file path or URL pointing to an import properties configuration file.
+     * @param importerClass the fully-qualified import class name (defaults to EadImporter)
+     * @param tag           a string &quot;tag&quot; to identify the source, e.g. the name of the
+     *                      file from which the data derives. If not provided the default value of
+     *                      &quot;-&quot; will be used
+     * @param version       whether to create a version record when an existing item is
+     *                      updated (enabled by default)
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
+     * @param data          the import data, as described above. The Content-Type
+     *                      header is used to distinguish the contents.
+     * @return a JSON object showing how many records were created, updated, or unchanged.
+     * @throws ItemNotFound          if the scope does not exist
+     * @throws ImportValidationError if data constraints are not met
+     * @throws IOException           if an error occurs reading the input data
+     * @throws DeserializationError  if the input data is not well-formed
+     */
     @POST
     @Consumes({
             MediaType.TEXT_PLAIN,               // File list
@@ -637,6 +766,56 @@ public class ImportResource extends AbstractResource {
         }
     }
 
+    /**
+     * Import items from CSV data, one item per row. The meaning of the POST body
+     * depends on its Content-Type:
+     * <ul>
+     * <li>{@code text/csv}: a CSV data file whose header row names the fields.
+     * To import DocumentaryUnits include a {@code sourceFileId} column.</li>
+     * <li>{@code application/json}: a JSON object of file-name/URL pairs, whose
+     * referenced files are fetched and imported</li>
+     * <li>{@code text/plain}: a plain text file of local file paths</li>
+     * <li>{@code application/octet-stream}: an archive (tar, tar.gz, or zip)</li>
+     * </ul>
+     * Field values containing the array separator are imported as multi-valued properties.
+     *
+     * @param scopeId       the id of the import scope (i.e. repository)
+     * @param tolerant      whether to die on the first validation error
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
+     * @param logMessage    log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param useSourceId   by default a description will update an existing description if it
+     *                      has the same language code. Setting this option to 'true' allows adding
+     *                      multiple descriptions in the same language by taking into account the
+     *                      value of the source file ID.
+     * @param lang          the default description language, if not inferrable from the data
+     * @param fieldSep      the single-character field separator used in the CSV data
+     *                      (defaults to a comma)
+     * @param arraySep      the separator marking multiple values within a single field;
+     *                      fields containing it are imported as multi-valued properties
+     * @param hierarchyFile a local file path or URL pointing to a TSV file mapping each
+     *                      item's local identifier to that of its parent, allowing a
+     *                      hierarchy to be reconstructed from otherwise flat data.
+     * @param propertyFile  a local file path or URL pointing to an import properties configuration file.
+     * @param importerClass the fully-qualified import class name (defaults to EadImporter)
+     * @param tag           a string &quot;tag&quot; to identify the source, e.g. the name of the
+     *                      file from which the data derives. If not provided the default value of
+     *                      &quot;-&quot; will be used
+     * @param version       whether to create a version record when an existing item is
+     *                      updated (enabled by default)
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
+     * @param data          the import data, as described above. The Content-Type
+     *                      header is used to distinguish the contents.
+     * @return a JSON object showing how many records were created, updated, or unchanged.
+     * @throws ItemNotFound          if the scope does not exist
+     * @throws ImportValidationError if data constraints are not met
+     * @throws IOException           if an error occurs reading the input data
+     * @throws DeserializationError  if the input data is not well-formed, or the field
+     *                               separator is not a single character
+     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE,
             MediaType.APPLICATION_OCTET_STREAM})
@@ -727,7 +906,8 @@ public class ImportResource extends AbstractResource {
      * @param tolerant don't abort on the first error
      * @param commit   actually change the graph
      * @return an import log
-     * @throws DeserializationError the problems are found with the import data
+     * @throws DeserializationError if problems are found with the import data
+     * @throws ItemNotFound         if the scope does not exist
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -774,7 +954,7 @@ public class ImportResource extends AbstractResource {
      * @param commit   actually change the graph
      * @param table    the tabular data
      * @return an import log
-     * @throws DeserializationError the problems are found with the import data
+     * @throws DeserializationError if problems are found with the import data
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
