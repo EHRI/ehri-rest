@@ -27,7 +27,7 @@ DatePeriod,type,,,
 DatePeriod,startDate,,,
 DatePeriod,endDate,,,
 DatePeriod,precision,,,
-DocumentaryUnitDescription,parallelFormsOfName,,,
+DocumentaryUnitDescription,parallelFormsOfName,,,1
 DocumentaryUnitDescription,ref,,,
 DocumentaryUnitDescription,creationDate,,,1
 DocumentaryUnitDescription,abstract,,,
@@ -53,7 +53,7 @@ DocumentaryUnitDescription,levelOfDescription,,,
 DocumentaryUnitDescription,notes,,,1
 DocumentaryUnitDescription,languageOfMaterial,,,1
 DocumentaryUnitDescription,scriptOfMaterial,,,1
-DocumentaryUnitDescription,findingAids,,,
+DocumentaryUnitDescription,findingAids,,,1
 DocumentaryUnitDescription,publicationNote,,,
 DocumentaryUnitDescription,datesOfDescriptions,,,
 DocumentaryUnitDescription,archivistNote,,,
@@ -81,7 +81,7 @@ HistoricalAgentDescription,otherFormsOfFirstName,,,1
 HistoricalAgentDescription,otherFormsOfLastName,,,1
 RepositoryDescription,typeOfEntity,,,
 RepositoryDescription,otherFormsOfName,,,1
-RepositoryDescription,parallelFormsOfName,,,
+RepositoryDescription,parallelFormsOfName,,,1
 RepositoryDescription,history,,,
 RepositoryDescription,geoculturalContext,,,
 RepositoryDescription,mandates,,,
