@@ -192,7 +192,7 @@ public class EadHandler extends SaxXmlHandler {
         }
 
         if (qName.equals(ImportHelpers.LANGUAGE_KEY_PREFIX) || localName.equals(ImportHelpers.LANGUAGE_KEY_PREFIX)) {
-            String lang = (String) currentGraphPath.peek().get("languageCode");
+            String lang = (String) (currentGraphPath.peek().get("languageCode"));
             if (lang != null) {
                 langCode = lang;
             }

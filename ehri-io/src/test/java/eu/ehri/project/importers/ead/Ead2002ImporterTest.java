@@ -30,35 +30,32 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
-public class Ead3ImporterTest extends AbstractImporterTest {
+public class Ead2002ImporterTest extends AbstractImporterTest {
 
     @Test
     public void testImportItems() throws Exception {
 
-        final String logMessage = "Importing a single EAD 3";
+        final String logMessage = "Importing a single EAD 2002";
 
         int origCount = getNodeCount(graph);
         List<VertexProxy> before = getGraphState(graph);
-        try (InputStream ios = ClassLoader.getSystemResourceAsStream("simple-ead3.xml")) {
-            saxImportManager(EadImporter.class, EadHandler.class, "ead3.properties")
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("simple-ead2002.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "ead2002.properties")
                     .importInputStream(ios, logMessage);
         }
         List<VertexProxy> after = getGraphState(graph);
         diffGraph(before, after).printDebug(System.out, true);
 
-        // TODO: lots of information is missing here!
         /*
          * Nodes created:
-         *  - 2 unit
-         *  - 2 description
+         *  - 1 unit
+         *  - 1 description
          *  - 1 system event
-         *  - 3 event link
-         *  - 5 access points
-         *  - 2 maintenance events
-         *  - 5 date periods
+         *  - 2 event links
+         *  - 1 date period
          *  - 1 unknown properties
          */
-        assertEquals(origCount + 21, getNodeCount(graph));
+        assertEquals(origCount + 7, getNodeCount(graph));
 
         DocumentaryUnitDescription desc = manager.getEntity("nl-r1-t1.eng-test_1_eng", DocumentaryUnitDescription.class);
         assertNotNull(desc);

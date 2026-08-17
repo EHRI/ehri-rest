@@ -60,10 +60,13 @@
 			<abstract label="Abstract:">Some t1 Text Here</abstract>
 			<didnote label="Note:">Information about the collection.</didnote>
 			<langmaterial label="Language:">
-				<language langcode="eng">English</language>
-				<descriptivenote>
-					<p>Materials in this collection are written in English.</p>
-				</descriptivenote>
+				<languageset>
+					<language langcode="eng">English</language>
+					<script scriptcode="Latn">Latin</script>
+					<descriptivenote>
+						<p>Materials in this collection are written in English.</p>
+					</descriptivenote>
+				</languageset>
 			</langmaterial>
 			<physloc label="Location:">Virtual</physloc>
 		</did>

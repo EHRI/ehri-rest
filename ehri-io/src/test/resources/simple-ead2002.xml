@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" audience="external">
+    <eadheader>
+        <eadid countrycode="NL">test-1</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Test 1</titleproper>
+                <author>EHRI</author>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>EHRI created this EAD for testing purposes.
+                <date>2021-03-01</date>
+            </creation>
+            <langusage>
+                <language langcode="eng">English</language>
+            </langusage>
+        </profiledesc>
+    </eadheader>
+    <archdesc level="collection">
+        <did>
+            <unitid label="Collection Number:">t1</unitid>
+            <unittitle label="Title:">Test Item 1</unittitle>
+            <unitdate>2018-2019</unitdate>
+            <abstract label="Abstract:">Some t1 Text Here</abstract>
+            <langmaterial label="Language:">
+                <language langcode="eng" scriptcode="Latn">English</language>
+                <descriptivenote>
+                    <p>Materials in this collection are written in English.</p>
+                </descriptivenote>
+            </langmaterial>
+        </did>
+        <scopecontent>
+            <p>Some info about the collection.</p>
+        </scopecontent>
+    </archdesc>
+</ead>
