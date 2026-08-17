@@ -603,18 +603,33 @@ public class LanguageHelpers {
      * no conversion was found
      */
     public static String iso639DashTwoCode(String nameOrCode) {
+        return tryIso639DashTwoCode(nameOrCode).orElse(nameOrCode);
+    }
+
+    /**
+     * Take an ISO-639-1 code or a language name and try and map to a valid ISO639-2 code.
+     *
+     * @param nameOrCode a language code or name to convert
+     * @return the ISO 639-2 language code for that code or name, or empty if
+     * no conversion was found and the input is not already a recognised code
+     */
+    public static Optional<String> tryIso639DashTwoCode(String nameOrCode) {
         if (nameOrCode.length() == 2 && locale2To3Map.containsKey(nameOrCode)) {
-            return locale2To3Map.get(nameOrCode).getISO3Language();
+            return Optional.of(locale2To3Map.get(nameOrCode).getISO3Language());
         } else if (nameOrCode.length() == 3 && iso639BibTermLookup.containsKey(nameOrCode)) {
-            return iso639BibTermLookup.get(nameOrCode);
+            return Optional.of(iso639BibTermLookup.get(nameOrCode));
+        } else if (nameOrCode.length() == 3 && locale3To2Map.containsKey(nameOrCode.toLowerCase())) {
+            // locale3To2Map keys are always lowercase (from Locale.getISO3Language()); match
+            // convertCode()'s case-insensitive handling of already-valid 3-letter codes.
+            return Optional.of(nameOrCode.toLowerCase());
         } else if (nameOrCode.length() > 3 && localeNameMap.containsKey(nameOrCode.toLowerCase())) {
-            return localeNameMap.get(nameOrCode.toLowerCase()).getISO3Language();
+            return Optional.of(localeNameMap.get(nameOrCode.toLowerCase()).getISO3Language());
             /* FIXME the localeNameMap depends on locale and translating an
              * English name to a code fails when executed on
              * e.g. a server with non-English locale
              */
         }
-        return nameOrCode;
+        return Optional.empty();
     }
 
     /**

@@ -105,7 +105,7 @@ public class CegesomaAATest extends AbstractImporterTest {
         for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
-            assertThat(dd.getProperty("languageOfMaterial"), containsInAnyOrder("In het Frans"));
+            assertEquals("In het Frans", dd.getProperty("languageOfMaterialNotes"));
             assertEquals("Zie ook AA 1297", dd.getProperty("relatedMaterial"));
             assertThat(dd.getProperty("notes"), hasItem(startsWith("Nr 1-2-13: fotokopies Bibliothek")));
             assertThat(dd.getProperty("findingAids"), containsInAnyOrder("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)"));

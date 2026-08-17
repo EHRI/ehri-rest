@@ -40,6 +40,23 @@ public class LanguageHelpersTest {
     }
 
     @Test
+    public void testTryIso639DashTwoCode() {
+        // two-to-three
+        assertEquals(Optional.of("sqi"), LanguageHelpers.tryIso639DashTwoCode("sq"));
+        // bibliographic to term
+        assertEquals(Optional.of("sqi"), LanguageHelpers.tryIso639DashTwoCode("alb"));
+        // already a valid term code
+        assertEquals(Optional.of("eng"), LanguageHelpers.tryIso639DashTwoCode("eng"));
+        // already a valid term code, uppercase
+        assertEquals(Optional.of("eng"), LanguageHelpers.tryIso639DashTwoCode("ENG"));
+        // name to code
+        assertEquals(Optional.of("eng"), LanguageHelpers.tryIso639DashTwoCode("English"));
+        // not a recognisable code or name
+        assertEquals(Optional.empty(), LanguageHelpers.tryIso639DashTwoCode("In het Frans"));
+        assertEquals(Optional.empty(), LanguageHelpers.tryIso639DashTwoCode("xyz"));
+    }
+
+    @Test
     public void testConvertCode() {
         assertEquals(Optional.of("sqi"), LanguageHelpers.convertCode("sq"));
         assertEquals(Optional.of("sqi"), LanguageHelpers.convertCode("alb"));

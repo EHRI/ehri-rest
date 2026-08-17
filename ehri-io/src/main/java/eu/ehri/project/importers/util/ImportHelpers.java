@@ -22,6 +22,7 @@ package eu.ehri.project.importers.util;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
@@ -42,6 +43,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.function.Function;
 
 /**
  * Import utility class.
@@ -54,15 +58,26 @@ public class ImportHelpers {
     // Keys in the node that denote unknown properties must start with the value of UNKNOWN.
     public static final String UNKNOWN_PREFIX = "UNKNOWN_";
     private static final String NODE_PROPERTIES = "allowedNodeProperties.csv";
+    private static final String VALUE_NORMALISERS = "valueNormalisers.properties";
 
     /**
-     * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
+     * The tag name of the EAD/EAC {@code <language>} element.
      */
     public static final String LANGUAGE_KEY_PREFIX = "language";
-    public static final String SCRIPT_KEY_PREFIX = "script";
+
+    /**
+     * Named value normalisers available for use in {@link #VALUE_NORMALISERS}, keyed by the
+     * tag used to refer to them there.
+     */
+    private static final Map<String, Function<String, Optional<String>>> NORMALISER_FUNCTIONS = ImmutableMap.of(
+            "languageCode", LanguageHelpers::tryIso639DashTwoCode,
+            "scriptCode", LanguageHelpers::scriptNameToCode
+    );
+
     private static final Logger logger = LoggerFactory.getLogger(ImportHelpers.class);
     private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
     private static final NodeProperties nodeProperties = loadNodeProperties();
+    private static final Map<String, NormaliserConfig> valueNormalisers = loadValueNormalisers();
 
     /**
      * Extract properties from the itemData Map that are marked as unknown, and return them in a new Map.
@@ -220,11 +235,37 @@ public class ImportHelpers {
         return me;
     }
 
+    /**
+     * Overwrites this property in the given graph node representation, replacing any
+     * existing value rather than accumulating it (unlike {@link #putPropertyInGraph}).
+     * If the value is effectively empty, nothing happens. Honours the same normaliser/
+     * fallback-property configuration as {@link #putPropertyInGraph}.
+     *
+     * @param c        a Map representation of a graph node
+     * @param property the key to store the value for
+     * @param value    the value to store
+     */
     public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
-        String normValue = normaliseValue(property, value);
-        if (normValue != null && !normValue.isEmpty()) {
-            logger.trace("overwrite property: {} {}", property, normValue);
-            c.put(property, normValue);
+        String trimmedValue = StringUtils.normalizeSpace(value);
+        NormaliserConfig config = valueNormalisers.get(property);
+        if (config == null) {
+            overwriteIfNotEmpty(c, property, trimmedValue);
+            return;
+        }
+        Optional<String> normalised = NORMALISER_FUNCTIONS.get(config.normaliser).apply(trimmedValue);
+        if (normalised.isPresent()) {
+            overwriteIfNotEmpty(c, property, normalised.get());
+        } else if (config.fallbackProperty != null) {
+            overwriteIfNotEmpty(c, config.fallbackProperty, trimmedValue);
+        } else {
+            overwriteIfNotEmpty(c, property, trimmedValue);
+        }
+    }
+
+    private static void overwriteIfNotEmpty(Map<String, Object> c, String property, String value) {
+        if (!value.isEmpty()) {
+            logger.trace("overwrite property: {} {}", property, value);
+            c.put(property, value);
         }
     }
 
@@ -232,13 +273,38 @@ public class ImportHelpers {
      * Stores this property value pair in the given graph node representation.
      * If the value is effectively empty, nothing happens.
      * If the property already exists, it is added to the value list.
+     * <p>
+     * Which properties have their values normalised, and where a value that fails
+     * normalisation ends up, is declared in {@link #VALUE_NORMALISERS} rather than
+     * hardcoded here. A property with no entry there is stored as plain text. A property
+     * whose value can't be normalised, but which has no fallback property configured,
+     * keeps its raw value - matching the behaviour of a property with no normaliser at all.
+     * Like any other non-multivalued property, repeated values accumulate as a list here
+     * and are joined into a single, newline-separated string later by
+     * {@link #flattenNonMultivaluedProperties}.
      *
      * @param c        a Map representation of a graph node
      * @param property the key to store the value for
      * @param value    the value to store
      */
     public static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
-        String normValue = normaliseValue(property, value);
+        String trimmedValue = StringUtils.normalizeSpace(value);
+        NormaliserConfig config = valueNormalisers.get(property);
+        if (config == null) {
+            addPropertyValue(c, property, trimmedValue);
+            return;
+        }
+        Optional<String> normalised = NORMALISER_FUNCTIONS.get(config.normaliser).apply(trimmedValue);
+        if (normalised.isPresent()) {
+            addPropertyValue(c, property, normalised.get());
+        } else if (config.fallbackProperty != null) {
+            addPropertyValue(c, config.fallbackProperty, trimmedValue);
+        } else {
+            addPropertyValue(c, property, trimmedValue);
+        }
+    }
+
+    private static void addPropertyValue(Map<String, Object> c, String property, String normValue) {
         if (normValue == null || normValue.isEmpty()) {
             return;
         }
@@ -252,18 +318,6 @@ public class ImportHelpers {
             }
         } else {
             c.put(property, normValue);
-        }
-    }
-
-    private static String normaliseValue(String property, String value) {
-        String trimmedValue = StringUtils.normalizeSpace(value);
-        // Language codes are converted to their 3-letter alternates
-        if (property.startsWith(LANGUAGE_KEY_PREFIX)) {
-            return LanguageHelpers.iso639DashTwoCode(trimmedValue);
-        } else if (property.startsWith(SCRIPT_KEY_PREFIX)) {
-            return LanguageHelpers.scriptNameToCode(trimmedValue).orElse(trimmedValue);
-        } else {
-            return trimmedValue;
         }
     }
 
@@ -297,5 +351,41 @@ public class ImportHelpers {
         } catch (NullPointerException npe) {
             throw new RuntimeException("Missing or empty properties file: " + NODE_PROPERTIES);
         }
+    }
+
+    /**
+     * The normaliser (a key in {@link #NORMALISER_FUNCTIONS}) configured for a property, and
+     * the optional fallback property its value is diverted to when that normaliser doesn't
+     * recognise it.
+     */
+    private static final class NormaliserConfig {
+        private final String normaliser;
+        private final String fallbackProperty;
+
+        private NormaliserConfig(String normaliser, String fallbackProperty) {
+            this.normaliser = normaliser;
+            this.fallbackProperty = fallbackProperty;
+        }
+    }
+
+    private static Map<String, NormaliserConfig> loadValueNormalisers() {
+        Properties props = new Properties();
+        try (InputStream is = ImportHelpers.class.getClassLoader().getResourceAsStream(VALUE_NORMALISERS)) {
+            props.load(is);
+        } catch (IOException | NullPointerException ex) {
+            throw new RuntimeException("Missing or unreadable properties file: " + VALUE_NORMALISERS, ex);
+        }
+        Map<String, NormaliserConfig> out = Maps.newHashMap();
+        for (String property : props.stringPropertyNames()) {
+            String[] parts = props.getProperty(property).split(":", 2);
+            String normaliser = parts[0].trim();
+            if (!NORMALISER_FUNCTIONS.containsKey(normaliser)) {
+                throw new RuntimeException("Unknown normaliser '" + normaliser + "' for property '"
+                        + property + "' in " + VALUE_NORMALISERS);
+            }
+            String fallbackProperty = parts.length > 1 ? parts[1].trim() : null;
+            out.put(property, new NormaliserConfig(normaliser, fallbackProperty));
+        }
+        return out;
     }
 }

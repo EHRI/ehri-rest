@@ -98,7 +98,7 @@ public class CegesomaABTest extends AbstractImporterTest {
             assertEquals("Liste des objets, documents et témoignages rassemblés pour l'exposition : (\"Résister à la solution finale\")", dd.getName());
             assertEquals("fra", dd.getLanguageOfDescription());
             assertThat(dd.getProperty("processInfo"), containsInAnyOrder("Cege Soma"));
-            assertThat(dd.getProperty("languageOfMaterial"), containsInAnyOrder("en français et en anglais"));
+            assertEquals("en français et en anglais", dd.getProperty("languageOfMaterialNotes"));
         }
 
         //test MaintenanceEvent order

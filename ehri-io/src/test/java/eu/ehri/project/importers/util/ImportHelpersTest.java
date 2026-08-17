@@ -19,5 +19,115 @@
 
 package eu.ehri.project.importers.util;
 
+import com.google.common.collect.Maps;
+import eu.ehri.project.models.EntityClass;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 public class ImportHelpersTest {
+
+    @Test
+    public void putPropertyInGraphNormalisesLanguageOfMaterial() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "languageOfMaterial", "English");
+        assertEquals("eng", c.get("languageOfMaterial"));
+        assertFalse(c.containsKey("languageOfMaterialNotes"));
+    }
+
+    @Test
+    public void putPropertyInGraphDivertsUnnormalisableLanguageOfMaterialToNotes() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "languageOfMaterial", "In het Frans");
+        assertFalse(c.containsKey("languageOfMaterial"));
+        assertEquals("In het Frans", c.get("languageOfMaterialNotes"));
+    }
+
+    @Test
+    public void putPropertyInGraphKeepsValidAndInvalidLanguageOfMaterialValuesSeparate() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "languageOfMaterial", "eng");
+        ImportHelpers.putPropertyInGraph(c, "languageOfMaterial", "In het Frans");
+        assertEquals("eng", c.get("languageOfMaterial"));
+        assertEquals("In het Frans", c.get("languageOfMaterialNotes"));
+    }
+
+    @Test
+    public void putPropertyInGraphAccumulatesMultipleUnnormalisableValuesAsList() {
+        // Like any other non-multivalued property, repeated raw values accumulate as a
+        // list at this stage; they are only joined into a single string once flattened
+        // (see flattenNonMultivaluedPropertiesJoinsMultipleLanguageOfMaterialNotes below).
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "languageOfMaterial", "In het Frans");
+        ImportHelpers.putPropertyInGraph(c, "languageOfMaterial", "In het Engels");
+        assertFalse(c.containsKey("languageOfMaterial"));
+        assertEquals(Arrays.asList("In het Frans", "In het Engels"), c.get("languageOfMaterialNotes"));
+    }
+
+    @Test
+    public void flattenNonMultivaluedPropertiesJoinsMultipleLanguageOfMaterialNotes() {
+        Object flattened = ImportHelpers.flattenNonMultivaluedProperties("languageOfMaterialNotes",
+                Arrays.asList("In het Frans", "In het Engels"), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+        assertEquals("In het Frans\n\nIn het Engels", flattened);
+    }
+
+    @Test
+    public void putPropertyInGraphNormalisesLanguageCode() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "languageCode", "dut");
+        assertEquals("nld", c.get("languageCode"));
+    }
+
+    @Test
+    public void putPropertyInGraphKeepsUnnormalisableLanguageCodeAsIs() {
+        // languageCode has no fallback property configured, so an unrecognised value
+        // is kept as-is, matching the behaviour of a property with no normaliser at all.
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "languageCode", "not a real code");
+        assertEquals("not a real code", c.get("languageCode"));
+    }
+
+    @Test
+    public void putPropertyInGraphNormalisesScriptOfMaterial() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "scriptOfMaterial", "Latin");
+        assertEquals("Latn", c.get("scriptOfMaterial"));
+    }
+
+    @Test
+    public void putPropertyInGraphStoresUnconfiguredPropertiesAsPlainText() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.putPropertyInGraph(c, "scopeAndContent", "  some   text  ");
+        assertEquals("some text", c.get("scopeAndContent"));
+    }
+
+    @Test
+    public void overwritePropertyInGraphNormalisesLanguageOfMaterial() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.overwritePropertyInGraph(c, "languageOfMaterial", "English");
+        assertEquals("eng", c.get("languageOfMaterial"));
+        assertFalse(c.containsKey("languageOfMaterialNotes"));
+    }
+
+    @Test
+    public void overwritePropertyInGraphHonoursFallbackProperty() {
+        // Matches putPropertyInGraph's behaviour: an unnormalisable languageOfMaterial
+        // value is diverted to languageOfMaterialNotes, not left under languageOfMaterial.
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.overwritePropertyInGraph(c, "languageOfMaterial", "In het Frans");
+        assertFalse(c.containsKey("languageOfMaterial"));
+        assertEquals("In het Frans", c.get("languageOfMaterialNotes"));
+    }
+
+    @Test
+    public void overwritePropertyInGraphReplacesRatherThanAccumulates() {
+        Map<String, Object> c = Maps.newHashMap();
+        ImportHelpers.overwritePropertyInGraph(c, "scopeAndContent", "first");
+        ImportHelpers.overwritePropertyInGraph(c, "scopeAndContent", "second");
+        assertEquals("second", c.get("scopeAndContent"));
+    }
 }

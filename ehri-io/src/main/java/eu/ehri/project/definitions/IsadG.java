@@ -37,6 +37,7 @@ public enum IsadG implements DefinitionList {
     extentAndMedium("3.1.5"),
     findingAids("3.4.5", true),
     languageOfMaterial("3.4.3", true),
+    languageOfMaterialNotes("3.4.3"),
     levelOfDescription("3.1.4"),
     locationOfOriginals("3.5.1", true),
     locationOfCopies("3.5.2", true),
