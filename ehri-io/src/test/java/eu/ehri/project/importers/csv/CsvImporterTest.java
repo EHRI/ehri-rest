@@ -77,7 +77,7 @@ public class CsvImporterTest extends AbstractImporterTest {
             DocumentaryUnitDescription d1 = unit.getDescriptions().iterator().next().as(DocumentaryUnitDescription.class);
             assertEquals("eng", d1.getLanguageOfDescription());
             assertThat(d1.getProperty("languageOfMaterial"), containsInAnyOrder("nld", "eng", "fra"));
-            assertEquals("Latn", d1.getProperty("scriptOfMaterial"));
+            assertThat(d1.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
             assertEquals(ps, unit.getRepository());
         }
     }

@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -95,8 +97,8 @@ public class CegesomaABTest extends AbstractImporterTest {
         for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertEquals("Liste des objets, documents et témoignages rassemblés pour l'exposition : (\"Résister à la solution finale\")", dd.getName());
             assertEquals("fra", dd.getLanguageOfDescription());
-            assertEquals("Cege Soma", dd.getProperty("processInfo"));
-            assertEquals("en français et en anglais", dd.getProperty("languageOfMaterial"));
+            assertThat(dd.getProperty("processInfo"), containsInAnyOrder("Cege Soma"));
+            assertThat(dd.getProperty("languageOfMaterial"), containsInAnyOrder("en français et en anglais"));
         }
 
         //test MaintenanceEvent order

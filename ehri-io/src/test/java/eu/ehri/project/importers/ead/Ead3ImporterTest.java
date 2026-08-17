@@ -26,6 +26,8 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -62,7 +64,7 @@ public class Ead3ImporterTest extends AbstractImporterTest {
 
         DocumentaryUnitDescription desc = manager.getEntity("nl-r1-t1.eng-test_1_eng", DocumentaryUnitDescription.class);
         assertNotNull(desc);
-        assertEquals("eng", desc.getProperty("languageOfMaterial"));
-        assertEquals("Latn", desc.getProperty("scriptOfMaterial"));
+        assertThat(desc.getProperty("languageOfMaterial"), containsInAnyOrder("eng"));
+        assertThat(desc.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
     }
 }

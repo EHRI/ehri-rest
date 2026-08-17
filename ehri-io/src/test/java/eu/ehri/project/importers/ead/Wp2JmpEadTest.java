@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -106,7 +108,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
             // languages
             for (DocumentaryUnitDescription d : c2.getDocumentDescriptions()) {
-                assertEquals("deu", d.getProperty("languageOfMaterial").toString());
+                assertThat(d.getProperty("languageOfMaterial"), containsInAnyOrder("deu"));
             }
 
             List<Accessible> subjects = toList(ev.getSubjects());
@@ -122,7 +124,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
             // Check the author of the description
             for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
-                assertEquals("Shoah History Department, Jewish Museum in Prague", d.getProperty("processInfo"));
+                assertThat(d.getProperty("processInfo"), containsInAnyOrder("Shoah History Department, Jewish Museum in Prague"));
             }
 
 

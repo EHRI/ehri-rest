@@ -83,19 +83,25 @@ public class ImportHelpers {
 
     /**
      * only properties that have the multivalued-status can actually be multivalued. all other properties will be
-     * flattened by this method.
+     * flattened by this method. Conversely, properties that are marked as multivalued but whose value is a plain
+     * scalar (e.g. because only a single value was encountered during import) are wrapped in a single-item list,
+     * so that a given multivalued property is always represented consistently.
      *
      * @param key    a property key
      * @param value  a property value
      * @param entity the EntityClass with which this Map must comply
-     * @return an object which, if the input was a list, will be joined by newlines
+     * @return an object which, if the input was a list but the property is not multivalued, will be joined by
+     * newlines; or, if the input was a scalar but the property is multivalued, will be wrapped in a list
      */
     public static Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
-        if (value instanceof List
-                && !(nodeProperties.hasProperty(entity.getName(), key)
-                && nodeProperties.isMultivaluedProperty(entity.getName(), key))) {
+        boolean multivalued = nodeProperties.hasProperty(entity.getName(), key)
+                && nodeProperties.isMultivaluedProperty(entity.getName(), key);
+        if (value instanceof List && !multivalued) {
             logger.trace("Flattening array property value: {}: {}", key, value);
             return stringJoiner.join((List<?>) value);
+        } else if (!(value instanceof List) && multivalued) {
+            logger.trace("Wrapping scalar property value as array: {}: {}", key, value);
+            return Lists.newArrayList(value);
         } else {
             return value;
         }

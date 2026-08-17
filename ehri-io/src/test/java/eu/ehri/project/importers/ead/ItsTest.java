@@ -195,7 +195,7 @@ public class ItsTest extends AbstractImporterTest {
         assertTrue(descriptions.iterator().hasNext());
         for (DocumentaryUnitDescription d : descriptions) {
             assertEquals("R 2 Geheime Staatspolizei (Gestapo).ead#DEU", d.getProperty("sourceFileId"));
-            assertTrue((d.getProperty("processInfo")).equals("ITS employee"));
+            assertThat(d.getProperty("processInfo"), hasItem("ITS employee"));
 
             int countRevised_ME = 0;
             int countCreated_ME = 0;

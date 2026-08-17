@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -144,7 +146,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
             // Check the author of the top level description
             for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
-                assertEquals("BT", d.getProperty("processInfo"));
+                assertThat(d.getProperty("processInfo"), containsInAnyOrder("BT"));
             }
 
             // Check the importer is Idempotent

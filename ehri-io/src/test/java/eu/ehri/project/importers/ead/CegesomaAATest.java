@@ -37,6 +37,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -101,10 +105,10 @@ public class CegesomaAATest extends AbstractImporterTest {
         for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
-            assertEquals("In het Frans", dd.getProperty("languageOfMaterial"));
+            assertThat(dd.getProperty("languageOfMaterial"), containsInAnyOrder("In het Frans"));
             assertEquals("Zie ook AA 1297", dd.getProperty("relatedMaterial"));
-            assertTrue(dd.getProperty("notes").toString().startsWith("Nr 1-2-13: fotokopies Bibliothek"));
-            assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.getProperty("findingAids"));
+            assertThat(dd.getProperty("notes"), hasItem(startsWith("Nr 1-2-13: fotokopies Bibliothek")));
+            assertThat(dd.getProperty("findingAids"), containsInAnyOrder("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)"));
 
             for (MaintenanceEvent me : dd.getMaintenanceEvents()) {
                 assertEquals("Automatisch gegenereerd door PALLAS systeem", me.getProperty("source"));

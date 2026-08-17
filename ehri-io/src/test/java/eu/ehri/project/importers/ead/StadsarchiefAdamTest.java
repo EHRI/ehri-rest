@@ -32,6 +32,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -132,7 +134,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
                     assertTrue(d.getProperty(property).toString().startsWith("Inleiding"));
                 } else if (property.equals("languageOfMaterial")) {
                     hasLanguageOfMaterial = true;
-                    assertEquals("nld", d.getProperty(property).toString());
+                    assertThat(d.getProperty(property), containsInAnyOrder("nld"));
                 }
             }
             assertTrue(hasScopeAndContent);
