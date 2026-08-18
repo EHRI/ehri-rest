@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -119,7 +120,7 @@ class DateParser {
      * remove the raw data.
      *
      * @param data a map of input data
-     * @return a list of parsed date period maps
+     * @return a list of parsed date period maps, with exact duplicates collapsed
      */
     static List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
@@ -152,7 +153,8 @@ class DateParser {
         }
         replaceDates(data, extractedDates, dateValues);
 
-        return extractedDates;
+        // Collapse exact duplicates, e.g. a repeated <unitdate> element.
+        return Lists.newArrayList(new LinkedHashSet<>(extractedDates));
     }
 
     private static void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates, Map<String, String> dateValues) {
@@ -433,10 +435,8 @@ class DateParser {
         }
         if (endOfPeriod) {
             if (!date.equals(returnDate)) {
-                // NB: checking the full string was consumed (not just p.getIndex() > 0) matters
-                // here - SimpleDateFormat's lenient parsing will otherwise happily match just the
-                // "yyyy-MM" (or "yyyy") prefix of an already-complete, non-zero-padded date like
-                // "1945-6-30", wrongly treating a full date as a partial one to be widened.
+                // Require the full string consumed, not just p.getIndex() > 0 - otherwise
+                // lenient parsing matches the "yyyy-MM" prefix of e.g. "1945-6-30" too.
                 ParsePosition p = new ParsePosition(0);
                 yearMonthDateFormat.parse(date, p);
                 if (p.getIndex() == date.length()) {
