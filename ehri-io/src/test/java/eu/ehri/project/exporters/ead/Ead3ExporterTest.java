@@ -24,7 +24,9 @@ import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Ignore;
@@ -37,6 +39,7 @@ import java.io.InputStream;
 import java.util.ResourceBundle;
 
 import static eu.ehri.project.test.XmlTestHelpers.*;
+import static org.junit.Assert.assertTrue;
 
 
 public class Ead3ExporterTest extends XmlExporterTest {
@@ -184,6 +187,15 @@ public class Ead3ExporterTest extends XmlExporterTest {
     public void testDatePrecisionRoundTrip() throws Exception {
         Repository repo = manager.getEntity("r1", Repository.class);
         String xml = testImportExport(repo, "precision-ead3.xml", "prec-1", "eng");
+
+        // The stored startDate/endDate are always widened to a full date, regardless
+        // of the source @standarddate's precision - only the precision field, not the
+        // date's width, should carry that information.
+        DocumentaryUnit unit = graph.frame(getVertexByIdentifier(graph, "prec-1"), DocumentaryUnit.class);
+        Iterable<DatePeriod> periods = unit.getDocumentDescriptions().iterator().next()
+                .as(DocumentaryUnitDescription.class).getDatePeriods();
+        assertTrue(toList(periods).stream().anyMatch(p -> "1939-04-01".equals(p.getStartDate())));
+
         Document doc = parseDocument(xml);
         // Quarter precision was carried explicitly via @localtype and is preserved.
         // The standarddate stays month-truncated (ISO 8601 has no quarter form).

@@ -391,8 +391,7 @@ public class EadHandler extends SaxXmlHandler {
             if (oids instanceof List) {
                 ((List<String>) oids).add(otherIdentifier);
             } else {
-                currentGraph.put(Ontology.OTHER_IDENTIFIERS,
-                        Lists.newArrayList(oids, otherIdentifier));
+                currentGraph.put(Ontology.OTHER_IDENTIFIERS, Lists.newArrayList(oids, otherIdentifier));
             }
         } else {
             logger.trace("adding first alt id: {}", otherIdentifier);

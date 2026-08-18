@@ -86,8 +86,11 @@ public class EacImporterTest extends AbstractImporterTest {
         assertEquals(0, toList(abwehr.getAnnotations()).size());
         Description desc = abwehr.getDescriptions().iterator().next();
         DatePeriod d = desc.as(HistoricalAgentDescription.class).getDatePeriods().iterator().next();
-        assertEquals("1933", d.getStartDate());
-        assertEquals("1944", d.getEndDate());
+        // Source fromDate/toDate ("1933"/"1944") are year-only; stored dates are always
+        // widened to a full YYYY-MM-DD, with the inferred granularity kept in precision.
+        assertEquals("1933-01-01", d.getStartDate());
+        assertEquals("1944-12-31", d.getEndDate());
+        assertEquals(DatePeriod.DatePrecision.year, d.getPrecision());
     }
 
     @Test

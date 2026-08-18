@@ -102,6 +102,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
             assertEquals(1, datePeriods.size());
             assertEquals("1906-01-01", datePeriods.get(0).getStartDate());
             assertEquals("1919-12-31", datePeriods.get(0).getEndDate());
+            assertEquals(DatePeriod.DatePrecision.year, datePeriods.get(0).getPrecision());
         }
     }
 }

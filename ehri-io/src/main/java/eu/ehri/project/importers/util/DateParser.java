@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,8 +105,10 @@ class DateParser {
     private static final String UNIT_DATES = "unitDates";
     private static final String UNIT_DATES_NORMAL = "unitDatesNormal";
 
-    // An ISO 8601 date whose optional month and day groups reveal its granularity.
-    private static final Pattern ISO_DATE = Pattern.compile("(\\d{4})(-\\d{2})?(-\\d{2})?");
+    // A date whose optional month/day groups reveal its granularity. Lenient about
+    // digit count (1 or 2) so it also covers the sloppy text patterns above, e.g.
+    // "1924-1-1", as well as the always-2-digit forms from structured sub-nodes.
+    private static final Pattern DATE_COMPONENT = Pattern.compile("(\\d{4})(-\\d{1,2})?(-\\d{1,2})?");
 
     // A unitdate/@normal component: YYYY, YYYYMM or YYYYMMDD, with or without
     // hyphen separators (both "193904" and "1939-04" are accepted).
@@ -120,12 +123,11 @@ class DateParser {
      */
     static List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
-
         if (data.containsKey(Entities.DATE_PERIOD)) {
             Object dateRep = data.get(Entities.DATE_PERIOD);
             if (dateRep instanceof List) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) dateRep) {
-                    extractedDates.add(normaliseStructuredDate(getSubNode(event)));
+                for (Map<String, Object> dateData : (List<Map<String, Object>>) dateRep) {
+                    extractedDates.add(normaliseStructuredDate(getSubNode(dateData)));
                 }
             } else if (dateRep instanceof Map) {
                 extractedDates.add(normaliseStructuredDate(getSubNode((Map<String, Object>) dateRep)));
@@ -189,13 +191,16 @@ class DateParser {
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
-                data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
-                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher.groupCount() > 1 ? 2 : 1), true));
+                data.put(Ontology.DATE_PERIOD_START_DATE, matcher.group(1));
+                data.put(Ontology.DATE_PERIOD_END_DATE, matcher.group(matcher.groupCount() > 1 ? 2 : 1));
                 data.put(Ontology.DATE_HAS_DESCRIPTION, date);
                 break;
             }
         }
-        return data;
+        // A pattern match that doesn't turn out to be a valid date (rare, but e.g.
+        // the "Nth century" pattern isn't one) is rejected rather than kept half-
+        // resolved, so the original text is preserved instead - same as @normal.
+        return !data.isEmpty() && resolveDatePrecision(data) ? data : Collections.emptyMap();
     }
 
     /**
@@ -244,9 +249,9 @@ class DateParser {
 
     /**
      * Parse a unitdate/@normal value (a single date, or a "/"-separated range) into
-     * a date period. Precision is inferred from the start component's granularity;
-     * quarter and week can't be distinguished from month and day, since EAD2002
-     * has no equivalent of EAD3's @localtype.
+     * a date period. Unlike the other callers of {@link #resolveDatePrecision}, an
+     * unparseable value here isn't kept half-resolved - it's rejected outright, so
+     * the caller can fall back to preserving the original unitdate text instead.
      *
      * @param normal      the raw normal attribute value
      * @param description the corresponding unitdate text
@@ -254,36 +259,31 @@ class DateParser {
      */
     private static Optional<Map<String, Object>> parseNormalUnitDate(String normal, String description) {
         String[] parts = normal.trim().split("/", 2);
-        Optional<String> start = normaliseHyphenated(parts[0]);
+        Optional<String> start = canonicaliseNormalComponent(parts[0]);
         if (!start.isPresent()) {
             return Optional.empty();
         }
-        try {
-            Map<String, Object> data = Maps.newHashMap();
-            data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(start.get()));
-            if (parts.length > 1) {
-                Optional<String> end = normaliseHyphenated(parts[1]);
-                if (!end.isPresent()) {
-                    return Optional.empty();
-                }
-                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(end.get(), true));
+        Map<String, Object> data = Maps.newHashMap();
+        data.put(Ontology.DATE_PERIOD_START_DATE, start.get());
+        if (parts.length > 1) {
+            Optional<String> end = canonicaliseNormalComponent(parts[1]);
+            if (!end.isPresent()) {
+                return Optional.empty();
             }
-            inferPrecision(start.get()).ifPresent(p -> data.put(Ontology.DATE_PERIOD_PRECISION, p.name()));
-            data.put(Ontology.DATE_HAS_DESCRIPTION, description);
-            // see extractDates: unitDates is always a creation date
-            data.put(Ontology.DATE_PERIOD_TYPE, DatePeriod.DatePeriodType.creation.name());
-            return Optional.of(data);
-        } catch (IllegalArgumentException e) {
-            logger.debug("Unable to parse EAD2002 unitdate @normal value: {}", normal, e);
-            return Optional.empty();
+            data.put(Ontology.DATE_PERIOD_END_DATE, end.get());
         }
+        data.put(Ontology.DATE_HAS_DESCRIPTION, description);
+        // unitDates (ISAD(G) 3.1.3) is always a creation date; exporters only
+        // render dates of this type, so it must be set explicitly.
+        data.put(Ontology.DATE_PERIOD_TYPE, DatePeriod.DatePeriodType.creation.name());
+        return resolveDatePrecision(data) ? Optional.of(data) : Optional.empty();
     }
 
     /**
      * Convert a unitdate/@normal component (YYYY, YYYYMM or YYYYMMDD, optionally
      * hyphenated) into the canonical hyphenated form expected by {@link #normaliseDate}.
      */
-    private static Optional<String> normaliseHyphenated(String component) {
+    private static Optional<String> canonicaliseNormalComponent(String component) {
         Matcher m = NORMAL_DATE_COMPONENT.matcher(component.trim());
         if (!m.matches()) {
             return Optional.empty();
@@ -299,9 +299,10 @@ class DateParser {
     }
 
     /**
-     * Normalise a structured (e.g. EAD3) date sub-node: replace start/end date
-     * text with the @standarddate values if present, then resolve precision from
-     * an explicit value (EAD3's @localtype) or infer it from the start date.
+     * Normalise a structured (e.g. EAD3 or EAC) date sub-node: replace start/end
+     * date text with the @standarddate values if present, then resolve precision
+     * and widen dates as usual. Tolerant of a bad value - there's no fallback for
+     * a structured sub-node, so it's left as-is rather than dropped.
      *
      * @param node a mutable structured date sub-node
      * @return the same node, with precision resolved and temporary keys removed
@@ -309,7 +310,27 @@ class DateParser {
     private static Map<String, Object> normaliseStructuredDate(Map<String, Object> node) {
         moveIfPresent(node, START_STANDARD_DATE, Ontology.DATE_PERIOD_START_DATE);
         moveIfPresent(node, END_STANDARD_DATE, Ontology.DATE_PERIOD_END_DATE);
+        resolveDatePrecision(node);
+        return node;
+    }
 
+    private static void moveIfPresent(Map<String, Object> node, String from, String to) {
+        Object value = node.remove(from);
+        if (value != null) {
+            node.put(to, value);
+        }
+    }
+
+    /**
+     * Resolve a date period's precision - an explicit value (e.g. EAD3's
+     * @localtype) or one inferred from the start date's granularity - then widen
+     * start/end to full dates. This is the single place a DatePeriod's start/end
+     * become a full YYYY-MM-DD, whatever XML import path produced them.
+     *
+     * @param node a mutable map holding raw (possibly partial) start/end dates
+     * @return true if every present date value was successfully widened
+     */
+    private static boolean resolveDatePrecision(Map<String, Object> node) {
         Optional<DatePeriod.DatePrecision> precision = parsePrecision(node.get(Ontology.DATE_PERIOD_PRECISION));
         if (!precision.isPresent()) {
             precision = inferPrecision(node.get(Ontology.DATE_PERIOD_START_DATE));
@@ -319,13 +340,26 @@ class DateParser {
         } else {
             node.remove(Ontology.DATE_PERIOD_PRECISION);
         }
-        return node;
+
+        boolean start = widenIfPresent(node, Ontology.DATE_PERIOD_START_DATE, false);
+        boolean end = widenIfPresent(node, Ontology.DATE_PERIOD_END_DATE, true);
+        return start && end;
     }
 
-    private static void moveIfPresent(Map<String, Object> node, String from, String to) {
-        Object value = node.remove(from);
-        if (value != null) {
-            node.put(to, value);
+    /**
+     * Widen a date value in place to a full YYYY-MM-DD, if present.
+     */
+    private static boolean widenIfPresent(Map<String, Object> node, String key, boolean endOfPeriod) {
+        Object value = node.get(key);
+        if (value == null) {
+            return true;
+        }
+        try {
+            node.put(key, normaliseDate(value.toString().trim(), endOfPeriod));
+            return true;
+        } catch (IllegalArgumentException e) {
+            logger.debug("Unable to widen date value: {}", value, e);
+            return false;
         }
     }
 
@@ -348,7 +382,7 @@ class DateParser {
         if (date == null) {
             return Optional.empty();
         }
-        Matcher m = ISO_DATE.matcher(date.toString().trim());
+        Matcher m = DATE_COMPONENT.matcher(date.toString().trim());
         if (!m.matches()) {
             return Optional.empty();
         } else if (m.group(3) != null) {
