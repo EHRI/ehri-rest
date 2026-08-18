@@ -21,7 +21,6 @@ package eu.ehri.project.importers.util;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -50,7 +49,10 @@ import java.util.function.Function;
 /**
  * Import utility class.
  */
-public class ImportHelpers {
+public final class ImportHelpers {
+
+    private ImportHelpers() {
+    }
 
     public static final String LINK_TARGET = "target";
     public static final String OBJECT_IDENTIFIER = "objectIdentifier";
@@ -117,16 +119,6 @@ public class ImportHelpers {
         } else if (!(value instanceof List) && multivalued) {
             logger.trace("Wrapping scalar property value as array: {}: {}", key, value);
             return Lists.newArrayList(value);
-        } else {
-            return value;
-        }
-    }
-
-    public static Object explodeMultivaluedProperties(String key, String value, EntityClass entity, Splitter splitter) {
-        if (nodeProperties.hasProperty(entity.getName(), key)
-           && nodeProperties.isMultivaluedProperty(entity.getName(), key)) {
-            logger.trace("Exploding array property value: {}: {}", key, value);
-            return splitter.splitToList(value);
         } else {
             return value;
         }
@@ -236,6 +228,40 @@ public class ImportHelpers {
     }
 
     /**
+     * A way of writing a resolved (property, value) pair into a graph node representation -
+     * either accumulating ({@link #addPropertyValue}) or replacing ({@link #overwriteIfNotEmpty}).
+     */
+    @FunctionalInterface
+    private interface PropertyStore {
+        void store(Map<String, Object> c, String property, String value);
+    }
+
+    /**
+     * Resolves and stores this property/value pair via the given store, honouring the
+     * normaliser/fallback-property configuration declared in {@link #VALUE_NORMALISERS}.
+     * A property with no entry there is stored as plain text. A property whose value can't
+     * be normalised, but which has no fallback property configured, keeps its raw value -
+     * matching the behaviour of a property with no normaliser at all.
+     */
+    private static void storeNormalisedProperty(Map<String, Object> c, String property, String value,
+            PropertyStore store) {
+        String trimmedValue = StringUtils.normalizeSpace(value);
+        NormaliserConfig config = valueNormalisers.get(property);
+        if (config == null) {
+            store.store(c, property, trimmedValue);
+            return;
+        }
+        Optional<String> normalised = NORMALISER_FUNCTIONS.get(config.normaliser).apply(trimmedValue);
+        if (normalised.isPresent()) {
+            store.store(c, property, normalised.get());
+        } else if (config.fallbackProperty != null) {
+            store.store(c, config.fallbackProperty, trimmedValue);
+        } else {
+            store.store(c, property, trimmedValue);
+        }
+    }
+
+    /**
      * Overwrites this property in the given graph node representation, replacing any
      * existing value rather than accumulating it (unlike {@link #putPropertyInGraph}).
      * If the value is effectively empty, nothing happens. Honours the same normaliser/
@@ -246,20 +272,7 @@ public class ImportHelpers {
      * @param value    the value to store
      */
     public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
-        String trimmedValue = StringUtils.normalizeSpace(value);
-        NormaliserConfig config = valueNormalisers.get(property);
-        if (config == null) {
-            overwriteIfNotEmpty(c, property, trimmedValue);
-            return;
-        }
-        Optional<String> normalised = NORMALISER_FUNCTIONS.get(config.normaliser).apply(trimmedValue);
-        if (normalised.isPresent()) {
-            overwriteIfNotEmpty(c, property, normalised.get());
-        } else if (config.fallbackProperty != null) {
-            overwriteIfNotEmpty(c, config.fallbackProperty, trimmedValue);
-        } else {
-            overwriteIfNotEmpty(c, property, trimmedValue);
-        }
+        storeNormalisedProperty(c, property, value, ImportHelpers::overwriteIfNotEmpty);
     }
 
     private static void overwriteIfNotEmpty(Map<String, Object> c, String property, String value) {
@@ -272,36 +285,16 @@ public class ImportHelpers {
     /**
      * Stores this property value pair in the given graph node representation.
      * If the value is effectively empty, nothing happens.
-     * If the property already exists, it is added to the value list.
-     * <p>
-     * Which properties have their values normalised, and where a value that fails
-     * normalisation ends up, is declared in {@link #VALUE_NORMALISERS} rather than
-     * hardcoded here. A property with no entry there is stored as plain text. A property
-     * whose value can't be normalised, but which has no fallback property configured,
-     * keeps its raw value - matching the behaviour of a property with no normaliser at all.
-     * Like any other non-multivalued property, repeated values accumulate as a list here
-     * and are joined into a single, newline-separated string later by
-     * {@link #flattenNonMultivaluedProperties}.
+     * If the property already exists, it is added to the value list. Like any other
+     * non-multivalued property, repeated values accumulate as a list here and are joined
+     * into a single, newline-separated string later by {@link #flattenNonMultivaluedProperties}.
      *
      * @param c        a Map representation of a graph node
      * @param property the key to store the value for
      * @param value    the value to store
      */
     public static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
-        String trimmedValue = StringUtils.normalizeSpace(value);
-        NormaliserConfig config = valueNormalisers.get(property);
-        if (config == null) {
-            addPropertyValue(c, property, trimmedValue);
-            return;
-        }
-        Optional<String> normalised = NORMALISER_FUNCTIONS.get(config.normaliser).apply(trimmedValue);
-        if (normalised.isPresent()) {
-            addPropertyValue(c, property, normalised.get());
-        } else if (config.fallbackProperty != null) {
-            addPropertyValue(c, config.fallbackProperty, trimmedValue);
-        } else {
-            addPropertyValue(c, property, trimmedValue);
-        }
+        storeNormalisedProperty(c, property, value, ImportHelpers::addPropertyValue);
     }
 
     private static void addPropertyValue(Map<String, Object> c, String property, String normValue) {
@@ -353,21 +346,6 @@ public class ImportHelpers {
         }
     }
 
-    /**
-     * The normaliser (a key in {@link #NORMALISER_FUNCTIONS}) configured for a property, and
-     * the optional fallback property its value is diverted to when that normaliser doesn't
-     * recognise it.
-     */
-    private static final class NormaliserConfig {
-        private final String normaliser;
-        private final String fallbackProperty;
-
-        private NormaliserConfig(String normaliser, String fallbackProperty) {
-            this.normaliser = normaliser;
-            this.fallbackProperty = fallbackProperty;
-        }
-    }
-
     private static Map<String, NormaliserConfig> loadValueNormalisers() {
         Properties props = new Properties();
         try (InputStream is = ImportHelpers.class.getClassLoader().getResourceAsStream(VALUE_NORMALISERS)) {
@@ -387,5 +365,20 @@ public class ImportHelpers {
             out.put(property, new NormaliserConfig(normaliser, fallbackProperty));
         }
         return out;
+    }
+
+    /**
+     * The normaliser (a key in {@link #NORMALISER_FUNCTIONS}) configured for a property, and
+     * the optional fallback property its value is diverted to when that normaliser doesn't
+     * recognise it.
+     */
+    private static final class NormaliserConfig {
+        private final String normaliser;
+        private final String fallbackProperty;
+
+        private NormaliserConfig(String normaliser, String fallbackProperty) {
+            this.normaliser = normaliser;
+            this.fallbackProperty = fallbackProperty;
+        }
     }
 }
