@@ -433,14 +433,18 @@ class DateParser {
         }
         if (endOfPeriod) {
             if (!date.equals(returnDate)) {
+                // NB: checking the full string was consumed (not just p.getIndex() > 0) matters
+                // here - SimpleDateFormat's lenient parsing will otherwise happily match just the
+                // "yyyy-MM" (or "yyyy") prefix of an already-complete, non-zero-padded date like
+                // "1945-6-30", wrongly treating a full date as a partial one to be widened.
                 ParsePosition p = new ParsePosition(0);
                 yearMonthDateFormat.parse(date, p);
-                if (p.getIndex() > 0) {
+                if (p.getIndex() == date.length()) {
                     returnDate = isoDateTimeFormat.print(DateTime.parse(date).plusMonths(1).minusDays(1));
                 } else {
                     p = new ParsePosition(0);
                     yearDateFormat.parse(date, p);
-                    if (p.getIndex() > 0) {
+                    if (p.getIndex() == date.length()) {
                         returnDate = isoDateTimeFormat.print(DateTime.parse(date).plusYears(1).minusDays(1));
                     }
                 }
