@@ -328,24 +328,25 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
             // ISO 8601 cannot distinguish a quarter from a month, or a week from a day, so
             // for those we retain the precision explicitly in the local-semantics @localtype.
             String localType = localDatePrecision(precision);
-            if (start != null && end != null) {
-                DateTime startDateTime = DateTime.parse(start);
-                DateTime endDateTime = DateTime.parse(end);
+            DateTime startDateTime = start != null ? DateTime.parse(start) : null;
+            DateTime endDateTime = end != null ? DateTime.parse(end) : null;
+            String startStd = startDateTime != null ? formatNormalDate(startDateTime, precision, true) : null;
+            String endStd = endDateTime != null ? formatNormalDate(endDateTime, precision, true) : null;
+
+            // Skip the range if truncation makes start and end coincide.
+            if (startDateTime != null && endDateTime != null && !startStd.equals(endStd)) {
                 tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
                     tag(sw, "daterange", () -> {
                         tag(sw, "fromdate", Integer.toString(startDateTime.year().get()),
-                                attrs("standarddate", formatNormalDate(startDateTime, precision, true),
-                                        "localtype", localType));
+                                attrs("standarddate", startStd, "localtype", localType));
                        tag(sw, "todate", Integer.toString(endDateTime.year().get()),
-                               attrs("standarddate", formatNormalDate(endDateTime, precision, true),
-                                       "localtype", localType));
+                               attrs("standarddate", endStd, "localtype", localType));
                     });
                 });
-            } else if (start != null || end != null) {
-                String date = start != null ? start : end;
-                DateTime dt = DateTime.parse(date);
-                String stdDate = formatNormalDate(dt, precision, true);
-                String text = String.format("%s", dt.year().get());
+            } else if (startDateTime != null || endDateTime != null) {
+                DateTime dt = startDateTime != null ? startDateTime : endDateTime;
+                String stdDate = startDateTime != null ? startStd : endStd;
+                String text = Integer.toString(dt.year().get());
                 tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
                     tag(sw, "datesingle", text, attrs("standarddate", stdDate, "localtype", localType));
                 });

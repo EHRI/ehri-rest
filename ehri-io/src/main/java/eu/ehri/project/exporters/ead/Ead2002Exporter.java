@@ -300,26 +300,29 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
     private void addDatePeriods(XMLStreamWriter sw, Description desc) {
         for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
-            if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
-                String start = datePeriod.getStartDate();
-                String end = datePeriod.getEndDate();
-                DatePeriod.DatePrecision precision = datePeriod.getPrecision();
-                if (start != null && end != null) {
-                    DateTime startDateTime = new DateTime(start);
-                    DateTime endDateTime = new DateTime(end);
-                    String normal = String.format("%s/%s",
-                            formatNormalDate(startDateTime, precision, false),
-                            formatNormalDate(endDateTime, precision, false));
-                    String text = String.format("%s/%s",
-                            startDateTime.year().get(), endDateTime.year().get());
-                    tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
-                } else if (start != null) {
-                    DateTime startDateTime = new DateTime(start);
-                    String normal = formatNormalDate(startDateTime, precision, false);
-                    String text = String.format("%s", startDateTime.year().get());
-                    tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
+            if (!DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
+                continue;
+            }
+            String start = datePeriod.getStartDate();
+            String end = datePeriod.getEndDate();
+            if (start == null) {
+                continue;
+            }
+            DatePeriod.DatePrecision precision = datePeriod.getPrecision();
+            DateTime startDateTime = new DateTime(start);
+            String normal = formatNormalDate(startDateTime, precision, false);
+            String text = String.valueOf(startDateTime.year().get());
+
+            if (end != null) {
+                DateTime endDateTime = new DateTime(end);
+                String normalEnd = formatNormalDate(endDateTime, precision, false);
+                // Skip the range if truncation makes start and end coincide.
+                if (!normal.equals(normalEnd)) {
+                    normal = String.format("%s/%s", normal, normalEnd);
+                    text = String.format("%s/%s", startDateTime.year().get(), endDateTime.year().get());
                 }
             }
+            tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
         }
     }
 

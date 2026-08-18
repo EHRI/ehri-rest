@@ -174,6 +174,9 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "1939-04/1945-06", "//ead/archdesc/did/unitdate/@normal");
         // Day precision round-trips cleanly via @normal's granularity.
         assertXPath(doc, "19400101/19441231", "//ead/archdesc/dsc/c01/did/unitdate/@normal");
+        // Not the redundant "1946/1946".
+        assertXPath(doc, "1946", "//ead/archdesc/dsc/c01/c02/did/unitdate/@normal");
+        assertXPath(doc, "1946", "//ead/archdesc/dsc/c01/c02/did/unitdate/text()");
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {

@@ -48,5 +48,20 @@
 				</daterange>
 			</unitdatestructured>
 		</did>
+		<dsc>
+			<c01 level="file">
+				<did>
+					<unittitle label="Title:">Precision Test Sub-item</unittitle>
+					<unitid label="Collection Number:">prec-1-1</unitid>
+					<!-- Year precision, entirely within one year. -->
+					<unitdatestructured>
+						<daterange>
+							<fromdate standarddate="1946">1946</fromdate>
+							<todate standarddate="1946">1946</todate>
+						</daterange>
+					</unitdatestructured>
+				</did>
+			</c01>
+		</dsc>
 	</archdesc>
 </ead>

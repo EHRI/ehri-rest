@@ -211,6 +211,12 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "//unitdatestructured/daterange/fromdate[not(@localtype)]/@standarddate");
         assertXPath(doc, "1944-12",
                 "//unitdatestructured/daterange/todate[not(@localtype)]/@standarddate");
+        // A period entirely within one year collapses to a single date, not a
+        // daterange with matching fromdate/todate.
+        assertXPath(doc, "1946",
+                "//ead/archdesc/dsc/c01/did/unitdatestructured/datesingle/@standarddate");
+        assertXPath(doc, "0",
+                "count(//ead/archdesc/dsc/c01/did/unitdatestructured/daterange)");
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {
