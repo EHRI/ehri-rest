@@ -277,6 +277,7 @@
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+                precision: week
     childOf: nl-000001-1
     hasPermissionScope: nl-000001-1
 
@@ -305,6 +306,7 @@
                 type: creation
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+                precision: year
     childOf: nl-000001-1-a
     hasPermissionScope: nl-000001-1-a
 

@@ -159,7 +159,21 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@type='Sources']/p/bibref");
         assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname");
         assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject");
+        // The c02 creation date has year precision, so the normal date is truncated to the year
+        assertXPath(doc, "1939/1945", "//ead/archdesc/dsc/c01/c02/did/unitdate/@normal");
 
+    }
+
+    @Test
+    public void testDatePrecisionRoundTrip() throws Exception {
+        Repository repo = manager.getEntity("r1", Repository.class);
+        String xml = testImportExport(repo, "precision-ead2002.xml", "prec-1", "eng");
+        Document doc = parseDocument(xml);
+        // Quarter has no EAD2002 equivalent of @localtype, so it round-trips as
+        // month precision instead - a known gap, not a full round-trip.
+        assertXPath(doc, "1939-04/1945-06", "//ead/archdesc/did/unitdate/@normal");
+        // Day precision round-trips cleanly via @normal's granularity.
+        assertXPath(doc, "19400101/19441231", "//ead/archdesc/dsc/c01/did/unitdate/@normal");
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {

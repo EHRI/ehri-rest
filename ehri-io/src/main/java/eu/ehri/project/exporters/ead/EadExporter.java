@@ -30,6 +30,8 @@ import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.utils.LanguageHelpers;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -229,6 +231,51 @@ public interface EadExporter extends XmlExporter<DocumentaryUnit> {
                 .map(d -> d.<String>getProperty(IsadG.levelOfDescription))
                 .orElse(defaultLevel);
         return level != null ? ImmutableMap.of("level", level) : Collections.emptyMap();
+    }
+
+    /**
+     * Format a date for use in an EAD normalised-date attribute (e.g. {@code normal}
+     * or {@code standarddate}), truncating it to the precision of the date period.
+     * When no precision is set the date is rendered to the day.
+     *
+     * @param dt         the date to format
+     * @param precision  the precision of the date period, possibly null
+     * @param hyphenated whether to separate date components with hyphens
+     *                   (EAD 3 / ISO 8601) or run them together (EAD 2002)
+     * @return a normalised date string
+     */
+    static String formatNormalDate(DateTime dt, DatePeriod.DatePrecision precision, boolean hyphenated) {
+        final String pattern;
+        if (precision == DatePeriod.DatePrecision.year) {
+            pattern = "YYYY";
+        } else if (precision == DatePeriod.DatePrecision.quarter
+                || precision == DatePeriod.DatePrecision.month) {
+            // ISO 8601 has no quarter form, so it's truncated to month. Unlike
+            // day precision below, EAD has no compact YYYYMM form, so always hyphenate.
+            pattern = "YYYY-MM";
+        } else {
+            // week (which ISO 8601 only represents in W-notation), day and
+            // unspecified precision all render to the day
+            pattern = hyphenated ? "YYYY-MM-dd" : "YYYYMMdd";
+        }
+        return DateTimeFormat.forPattern(pattern).print(dt);
+    }
+
+    /**
+     * Get an explicit precision value for date precisions that a truncated ISO 8601
+     * date cannot represent, namely {@code quarter} (indistinguishable from a month)
+     * and {@code week} (indistinguishable from a day). For year/month/day (and unset)
+     * precision the standardised date already conveys the granularity, so this returns
+     * null and no marker is needed.
+     *
+     * @param precision the date period precision, possibly null
+     * @return the precision name for quarter/week, otherwise null
+     */
+    static String localDatePrecision(DatePeriod.DatePrecision precision) {
+        return precision == DatePeriod.DatePrecision.quarter
+                || precision == DatePeriod.DatePrecision.week
+                ? precision.name()
+                : null;
     }
 
     /**

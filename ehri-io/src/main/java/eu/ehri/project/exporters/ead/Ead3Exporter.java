@@ -36,8 +36,6 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,12 +49,13 @@ import static eu.ehri.project.exporters.ead.EadExporter.getEventDescription;
 import static eu.ehri.project.exporters.ead.EadExporter.getLangMaterialEntries;
 import static eu.ehri.project.exporters.ead.EadExporter.getLanguageOfMaterialNotes;
 import eu.ehri.project.exporters.ead.EadExporter.LangMaterialEntry;
+import static eu.ehri.project.exporters.ead.EadExporter.formatNormalDate;
+import static eu.ehri.project.exporters.ead.EadExporter.localDatePrecision;
 
 
 public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Ead3Exporter.class);
-    private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYY-MM-dd");
 
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead3Exporter.class.getName());
 
@@ -324,24 +323,31 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
         for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
             String start = datePeriod.getStartDate();
             String end = datePeriod.getEndDate();
+            DatePeriod.DatePrecision precision = datePeriod.getPrecision();
+            // The truncated standarddate expresses year/month/day precision natively, but
+            // ISO 8601 cannot distinguish a quarter from a month, or a week from a day, so
+            // for those we retain the precision explicitly in the local-semantics @localtype.
+            String localType = localDatePrecision(precision);
             if (start != null && end != null) {
                 DateTime startDateTime = DateTime.parse(start);
                 DateTime endDateTime = DateTime.parse(end);
                 tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
                     tag(sw, "daterange", () -> {
                         tag(sw, "fromdate", Integer.toString(startDateTime.year().get()),
-                                attrs("standarddate", unitDateNormalFormat.print(startDateTime)));
+                                attrs("standarddate", formatNormalDate(startDateTime, precision, true),
+                                        "localtype", localType));
                        tag(sw, "todate", Integer.toString(endDateTime.year().get()),
-                               attrs("standarddate", unitDateNormalFormat.print(endDateTime)));
+                               attrs("standarddate", formatNormalDate(endDateTime, precision, true),
+                                       "localtype", localType));
                     });
                 });
             } else if (start != null || end != null) {
                 String date = start != null ? start : end;
                 DateTime dt = DateTime.parse(date);
-                String stdDate = unitDateNormalFormat.print(dt);
+                String stdDate = formatNormalDate(dt, precision, true);
                 String text = String.format("%s", dt.year().get());
                 tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
-                    tag(sw, "datesingle", text, attrs("standarddate", stdDate));
+                    tag(sw, "datesingle", text, attrs("standarddate", stdDate, "localtype", localType));
                 });
             }
         }

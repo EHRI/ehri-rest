@@ -40,6 +40,14 @@ public interface DatePeriod extends Annotatable {
     }
 
     /**
+     * The precision to which a date period is known, ordered from coarsest
+     * to finest. When absent, dates are assumed to be precise to the day.
+     */
+    enum DatePrecision {
+        year, quarter, month, week, day
+    }
+
+    /**
      * The start date in UTC format.
      *
      * @return a UTC date string
@@ -65,6 +73,14 @@ public interface DatePeriod extends Annotatable {
     @Indexed
     @Property(Ontology.DATE_PERIOD_TYPE)
     DatePeriodType getDateType();
+
+    /**
+     * Get the precision to which this date period is known.
+     *
+     * @return a precision value, or null if unspecified
+     */
+    @Property(Ontology.DATE_PERIOD_PRECISION)
+    DatePrecision getPrecision();
 
     /**
      * Get the entity described by this date period.

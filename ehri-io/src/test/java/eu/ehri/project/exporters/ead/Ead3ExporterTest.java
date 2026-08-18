@@ -167,11 +167,38 @@ public class Ead3ExporterTest extends XmlExporterTest {
         assertXPath(doc, "1939-1945", "//ead/archdesc/did/unitdate");
         assertXPath(doc, "1939-01-01", "//ead/archdesc/did/unitdatestructured/daterange/fromdate/@standarddate");
         assertXPath(doc, "1945-01-01", "//ead/archdesc/did/unitdatestructured/daterange/todate/@standarddate");
+        // The c01 date period has week precision: ISO 8601 cannot distinguish a week from a
+        // day, so the standarddate stays a full date and the precision is retained in @localtype
         assertXPath(doc, "1939-01-01", "//ead/archdesc/dsc/c01/did/unitdatestructured/daterange/fromdate/@standarddate");
         assertXPath(doc, "1945-01-01", "//ead/archdesc/dsc/c01/did/unitdatestructured/daterange/todate/@standarddate");
-        assertXPath(doc, "1939-01-01", "//ead/archdesc/dsc/c01/c02/did/unitdatestructured/daterange/fromdate/@standarddate");
-        assertXPath(doc, "1945-01-01", "//ead/archdesc/dsc/c01/c02/did/unitdatestructured/daterange/todate/@standarddate");
+        assertXPath(doc, "week", "//ead/archdesc/dsc/c01/did/unitdatestructured/daterange/fromdate/@localtype");
+        assertXPath(doc, "week", "//ead/archdesc/dsc/c01/did/unitdatestructured/daterange/todate/@localtype");
+        // The c02 date period has year precision, so the standarddate is truncated to the year;
+        // year precision needs no @localtype since the ISO date already conveys the granularity
+        assertXPath(doc, "1939", "//ead/archdesc/dsc/c01/c02/did/unitdatestructured/daterange/fromdate/@standarddate");
+        assertXPath(doc, "1945", "//ead/archdesc/dsc/c01/c02/did/unitdatestructured/daterange/todate/@standarddate");
 
+    }
+
+    @Test
+    public void testDatePrecisionRoundTrip() throws Exception {
+        Repository repo = manager.getEntity("r1", Repository.class);
+        String xml = testImportExport(repo, "precision-ead3.xml", "prec-1", "eng");
+        Document doc = parseDocument(xml);
+        // Quarter precision was carried explicitly via @localtype and is preserved.
+        // The standarddate stays month-truncated (ISO 8601 has no quarter form).
+        assertXPath(doc, "quarter",
+                "//unitdatestructured/daterange/fromdate[@standarddate='1939-04']/@localtype");
+        assertXPath(doc, "quarter",
+                "//unitdatestructured/daterange/todate[@standarddate='1945-06']/@localtype");
+        // Month precision was inferred from the granularity of the standardised date:
+        // if it had not been imported, the re-export would default to day precision
+        // and emit "1940-01-01" rather than "1940-01". The month daterange carries no
+        // @localtype, which distinguishes it from the quarter one above.
+        assertXPath(doc, "1940-01",
+                "//unitdatestructured/daterange/fromdate[not(@localtype)]/@standarddate");
+        assertXPath(doc, "1944-12",
+                "//unitdatestructured/daterange/todate[not(@localtype)]/@standarddate");
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {

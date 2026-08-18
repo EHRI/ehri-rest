@@ -96,6 +96,7 @@ public class Ontology {
     public static final String DATE_PERIOD_START_DATE = "startDate";
     public static final String DATE_PERIOD_END_DATE = "endDate";
     public static final String DATE_PERIOD_TYPE = "type";
+    public static final String DATE_PERIOD_PRECISION = "precision";
     public static final String DATE_HAS_DESCRIPTION = "description";
 
     public static final String ITEM_IN_AUTHORITATIVE_SET = "inAuthoritativeSet";

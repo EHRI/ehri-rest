@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="http://ead3.archivists.org/schema/">
+	<control>
+		<recordid>precision-test-1</recordid>
+		<filedesc>
+			<titlestmt>
+				<titleproper>Precision Test</titleproper>
+				<author>EHRI</author>
+			</titlestmt>
+			<publicationstmt>
+				<p>EHRI</p>
+			</publicationstmt>
+		</filedesc>
+		<maintenancestatus value="new"/>
+		<maintenanceagency>
+			<agencyname>EHRI</agencyname>
+		</maintenanceagency>
+		<languagedeclaration>
+			<language langcode="eng"/>
+			<script scriptcode="Latn"/>
+		</languagedeclaration>
+		<maintenancehistory>
+			<maintenanceevent>
+				<eventtype value="created"/>
+				<eventdatetime>March 2021</eventdatetime>
+				<agenttype value="human"/>
+				<agent>Mike</agent>
+			</maintenanceevent>
+		</maintenancehistory>
+	</control>
+	<archdesc level="collection">
+		<did>
+			<unittitle label="Title:">Precision Test Item</unittitle>
+			<unitid label="Collection Number:">prec-1</unitid>
+			<!-- Quarter precision: ISO 8601 cannot represent a quarter, so it is
+			     carried explicitly in @localtype -->
+			<unitdatestructured>
+				<daterange>
+					<fromdate standarddate="1939-04" localtype="quarter">1939</fromdate>
+					<todate standarddate="1945-06" localtype="quarter">1945</todate>
+				</daterange>
+			</unitdatestructured>
+			<!-- Month precision: inferred from the granularity of @standarddate -->
+			<unitdatestructured>
+				<daterange>
+					<fromdate standarddate="1940-01">1940</fromdate>
+					<todate standarddate="1944-12">1944</todate>
+				</daterange>
+			</unitdatestructured>
+		</did>
+	</archdesc>
+</ead>
