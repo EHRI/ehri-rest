@@ -48,6 +48,9 @@ import java.util.stream.StreamSupport;
 import static eu.ehri.project.exporters.ead.EadExporter.textFieldAttrs;
 import static eu.ehri.project.exporters.ead.EadExporter.getLevelAttrs;
 import static eu.ehri.project.exporters.ead.EadExporter.getEventDescription;
+import static eu.ehri.project.exporters.ead.EadExporter.getLangMaterialEntries;
+import static eu.ehri.project.exporters.ead.EadExporter.getLanguageOfMaterialNotes;
+import eu.ehri.project.exporters.ead.EadExporter.LangMaterialEntry;
 
 
 public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
@@ -292,17 +295,26 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
             }
         }
 
-        if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
+        List<Object> languages = coerceList(desc.getProperty(IsadG.languageOfMaterial));
+        List<Object> scripts = coerceList(desc.getProperty(IsadG.scriptOfMaterial));
+        Optional<String> notes = getLanguageOfMaterialNotes(desc);
+        if (!languages.isEmpty() || notes.isPresent()) {
             tag(sw, "langmaterial", () -> {
-                for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
-                    String langName = LanguageHelpers.codeToName(v.toString());
-                    if (v.toString().length() != 3) {
-                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
+                for (LangMaterialEntry entry : getLangMaterialEntries(languages, scripts)) {
+                    if (entry.scriptCode.isPresent()) {
+                        String scriptCode = entry.scriptCode.get();
+                        tag(sw, "languageset", () -> {
+                            tag(sw, "language", entry.langName, textFieldAttrs(IsadG.languageOfMaterial,
+                                    "langcode", entry.langCode));
+                            tag(sw, "script", entry.scriptName.orElse(scriptCode),
+                                    textFieldAttrs(IsadG.scriptOfMaterial, "scriptcode", scriptCode));
+                        });
                     } else {
-                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
-                                .toString()));
+                        tag(sw, "language", entry.langName, textFieldAttrs(IsadG.languageOfMaterial,
+                                "langcode", entry.langCode));
                     }
                 }
+                notes.ifPresent(text -> tag(sw, "descriptivenote", () -> tag(sw, "p", text)));
             });
         }
     }

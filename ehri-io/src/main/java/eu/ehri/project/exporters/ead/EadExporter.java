@@ -163,9 +163,57 @@ public interface EadExporter extends XmlExporter<DocumentaryUnit> {
                 .orElse(Collections.emptySet())
                 .stream().collect(Collectors.toMap(e -> "encodinganalog", e -> e));
         for (int i = 0; i < kvs.length; i += 2) {
-            attrs.put(kvs[0], kvs[i + 1]);
+            attrs.put(kvs[i], kvs[i + 1]);
         }
         return attrs;
+    }
+
+    /**
+     * A language/script pairing for langmaterial export, codes resolved to display names.
+     */
+    final class LangMaterialEntry {
+        final String langCode;
+        final String langName;
+        final Optional<String> scriptCode;
+        final Optional<String> scriptName;
+
+        LangMaterialEntry(String langCode, String langName, Optional<String> scriptCode, Optional<String> scriptName) {
+            this.langCode = langCode;
+            this.langName = langName;
+            this.scriptCode = scriptCode;
+            this.scriptName = scriptName;
+        }
+    }
+
+    /**
+     * Pair up languageOfMaterial and scriptOfMaterial values positionally (they're
+     * independent lists with no explicit link between entries). A script with no
+     * language at the same position is dropped, as neither EAD format can express it.
+     */
+    static List<LangMaterialEntry> getLangMaterialEntries(List<Object> languages, List<Object> scripts) {
+        List<LangMaterialEntry> entries = new ArrayList<>();
+        for (int i = 0; i < languages.size(); i++) {
+            String langCode = languages.get(i).toString();
+            Optional<String> scriptCode = i < scripts.size()
+                    ? Optional.of(scripts.get(i).toString())
+                    : Optional.empty();
+            entries.add(new LangMaterialEntry(
+                    langCode,
+                    LanguageHelpers.codeToName(langCode),
+                    scriptCode,
+                    scriptCode.map(LanguageHelpers::scriptCodeToName)));
+        }
+        return entries;
+    }
+
+    /**
+     * Get a description's free-text languageOfMaterialNotes value, if set.
+     */
+    static Optional<String> getLanguageOfMaterialNotes(Description desc) {
+        if (!desc.getPropertyKeys().contains(IsadG.languageOfMaterialNotes.name())) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(desc.<String>getProperty(IsadG.languageOfMaterialNotes));
     }
 
     /**

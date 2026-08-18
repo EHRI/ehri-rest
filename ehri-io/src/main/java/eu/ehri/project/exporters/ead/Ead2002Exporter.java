@@ -281,17 +281,19 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             }
         }
 
-        if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
+        List<Object> languages = coerceList(desc.getProperty(IsadG.languageOfMaterial));
+        List<Object> scripts = coerceList(desc.getProperty(IsadG.scriptOfMaterial));
+        Optional<String> notes = getLanguageOfMaterialNotes(desc);
+        if (!languages.isEmpty() || notes.isPresent()) {
             tag(sw, "langmaterial", () -> {
-                for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
-                    String langName = LanguageHelpers.codeToName(v.toString());
-                    if (v.toString().length() != 3) {
-                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
-                    } else {
-                        tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
-                                .toString()));
-                    }
+                for (LangMaterialEntry entry : getLangMaterialEntries(languages, scripts)) {
+                    Map<String, String> attrs = entry.scriptCode
+                            .map(scriptCode -> textFieldAttrs(IsadG.languageOfMaterial,
+                                    "langcode", entry.langCode, "scriptcode", scriptCode))
+                            .orElseGet(() -> textFieldAttrs(IsadG.languageOfMaterial, "langcode", entry.langCode));
+                    tag(sw, "language", entry.langName, attrs);
                 }
+                notes.ifPresent(text -> characters(sw, text));
             });
         }
     }

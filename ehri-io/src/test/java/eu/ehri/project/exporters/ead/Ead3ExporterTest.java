@@ -87,6 +87,8 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "//ead/control/filedesc/publicationstmt/publisher/text()");
         assertXPath(doc, "NIOD Description",
                 "//ead/archdesc/did/repository/corpname/part/text()");
+        assertXPath(doc, "eng", "//ead/archdesc/did/langmaterial/languageset/language/@langcode");
+        assertXPath(doc, "Latn", "//ead/archdesc/did/langmaterial/languageset/script/@scriptcode");
         assertXPath(doc, "Scope and contents note content no label |||\n\n" +
                         "Scope and contents note content |||",
                 "//ead/archdesc/scopecontent/p/text()");
@@ -137,6 +139,10 @@ public class Ead3ExporterTest extends XmlExporterTest {
         assertXPath(doc, "1", "//ead/archdesc/did/unitid");
         assertXPath(doc, "Example Documentary Unit 1", "//ead/archdesc/did/unittitle");
         assertXPath(doc, "Institution Example", "//ead/archdesc/did/repository/corpname/part");
+        assertXPath(doc, "eng", "//ead/archdesc/did/langmaterial/languageset/language/@langcode");
+        assertXPath(doc, "Latn", "//ead/archdesc/did/langmaterial/languageset/script/@scriptcode");
+        assertXPath(doc, "ger", "//ead/archdesc/did/langmaterial/language/@langcode");
+        assertXPath(doc, "Example text", "//ead/archdesc/did/langmaterial/descriptivenote/p");
         assertXPath(doc, "a", "//ead/archdesc/dsc/c01/did/unitid");
         assertXPath(doc, "i", "//ead/archdesc/dsc/c01/c02/did/unitid");
         assertXPath(doc, "Example text", "//ead/archdesc/scopecontent/p");

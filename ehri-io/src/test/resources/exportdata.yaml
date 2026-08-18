@@ -204,11 +204,12 @@
           levelOfDescription: fonds
           notes:
             - Example text
-          languageOfMaterials:
+          languageOfMaterial:
             - eng
             - ger
-          scriptOfMaterials:
+          scriptOfMaterial:
             - Latn
+          languageOfMaterialNotes: Example text
           findingAids:
             - Example text
           publicationNote:

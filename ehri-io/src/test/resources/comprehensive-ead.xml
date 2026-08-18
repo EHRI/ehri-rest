@@ -73,7 +73,7 @@
                 <corpname>Harvard University Archives</corpname>
             </repository>
             <langmaterial>
-                <language langcode="eng"/>
+                <language langcode="eng" scriptcode="Latn"/>
             </langmaterial>
             <container id="cid15001" type="Box" label="Mixed materials">Container 1 indicator (is
                 this container tag?) |||</container>

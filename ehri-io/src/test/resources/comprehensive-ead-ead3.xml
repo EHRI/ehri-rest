@@ -122,7 +122,10 @@
          </repository>
          <!--MIXED CONTENT REMOVED FROM langmaterial-->
          <langmaterial>
-            <language langcode="eng"/>
+            <languageset>
+               <language langcode="eng"/>
+               <script scriptcode="Latn"/>
+            </languageset>
          </langmaterial>
          <container id="cid15001" localtype="Box" label="Mixed materials">Container 1 indicator (is
                 this container tag?) |||</container>
