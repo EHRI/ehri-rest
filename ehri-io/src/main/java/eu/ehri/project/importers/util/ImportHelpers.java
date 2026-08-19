@@ -40,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -102,7 +103,9 @@ public final class ImportHelpers {
      * only properties that have the multivalued-status can actually be multivalued. all other properties will be
      * flattened by this method. Conversely, properties that are marked as multivalued but whose value is a plain
      * scalar (e.g. because only a single value was encountered during import) are wrapped in a single-item list,
-     * so that a given multivalued property is always represented consistently.
+     * so that a given multivalued property is always represented consistently. A list value is deduplicated
+     * first, since a source document can redundantly repeat the same value (e.g. across more than one XML
+     * element mapped to the same property).
      *
      * @param key    a property key
      * @param value  a property value
@@ -113,10 +116,14 @@ public final class ImportHelpers {
     public static Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
         boolean multivalued = nodeProperties.hasProperty(entity.getName(), key)
                 && nodeProperties.isMultivaluedProperty(entity.getName(), key);
-        if (value instanceof List && !multivalued) {
-            logger.trace("Flattening array property value: {}: {}", key, value);
-            return stringJoiner.join((List<?>) value);
-        } else if (!(value instanceof List) && multivalued) {
+        if (value instanceof List) {
+            List<?> deduped = Lists.newArrayList(new LinkedHashSet<>((List<?>) value));
+            if (multivalued) {
+                return deduped;
+            }
+            logger.trace("Flattening array property value: {}: {}", key, deduped);
+            return stringJoiner.join(deduped);
+        } else if (multivalued) {
             logger.trace("Wrapping scalar property value as array: {}: {}", key, value);
             return Lists.newArrayList(value);
         } else {

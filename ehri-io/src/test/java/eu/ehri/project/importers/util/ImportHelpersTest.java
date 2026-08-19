@@ -76,6 +76,24 @@ public class ImportHelpersTest {
     }
 
     @Test
+    public void flattenNonMultivaluedPropertiesDedupesMultivaluedLists() {
+        // languageOfMaterial is multivalued: an exact repeat (e.g. from a source document
+        // that redundantly repeats the same language) is collapsed rather than kept.
+        Object flattened = ImportHelpers.flattenNonMultivaluedProperties("languageOfMaterial",
+                Arrays.asList("eng", "fra", "eng"), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+        assertEquals(Arrays.asList("eng", "fra"), flattened);
+    }
+
+    @Test
+    public void flattenNonMultivaluedPropertiesDedupesBeforeJoiningNonMultivaluedLists() {
+        // scopeAndContent is not multivalued: duplicate entries are still collapsed
+        // before the remainder are joined into a single string.
+        Object flattened = ImportHelpers.flattenNonMultivaluedProperties("scopeAndContent",
+                Arrays.asList("some text", "some text", "other text"), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+        assertEquals("some text\n\nother text", flattened);
+    }
+
+    @Test
     public void putPropertyInGraphNormalisesLanguageCode() {
         Map<String, Object> c = Maps.newHashMap();
         ImportHelpers.putPropertyInGraph(c, "languageCode", "dut");

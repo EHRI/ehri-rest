@@ -21,6 +21,7 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
 
@@ -72,5 +73,22 @@ public class Ead3ImporterTest extends AbstractImporterTest {
         // into a single access point's name, rather than becoming two access points.
         List<AccessPoint> creators = toList(desc.getAccessPoints());
         assertEquals(1, creators.stream().filter(ap -> "EHRI 2010-2024".equals(ap.getName())).count());
+    }
+
+    @Test
+    public void testImportDedupesRepeatedLanguageSets() throws Exception {
+        final String logMessage = "Importing EAD 3 with duplicate langmaterial";
+
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("duplicate-langmaterial-ead3.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "ead3.properties")
+                    .importInputStream(ios, logMessage);
+        }
+
+        DocumentaryUnit unit = manager.getEntity("nl-r1-t1", DocumentaryUnit.class);
+        assertNotNull(unit);
+        DocumentaryUnitDescription desc = toList(unit.getDocumentDescriptions()).get(0);
+        // Duplicates (eng, Latn) are collapsed; the distinct fra is kept.
+        assertThat(desc.getProperty("languageOfMaterial"), containsInAnyOrder("eng", "fra"));
+        assertThat(desc.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
     }
 }
