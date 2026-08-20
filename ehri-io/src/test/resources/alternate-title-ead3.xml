@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="http://ead3.archivists.org/schema/">
+	<control>
+		<recordid>test-alt-title</recordid>
+		<filedesc>
+			<titlestmt>
+				<titleproper>Test Alternate Title</titleproper>
+				<author>EHRI</author>
+			</titlestmt>
+			<publicationstmt>
+				<p>EHRI</p>
+			</publicationstmt>
+		</filedesc>
+		<maintenancestatus value="new"/>
+		<maintenanceagency>
+			<agencyname>EHRI</agencyname>
+		</maintenanceagency>
+		<conventiondeclaration>
+			<citation>DACS</citation>
+		</conventiondeclaration>
+	</control>
+	<archdesc level="collection">
+		<did>
+			<unitid label="Collection Number:">t1</unitid>
+			<unittitle label="Title:">Primary Title</unittitle>
+			<unittitle localtype="alternate_title">Alternate Title</unittitle>
+		</did>
+	</archdesc>
+</ead>

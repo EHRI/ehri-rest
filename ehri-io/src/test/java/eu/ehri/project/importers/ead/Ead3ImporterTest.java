@@ -91,4 +91,22 @@ public class Ead3ImporterTest extends AbstractImporterTest {
         assertThat(desc.getProperty("languageOfMaterial"), containsInAnyOrder("eng", "fra"));
         assertThat(desc.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
     }
+
+    @Test
+    public void testImportParsesAlternateTitleAsParallelFormsOfName() throws Exception {
+        final String logMessage = "Importing EAD 3 with an alternate title";
+
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("alternate-title-ead3.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "ead3.properties")
+                    .importInputStream(ios, logMessage);
+        }
+
+        DocumentaryUnit unit = manager.getEntity("nl-r1-t1", DocumentaryUnit.class);
+        assertNotNull(unit);
+        DocumentaryUnitDescription desc = toList(unit.getDocumentDescriptions()).get(0);
+        // The plain <unittitle label="Title:"> is still the description's name...
+        assertEquals("Primary Title", desc.getName());
+        // ...while <unittitle localtype="alternate_title"> is diverted to parallelFormsOfName.
+        assertThat(desc.getProperty("parallelFormsOfName"), containsInAnyOrder("Alternate Title"));
+    }
 }

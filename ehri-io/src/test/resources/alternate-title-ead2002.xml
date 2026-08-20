@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" audience="external">
+    <eadheader>
+        <eadid countrycode="NL">test-alt-title</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Test Alternate Title</titleproper>
+                <author>EHRI</author>
+            </titlestmt>
+        </filedesc>
+    </eadheader>
+    <archdesc level="collection">
+        <did>
+            <unitid label="Collection Number:">t1</unitid>
+            <unittitle label="Title:">Primary Title</unittitle>
+            <unittitle label="alternate_title">Alternate Title</unittitle>
+        </did>
+    </archdesc>
+</ead>

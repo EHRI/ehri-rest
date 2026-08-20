@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.base.AbstractImporterTest;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
 
@@ -63,5 +64,23 @@ public class Ead2002ImporterTest extends AbstractImporterTest {
         assertNotNull(desc);
         assertThat(desc.getProperty("languageOfMaterial"), containsInAnyOrder("eng"));
         assertThat(desc.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
+    }
+
+    @Test
+    public void testImportParsesAlternateTitleAsParallelFormsOfName() throws Exception {
+        final String logMessage = "Importing EAD 2002 with an alternate title";
+
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("alternate-title-ead2002.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "ead2002.properties")
+                    .importInputStream(ios, logMessage);
+        }
+
+        DocumentaryUnit unit = manager.getEntity("nl-r1-t1", DocumentaryUnit.class);
+        assertNotNull(unit);
+        DocumentaryUnitDescription desc = toList(unit.getDocumentDescriptions()).get(0);
+        // The plain <unittitle label="Title:"> is still the description's name...
+        assertEquals("Primary Title", desc.getName());
+        // ...while <unittitle label="alternate_title"> is diverted to parallelFormsOfName.
+        assertThat(desc.getProperty("parallelFormsOfName"), containsInAnyOrder("Alternate Title"));
     }
 }
