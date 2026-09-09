@@ -91,6 +91,21 @@ public class FunctionsTest {
     }
 
     @Test
+    public void testscriptCodeToName() {
+        try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
+                .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
+            StatementResult result1 = session
+                    .run("RETURN eu.ehri.project.cypher.scriptCodeToName({code}) as value", Values.parameters("code", "Latn"));
+            assertThat(result1.single().get("value").asString(), equalTo("Latin"));
+
+            StatementResult result2 = session
+                    .run("RETURN eu.ehri.project.cypher.scriptCodeToName({code}) as value",
+                            Values.parameters("code", null));
+            assertThat(result2.single().get("value").asObject(), equalTo(null));
+        }
+    }
+
+    @Test
     public void testToList() {
         try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
                 .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {

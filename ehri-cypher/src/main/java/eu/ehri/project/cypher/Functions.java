@@ -55,6 +55,11 @@ public class Functions {
     }
 
     @UserFunction
+    public String scriptCodeToName(@Name("code") String code) {
+        return code == null ? null : LanguageHelpers.scriptCodeToName(code);
+    }
+
+    @UserFunction
     public List<Object> coerceList(@Name("data") Object data) {
         if (data == null) {
             return Collections.emptyList();
