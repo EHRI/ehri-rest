@@ -265,6 +265,30 @@ public class LanguageHelpers {
             .put("cze", "ces") // czech
             .build();
 
+    private static final ImmutableBiMap<String, String> additionalLanguageCodes = ImmutableBiMap.<String, String>builder()
+            .put("arc", "Aramaic")
+            .put("ase", "American Sign Language")
+            .put("gos", "Gronings")
+            .put("gsw", "Alemannic")
+            .put("hbs", "Serbo-Croatian")
+            .put("ils", "International Sign")
+            .put("isr", "Israeli Sign Language")
+            .put("lad", "Ladino")
+            .put("mis", "Uncoded languages")
+            .put("mul", "Multiple languages")
+            .put("ota", "Ottoman Turkish")
+            .put("pap", "Papiamento")
+            .put("rom", "Romani")
+            .put("rue", "Rusyn")
+            .put("und", "Undetermined")
+            .put("zxx", "No linguistic content")
+            .build();
+
+    // Lowercased-name index for additionalLanguageCodes, for case-insensitive
+    // name lookups consistent with localeNameMap's handling of Locale-backed names.
+    private static final Map<String, String> additionalLanguageNames = additionalLanguageCodes.entrySet().stream()
+            .collect(ImmutableMap.toImmutableMap(e -> e.getValue().toLowerCase(), Map.Entry::getKey));
+
     /**
      * Continent names as defined by the EAG schema
      */
@@ -550,6 +574,8 @@ public class LanguageHelpers {
             return Optional.ofNullable(iso639BibTermLookup.get(twoOrThree));
         } else if (locale3To2Map.containsKey(codeLower)) {
             return Optional.of(codeLower);
+        } else if (twoOrThree.length() == 3 && additionalLanguageCodes.containsKey(codeLower)) {
+            return Optional.of(codeLower);
         }
         return Optional.empty();
     }
@@ -581,12 +607,16 @@ public class LanguageHelpers {
             // locale3To2Map keys are always lowercase (from Locale.getISO3Language()); match
             // convertCode()'s case-insensitive handling of already-valid 3-letter codes.
             return Optional.of(nameOrCode.toLowerCase());
+        } else if (nameOrCode.length() == 3 && additionalLanguageCodes.containsKey(nameOrCode.toLowerCase())) {
+            return Optional.of(nameOrCode.toLowerCase());
         } else if (nameOrCode.length() > 3 && localeNameMap.containsKey(nameOrCode.toLowerCase())) {
             return Optional.of(localeNameMap.get(nameOrCode.toLowerCase()).getISO3Language());
             /* FIXME the localeNameMap depends on locale and translating an
              * English name to a code fails when executed on
              * e.g. a server with non-English locale
              */
+        } else if (nameOrCode.length() > 3 && additionalLanguageNames.containsKey(nameOrCode.toLowerCase())) {
+            return Optional.of(additionalLanguageNames.get(nameOrCode.toLowerCase()));
         }
         return Optional.empty();
     }
@@ -633,6 +663,8 @@ public class LanguageHelpers {
             String twoCode = locale3To2Map.get(termCode);
             if (locale2To3Map.containsKey(twoCode)) {
                 return locale2To3Map.get(twoCode).getDisplayLanguage(Locale.ENGLISH);
+            } else if (additionalLanguageCodes.containsKey(termCode)) {
+                return additionalLanguageCodes.get(termCode);
             }
         }
         return code;
