@@ -24,9 +24,12 @@ import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
+import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -71,7 +74,7 @@ public class CsvImporterTest extends AbstractImporterTest {
              * systemEvent: 1
              * datePeriod: 4
              */
-            assertEquals(count + 22, getNodeCount(graph));
+            assertEquals(count + 27, getNodeCount(graph));
             DocumentaryUnit unit = manager.getEntity("nl-r1-kd3", DocumentaryUnit.class);
 
             DocumentaryUnitDescription d1 = unit.getDescriptions().iterator().next().as(DocumentaryUnitDescription.class);
@@ -79,6 +82,35 @@ public class CsvImporterTest extends AbstractImporterTest {
             assertThat(d1.getProperty("languageOfMaterial"), containsInAnyOrder("nld", "eng", "fra"));
             assertThat(d1.getProperty("scriptOfMaterial"), containsInAnyOrder("Latn"));
             assertEquals(ps, unit.getRepository());
+
+            // A single-valued flat access point column, e.g. "creatorAccessPoint,Kazerne Dossin"
+            DocumentaryUnit kd1 = manager.getEntity("nl-r1-kd1", DocumentaryUnit.class);
+            DocumentaryUnitDescription kd1desc = kd1.getDescriptions().iterator().next().as(DocumentaryUnitDescription.class);
+            List<String> kd1AccessPointNames = accessPointNames(kd1desc.getAccessPoints());
+            assertThat(kd1AccessPointNames, containsInAnyOrder("Kazerne Dossin", "Holocaust", "Human Rights"));
+            for (AccessPoint ap : kd1desc.getAccessPoints()) {
+                if (ap.getName().equals("Kazerne Dossin")) {
+                    assertEquals(AccessPointType.creator, ap.getRelationshipType());
+                } else {
+                    assertEquals(AccessPointType.subject, ap.getRelationshipType());
+                }
+            }
+
+            // A multi-valued flat access point column, split on "||", e.g.
+            // "subjectAccessPoint,Anti-semitism||Genocide"
+            DocumentaryUnit kd4 = manager.getEntity("nl-r1-kd4", DocumentaryUnit.class);
+            DocumentaryUnitDescription kd4desc = kd4.getDescriptions().iterator().next().as(DocumentaryUnitDescription.class);
+            List<String> kd4AccessPointNames = accessPointNames(kd4desc.getAccessPoints());
+            assertThat(kd4AccessPointNames, containsInAnyOrder(
+                    "Kazerne Dossin", "Anti-semitism", "Genocide"));
         }
+    }
+
+    private static List<String> accessPointNames(Iterable<AccessPoint> accessPoints) {
+        List<String> names = Lists.newArrayList();
+        for (AccessPoint ap : accessPoints) {
+            names.add(ap.getName());
+        }
+        return names;
     }
 }
