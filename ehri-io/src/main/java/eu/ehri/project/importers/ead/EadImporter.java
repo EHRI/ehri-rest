@@ -161,6 +161,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             descBuilder.addRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
+        logger.trace("Extracting relations:\n{}", itemData);
         for (Map<String, Object> rel : extractRelations(itemData)) {
             logger.trace("relation found: {}", rel.get(Ontology.NAME_KEY));
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
@@ -285,25 +286,35 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             } else if (key.endsWith(ACCESS_POINT)) {
                 if (data.get(key) instanceof List) {
                     //type, targetUrl, targetName, notes
-                    for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
-                        if (origRelation.isEmpty()) {
-                            break;
-                        }
-                        Map<String, Object> relationNode = Maps.newHashMap();
-                        for (String eventkey : origRelation.keySet()) {
-                            if (eventkey.endsWith(ACCESS_POINT)) {
-                                relationNode.put(Ontology.ACCESS_POINT_TYPE,
-                                        eventkey.substring(0, eventkey.indexOf(ACCESS_POINT)));
-                                relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
-                            } else {
-                                relationNode.put(eventkey, origRelation.get(eventkey));
+                    for (Object item : (List<Object>) data.get(key)) {
+                        if (item instanceof Map) {
+                            Map<String, Object> origRelation = (Map<String, Object>) item;
+                            if (origRelation.isEmpty()) {
+                                break;
                             }
-                        }
-                        if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                            relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
-                        }
-                        //if no name is given, it was apparently an empty <controlaccess> tag?
-                        if (relationNode.containsKey(Ontology.NAME_KEY)) {
+                            Map<String, Object> relationNode = Maps.newHashMap();
+                            for (String eventkey : origRelation.keySet()) {
+                                if (eventkey.endsWith(ACCESS_POINT)) {
+                                    relationNode.put(Ontology.ACCESS_POINT_TYPE,
+                                            eventkey.substring(0, eventkey.indexOf(ACCESS_POINT)));
+                                    relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
+                                } else {
+                                    relationNode.put(eventkey, origRelation.get(eventkey));
+                                }
+                            }
+                            if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
+                                relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
+                            }
+                            //if no name is given, it was apparently an empty <controlaccess> tag?
+                            if (relationNode.containsKey(Ontology.NAME_KEY)) {
+                                list.add(relationNode);
+                            }
+                        } else {
+                            // Flat (e.g. CSV) multi-valued access point column: each list item
+                            // is a plain name string rather than a nested map of properties.
+                            Map<String, Object> relationNode = Maps.newHashMap();
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, key.substring(0, key.indexOf(ACCESS_POINT)));
+                            relationNode.put(Ontology.NAME_KEY, item);
                             list.add(relationNode);
                         }
                     }
