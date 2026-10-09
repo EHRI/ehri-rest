@@ -21,6 +21,7 @@ package eu.ehri.project.graphql;
 
 import eu.ehri.project.definitions.*;
 import eu.ehri.project.models.AccessPointType;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.LinkType;
 import eu.ehri.project.models.base.*;
 import graphql.TypeResolutionEnvironment;
@@ -209,11 +210,22 @@ final class SchemaTypes {
                     .build())
             .build();
 
+    final GraphQLEnumType datePrecisionEnum = newEnum()
+            .name(DatePeriod.DatePrecision.class.getSimpleName())
+            .description(__("graphql.enum.datePrecision.description"))
+            .value(DatePeriod.DatePrecision.year.name())
+            .value(DatePeriod.DatePrecision.quarter.name())
+            .value(DatePeriod.DatePrecision.month.name())
+            .value(DatePeriod.DatePrecision.week.name())
+            .value(DatePeriod.DatePrecision.day.name())
+            .build();
+
     final GraphQLObjectType datePeriodType = newObject()
             .name(Entities.DATE_PERIOD)
             .description(__("datePeriod.description"))
             .field(nullAttr(Ontology.DATE_PERIOD_START_DATE, __("datePeriod.field.startDate.description")))
             .field(nullAttr(Ontology.DATE_PERIOD_END_DATE, __("datePeriod.field.endDate.description")))
+            .field(nullAttr(Ontology.DATE_PERIOD_PRECISION, __("datePeriod.field.precision.description"), datePrecisionEnum))
             .build();
 
     final GraphQLObjectType addressType = newObject()
