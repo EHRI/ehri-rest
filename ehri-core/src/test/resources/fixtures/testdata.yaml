@@ -269,6 +269,7 @@
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+                precision: year
             - id: c1-dp2
               type: DatePeriod
               data:

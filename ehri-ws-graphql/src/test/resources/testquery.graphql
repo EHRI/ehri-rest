@@ -18,6 +18,7 @@ query test {
             dates {
                 startDate
                 endDate
+                precision
             }
             accessPoints {
                 name
