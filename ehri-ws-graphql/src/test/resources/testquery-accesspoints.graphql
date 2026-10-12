@@ -28,6 +28,25 @@ query accessPoints {
                 }
             }
         }
+        incomingSubjects: connected(accessPointType: subject, direction: incoming) {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
+        outgoingAny: connected(direction: outgoing) {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
+        all: connected {
+            item {
+                __typename
+            }
+        }
         description(languageCode: "eng", identifier: "c1-desc") {
             accessPoints {
                 name
@@ -43,6 +62,37 @@ query accessPoints {
             }
             subjectOrPlaceAccessPoints: accessPoints(type: [subject, place]) {
                 name
+            }
+        }
+    }
+
+    a1: HistoricalAgent(id: "a1") {
+        subjects: connected(accessPointType: subject) {
+            item {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+        outgoingSubjects: connected(accessPointType: subject, direction: outgoing) {
+            item {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+        incomingSubjects: connected(accessPointType: subject, direction: incoming) {
+            item {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+        allSubjects: connected(accessPointType: subject, direction: both) {
+            item {
+                ... on DocumentaryUnit {
+                    id
+                }
             }
         }
     }

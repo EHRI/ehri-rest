@@ -96,8 +96,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(OK, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        // A light end-to-end check: field-level assertions on the
-        // query results live in GraphQLImplTest.
+        // Check we get some data...
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals("c1-12345678", data.path("data").path("c1").path("pid").textValue());
     }

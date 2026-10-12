@@ -323,23 +323,48 @@ final class DataFetchers {
                     .getAnnotator())
                     .map(Named::getName).orElse(null);
 
+    // Connection direction, according to which item owns the link's access point
+    enum ConnectionDirection {
+        outgoing, incoming, both
+    }
+
     static final DataFetcher<List<Map<String, Object>>> connectedItemsDataFetcher = env -> {
         String linkType = env.getArgument(LINK_TYPE_PARAM);
         List<String> accessPointTypes = env.getArgument(ACCESS_POINT_TYPE_PARAM);
+        boolean filterTypes = accessPointTypes != null && !accessPointTypes.isEmpty();
+        String directionArg = env.getArgument(DIRECTION_PARAM);
+        ConnectionDirection direction = directionArg != null
+                ? ConnectionDirection.valueOf(directionArg)
+                : ConnectionDirection.both;
+        boolean filterBodies = filterTypes || direction != ConnectionDirection.both;
+
         Entity source = env.getSource();
         Iterable<Link> links = source.as(Linkable.class).getLinks();
         return StreamSupport.stream(links.spliterator(), false)
                 .filter(link -> linkType == null || linkType.equals(link.getLinkType().toString()))
-                .filter(link -> accessPointTypes == null || accessPointTypes.isEmpty()
-                        || Iterables.any(link.getLinkBodies(),
-                        body -> body != null && Entities.ACCESS_POINT.equals(body.getType())
-                                && hasAccessPointType(body.as(AccessPoint.class), accessPointTypes)))
+                .filter(link -> !filterBodies || Iterables.any(link.getLinkBodies(), body -> {
+                    if (body == null || !Entities.ACCESS_POINT.equals(body.getType())) {
+                        return false;
+                    }
+                    AccessPoint accessPoint = body.as(AccessPoint.class);
+                    return (!filterTypes || hasAccessPointType(accessPoint, accessPointTypes))
+                            && hasDirection(accessPoint, source, direction);
+                }))
                 .map(link -> {
             Linkable target = Iterables.tryFind(link.getLinkTargets(),
                     t -> t != null && !t.equals(source)).orNull();
             return target == null ? null : mapOf("context", link, "item", target);
         }).filter(Objects::nonNull).collect(Collectors.toList());
     };
+
+    private static boolean hasDirection(AccessPoint accessPoint, Entity item, ConnectionDirection direction) {
+        if (direction == ConnectionDirection.both) {
+            return true;
+        }
+        Description description = accessPoint.getDescription();
+        boolean owned = description != null && item.equals(description.getEntity());
+        return direction == ConnectionDirection.outgoing ? owned : !owned;
+    }
 
     private static boolean hasAccessPointType(AccessPoint accessPoint, List<String> types) {
         AccessPointType apType = accessPoint.getRelationshipType();
