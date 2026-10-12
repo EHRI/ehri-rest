@@ -28,9 +28,12 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
@@ -321,17 +324,26 @@ final class DataFetchers {
                     .map(Named::getName).orElse(null);
 
     static final DataFetcher<List<Map<String, Object>>> connectedItemsDataFetcher = env -> {
-        String linkType = env.getArgument("linkType");
+        String linkType = env.getArgument(LINK_TYPE_PARAM);
+        String accessPointType = env.getArgument(ACCESS_POINT_TYPE_PARAM);
         Entity source = env.getSource();
         Iterable<Link> links = source.as(Linkable.class).getLinks();
         return StreamSupport.stream(links.spliterator(), false)
                 .filter(link -> linkType == null || linkType.equals(link.getLinkType().toString()))
+                .filter(link -> accessPointType == null || Iterables.any(link.getLinkBodies(),
+                        body -> body != null && Entities.ACCESS_POINT.equals(body.getType())
+                                && hasAccessPointType(body.as(AccessPoint.class), accessPointType)))
                 .map(link -> {
             Linkable target = Iterables.tryFind(link.getLinkTargets(),
                     t -> t != null && !t.equals(source)).orNull();
             return target == null ? null : mapOf("context", link, "item", target);
         }).filter(Objects::nonNull).collect(Collectors.toList());
     };
+
+    private static boolean hasAccessPointType(AccessPoint accessPoint, String type) {
+        AccessPointType apType = accessPoint.getRelationshipType();
+        return apType != null && apType.name().equals(type);
+    }
 
     static <S, T> DataFetcher<T> transformingDataFetcher(DataFetcher<S> fetcher, Function<S, T> transformer) {
         return env -> transformer.apply(fetcher.get(env));
@@ -341,6 +353,18 @@ final class DataFetchers {
         return env -> {
             Iterable<? extends Entity> elements = f.apply((env.getSource()));
             return api().query().withStreaming(true).withLimit(-1).page(elements, Entity.class);
+        };
+    }
+
+    DataFetcher<Iterable<Entity>> accessPointsDataFetcher() {
+        return env -> {
+            String type = env.getArgument(TYPE_PARAM);
+            return oneToManyRelationshipFetcher(r -> {
+                Iterable<AccessPoint> accessPoints = r.as(Description.class).getAccessPoints();
+                return type == null
+                        ? accessPoints
+                        : Iterables.filter(accessPoints, ap -> hasAccessPointType(ap, type));
+            }).get(env);
         };
     }
 

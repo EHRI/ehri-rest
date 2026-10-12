@@ -36,6 +36,9 @@ final class GraphQLConstants {
     static final String ALL_PARAM = "all";
     static final String LANG_PARAM = "lang";
     static final String TOP_LEVEL_PARAM = "topLevel";
+    static final String LINK_TYPE_PARAM = "linkType";
+    static final String ACCESS_POINT_TYPE_PARAM = "accessPointType";
+    static final String TYPE_PARAM = "type";
 
     // Connection/edge field names
     static final String HAS_PREVIOUS_PAGE = "hasPreviousPage";

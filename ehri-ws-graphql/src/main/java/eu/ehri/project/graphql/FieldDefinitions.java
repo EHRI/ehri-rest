@@ -25,6 +25,7 @@ import eu.ehri.project.definitions.DefinitionList;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Geo;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.persistence.Bundle;
 import graphql.schema.*;
 
@@ -291,7 +292,12 @@ final class FieldDefinitions {
 
     static final GraphQLFieldDefinition.Builder accessPointFieldDefinition =
             listFieldDefinition("accessPoints", __("graphql.field.accessPoints.description"),
-                    GraphQLTypeReference.typeRef(Entities.ACCESS_POINT));
+                    GraphQLTypeReference.typeRef(Entities.ACCESS_POINT))
+                    .argument(newArgument()
+                            .name(TYPE_PARAM)
+                            .description(__("graphql.argument.accessPointType"))
+                            .type(GraphQLTypeReference.typeRef(AccessPointType.class.getSimpleName()))
+                            .build());
 
     static final GraphQLFieldDefinition.Builder datePeriodFieldDefinition =
             listFieldDefinition("dates", __("graphql.field.dates.description"),

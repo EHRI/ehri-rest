@@ -137,8 +137,7 @@ public class GraphQLImpl {
                                 fetchers.oneToManyRelationshipFetcher(r -> r.as(Temporal.class).getDatePeriods()));
                         break;
                     case "accessPoints":
-                        builder.dataFetcher(coordinates(type, field),
-                                fetchers.oneToManyRelationshipFetcher(r -> r.as(Description.class).getAccessPoints()));
+                        builder.dataFetcher(coordinates(type, field), fetchers.accessPointsDataFetcher());
                         break;
                     case "addresses":
                         builder.dataFetcher(coordinates(type, field),

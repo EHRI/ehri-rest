@@ -142,6 +142,23 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         assertEquals(1, nextData.path("data").path("test").path("items").size());
     }
 
+    @Test
+    public void testQueryAccessPointTypes() throws Exception {
+        JsonNode c1 = execute("testquery-accesspoints.graphql", Collections.emptyMap())
+                .path("data").path("c1");
+        // c1's link to a1 has a subject access point as its body
+        assertEquals(1, c1.path("connectedSubjects").size());
+        assertEquals("a1", c1.path("connectedSubjects").path(0).path("item").path("id").textValue());
+        assertEquals(0, c1.path("connectedPeople").size());
+        assertEquals(1, c1.path("connectedAssociativeSubjects").size());
+
+        JsonNode desc = c1.path("description");
+        assertEquals(2, desc.path("accessPoints").size());
+        assertEquals(1, desc.path("subjectAccessPoints").size());
+        assertEquals("Subject Access 1", desc.path("subjectAccessPoints").path(0).path("name").textValue());
+        assertEquals(0, desc.path("placeAccessPoints").size());
+    }
+
     private JsonNode execute(String queryResource, Map<String, Object> vars) throws Exception {
         GraphQLSchema schema = new GraphQLImpl(api(adminUser)).getSchema();
         ExecutionResult result = GraphQL.newGraphQL(schema).build()
