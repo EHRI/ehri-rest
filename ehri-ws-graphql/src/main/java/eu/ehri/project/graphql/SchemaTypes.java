@@ -513,7 +513,7 @@ final class SchemaTypes {
                 .argument(GraphQLArgument.newArgument()
                         .name(ACCESS_POINT_TYPE_PARAM)
                         .description(__("graphql.argument.connected.accessPointType"))
-                        .type(accessPointTypeEnum)
+                        .type(GraphQLList.list(accessPointTypeEnum))
                         .build()
                 )
                 .name("connected")
