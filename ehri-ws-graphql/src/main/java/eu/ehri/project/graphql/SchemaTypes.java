@@ -199,6 +199,17 @@ final class SchemaTypes {
             .value(AccessPointType.genre.name())
             .build();
 
+    final GraphQLEnumType connectionDirectionEnum = newEnum()
+            .name(DataFetchers.ConnectionDirection.class.getSimpleName())
+            .description(__("graphql.enum.connectionDirection.description"))
+            .value(DataFetchers.ConnectionDirection.outgoing.name(), DataFetchers.ConnectionDirection.outgoing.name(),
+                    __("graphql.enum.connectionDirection.outgoing"))
+            .value(DataFetchers.ConnectionDirection.incoming.name(), DataFetchers.ConnectionDirection.incoming.name(),
+                    __("graphql.enum.connectionDirection.incoming"))
+            .value(DataFetchers.ConnectionDirection.both.name(), DataFetchers.ConnectionDirection.both.name(),
+                    __("graphql.enum.connectionDirection.both"))
+            .build();
+
     final GraphQLObjectType accessPointType = newObject()
             .name(Entities.ACCESS_POINT)
             .description(__("accessPoint.description"))
@@ -514,6 +525,13 @@ final class SchemaTypes {
                         .name(ACCESS_POINT_TYPE_PARAM)
                         .description(__("graphql.argument.connected.accessPointType"))
                         .type(GraphQLList.list(accessPointTypeEnum))
+                        .build()
+                )
+                .argument(GraphQLArgument.newArgument()
+                        .name(DIRECTION_PARAM)
+                        .description(__("graphql.argument.connected.direction"))
+                        .type(connectionDirectionEnum)
+                        .defaultValueProgrammatic(DataFetchers.ConnectionDirection.both.name())
                         .build()
                 )
                 .name("connected")

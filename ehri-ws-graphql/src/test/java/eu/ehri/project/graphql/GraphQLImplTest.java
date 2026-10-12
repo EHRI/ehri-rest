@@ -144,14 +144,27 @@ public class GraphQLImplTest extends AbstractFixtureTest {
 
     @Test
     public void testQueryAccessPointTypes() throws Exception {
-        JsonNode c1 = execute("testquery-accesspoints.graphql", Collections.emptyMap())
-                .path("data").path("c1");
-        // c1's link to a1 has a subject access point as its body
+        JsonNode data = execute("testquery-accesspoints.graphql", Collections.emptyMap()).path("data");
+        JsonNode c1 = data.path("c1");
+        // link2: c1 -> a1, via c1's subject access point
         assertEquals(1, c1.path("connectedSubjects").size());
         assertEquals("a1", c1.path("connectedSubjects").path(0).path("item").path("id").textValue());
         assertEquals(0, c1.path("connectedPeople").size());
         assertEquals(1, c1.path("connectedAssociativeSubjects").size());
         assertEquals(1, c1.path("connectedSubjectsOrPeople").size());
+        assertEquals(0, c1.path("incomingSubjects").size());
+        // excludes link1, which has no access point
+        assertEquals(1, c1.path("outgoingAny").size());
+        assertEquals("a1", c1.path("outgoingAny").path(0).path("item").path("id").textValue());
+        assertTrue(c1.path("all").size() > 1);
+
+        // From a1, link2 is incoming
+        JsonNode a1 = data.path("a1");
+        assertEquals(1, a1.path("subjects").size());
+        assertEquals(0, a1.path("outgoingSubjects").size());
+        assertEquals(1, a1.path("incomingSubjects").size());
+        assertEquals("c1", a1.path("incomingSubjects").path(0).path("item").path("id").textValue());
+        assertEquals(1, a1.path("allSubjects").size());
 
         JsonNode desc = c1.path("description");
         assertEquals(2, desc.path("accessPoints").size());
