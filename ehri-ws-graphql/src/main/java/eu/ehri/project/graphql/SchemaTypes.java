@@ -55,6 +55,7 @@ final class SchemaTypes {
     private static final List<GraphQLFieldDefinition> repositoryDescriptionListFields = listStringAttrs(Isdiah.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionNullFields = nullStringAttrs(Isaar.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionListFields = listStringAttrs(Isaar.values());
+    private static final List<GraphQLFieldDefinition> historicalAgentListFields = listStringAttrs(new Skos[]{Skos.seeAlso});
     private static final List<GraphQLFieldDefinition> countryDescriptionNullFields = nullStringAttrs(CountryInfo.values());
     private static final List<GraphQLFieldDefinition> countryDescriptionListFields = listStringAttrs(CountryInfo.values());
     private static final List<GraphQLFieldDefinition> conceptNullFields = nullStringAttrs(Skos.values());
@@ -353,6 +354,7 @@ final class SchemaTypes {
             .fields(entityFields)
             .fields(pidFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("historicalAgent.field.identifier.description")))
+            .fields(historicalAgentListFields)
             .field(singleDescriptionFieldDefinition(historicalAgentDescriptionType))
             .field(descriptionsFieldDefinition(historicalAgentDescriptionType))
             .fields(linksAndAnnotationsFields())
