@@ -120,6 +120,8 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         assertEquals("c4", data.path("data").path("link4").path("source").path("id").textValue());
         assertEquals("copy", data.path("data").path("link4").path("linkType").textValue());
         assertEquals("r1", data.path("data").path("itemByPid").path("id").textValue());
+        assertEquals("http://www.example.com/authorities/a1", data.path("data").path("firstAgentDesc")
+                .path("seeAlso").path(0).textValue());
     }
 
     @Test

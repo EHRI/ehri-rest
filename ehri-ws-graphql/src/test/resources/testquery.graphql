@@ -182,6 +182,7 @@ query test {
     }
 
     firstAgentDesc: HistoricalAgent(id: "a1") {
+        seeAlso
         ...desc
     }
 

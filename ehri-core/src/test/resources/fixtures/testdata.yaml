@@ -450,6 +450,8 @@
   data:
     identifier: a1
     __pid: a1-1234
+    seeAlso:
+      - http://www.example.com/authorities/a1
   relationships:
     describes:
       - id: ad1
