@@ -1,0 +1,36 @@
+query accessPoints {
+    c1: DocumentaryUnit(id: "c1") {
+        connectedSubjects: connected(accessPointType: subject) {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
+        connectedPeople: connected(accessPointType: person) {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
+        connectedAssociativeSubjects: connected(linkType: associative, accessPointType: subject) {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
+        description(languageCode: "eng", identifier: "c1-desc") {
+            accessPoints {
+                name
+            }
+            subjectAccessPoints: accessPoints(type: subject) {
+                name
+            }
+            placeAccessPoints: accessPoints(type: place) {
+                name
+            }
+        }
+    }
+}

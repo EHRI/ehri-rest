@@ -30,6 +30,7 @@ import graphql.schema.*;
 import java.util.List;
 
 import static eu.ehri.project.graphql.FieldDefinitions.*;
+import static eu.ehri.project.graphql.GraphQLConstants.*;
 import static eu.ehri.project.graphql.Messages.__;
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLEnumType.newEnum;
@@ -504,9 +505,15 @@ final class SchemaTypes {
     private GraphQLFieldDefinition connectedTypeFieldDefinition() {
         return newFieldDefinition()
                 .argument(GraphQLArgument.newArgument()
-                        .name("linkType")
+                        .name(LINK_TYPE_PARAM)
                         .description(__("link.field.linkType.description"))
                         .type(linkTypeEnum)
+                        .build()
+                )
+                .argument(GraphQLArgument.newArgument()
+                        .name(ACCESS_POINT_TYPE_PARAM)
+                        .description(__("graphql.argument.connected.accessPointType"))
+                        .type(accessPointTypeEnum)
                         .build()
                 )
                 .name("connected")
