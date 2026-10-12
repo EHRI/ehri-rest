@@ -14,6 +14,13 @@ query accessPoints {
                 }
             }
         }
+        connectedSubjectsOrPeople: connected(accessPointType: [subject, person]) {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
         connectedAssociativeSubjects: connected(linkType: associative, accessPointType: subject) {
             item {
                 ... on HistoricalAgent {
@@ -29,6 +36,12 @@ query accessPoints {
                 name
             }
             placeAccessPoints: accessPoints(type: place) {
+                name
+            }
+            subjectOrPersonAccessPoints: accessPoints(type: [subject, person]) {
+                name
+            }
+            subjectOrPlaceAccessPoints: accessPoints(type: [subject, place]) {
                 name
             }
         }

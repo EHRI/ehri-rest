@@ -151,12 +151,15 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         assertEquals("a1", c1.path("connectedSubjects").path(0).path("item").path("id").textValue());
         assertEquals(0, c1.path("connectedPeople").size());
         assertEquals(1, c1.path("connectedAssociativeSubjects").size());
+        assertEquals(1, c1.path("connectedSubjectsOrPeople").size());
 
         JsonNode desc = c1.path("description");
         assertEquals(2, desc.path("accessPoints").size());
         assertEquals(1, desc.path("subjectAccessPoints").size());
         assertEquals("Subject Access 1", desc.path("subjectAccessPoints").path(0).path("name").textValue());
         assertEquals(0, desc.path("placeAccessPoints").size());
+        assertEquals(2, desc.path("subjectOrPersonAccessPoints").size());
+        assertEquals(1, desc.path("subjectOrPlaceAccessPoints").size());
     }
 
     private JsonNode execute(String queryResource, Map<String, Object> vars) throws Exception {

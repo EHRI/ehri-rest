@@ -325,14 +325,15 @@ final class DataFetchers {
 
     static final DataFetcher<List<Map<String, Object>>> connectedItemsDataFetcher = env -> {
         String linkType = env.getArgument(LINK_TYPE_PARAM);
-        String accessPointType = env.getArgument(ACCESS_POINT_TYPE_PARAM);
+        List<String> accessPointTypes = env.getArgument(ACCESS_POINT_TYPE_PARAM);
         Entity source = env.getSource();
         Iterable<Link> links = source.as(Linkable.class).getLinks();
         return StreamSupport.stream(links.spliterator(), false)
                 .filter(link -> linkType == null || linkType.equals(link.getLinkType().toString()))
-                .filter(link -> accessPointType == null || Iterables.any(link.getLinkBodies(),
+                .filter(link -> accessPointTypes == null || accessPointTypes.isEmpty()
+                        || Iterables.any(link.getLinkBodies(),
                         body -> body != null && Entities.ACCESS_POINT.equals(body.getType())
-                                && hasAccessPointType(body.as(AccessPoint.class), accessPointType)))
+                                && hasAccessPointType(body.as(AccessPoint.class), accessPointTypes)))
                 .map(link -> {
             Linkable target = Iterables.tryFind(link.getLinkTargets(),
                     t -> t != null && !t.equals(source)).orNull();
@@ -340,9 +341,9 @@ final class DataFetchers {
         }).filter(Objects::nonNull).collect(Collectors.toList());
     };
 
-    private static boolean hasAccessPointType(AccessPoint accessPoint, String type) {
+    private static boolean hasAccessPointType(AccessPoint accessPoint, List<String> types) {
         AccessPointType apType = accessPoint.getRelationshipType();
-        return apType != null && apType.name().equals(type);
+        return apType != null && types.contains(apType.name());
     }
 
     static <S, T> DataFetcher<T> transformingDataFetcher(DataFetcher<S> fetcher, Function<S, T> transformer) {
@@ -358,12 +359,12 @@ final class DataFetchers {
 
     DataFetcher<Iterable<Entity>> accessPointsDataFetcher() {
         return env -> {
-            String type = env.getArgument(TYPE_PARAM);
+            List<String> types = env.getArgument(TYPE_PARAM);
             return oneToManyRelationshipFetcher(r -> {
                 Iterable<AccessPoint> accessPoints = r.as(Description.class).getAccessPoints();
-                return type == null
+                return types == null || types.isEmpty()
                         ? accessPoints
-                        : Iterables.filter(accessPoints, ap -> hasAccessPointType(ap, type));
+                        : Iterables.filter(accessPoints, ap -> hasAccessPointType(ap, types));
             }).get(env);
         };
     }

@@ -296,7 +296,7 @@ final class FieldDefinitions {
                     .argument(newArgument()
                             .name(TYPE_PARAM)
                             .description(__("graphql.argument.accessPointType"))
-                            .type(GraphQLTypeReference.typeRef(AccessPointType.class.getSimpleName()))
+                            .type(GraphQLList.list(GraphQLTypeReference.typeRef(AccessPointType.class.getSimpleName())))
                             .build());
 
     static final GraphQLFieldDefinition.Builder datePeriodFieldDefinition =
