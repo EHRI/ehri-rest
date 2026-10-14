@@ -38,6 +38,8 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
@@ -212,6 +214,50 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
         assertEquals("Validation error (MissingFieldArgument@[DocumentaryUnit]) : Missing field argument 'id'",
+                data.path("errors").path(0).path("message").textValue());
+    }
+
+    @Test
+    public void testGraphQLStreamingTooManyIds() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-ids-variable.graphql");
+        Map<String, Object> vars = Maps.newHashMap();
+        vars.put("ids", IntStream.rangeClosed(0, 1000).mapToObj(String::valueOf).collect(Collectors.toList()));
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .header(AbstractResource.STREAM_HEADER_NAME, "true")
+                .entity(new GraphQLQuery(testQuery, vars, null))
+                .post(ClientResponse.class);
+
+        assertStatus(BAD_REQUEST, response);
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("Too many IDs for 'documentaryUnits': 1001 > 1000",
+                data.path("errors").path(0).path("message").textValue());
+    }
+
+    @Test
+    public void testGraphQLStreamingIdsWithTopLevel() throws Exception {
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .header(AbstractResource.STREAM_HEADER_NAME, "true")
+                .entity("{ documentaryUnits(ids: [\"c1\"], topLevel: true) { items { id } } }")
+                .post(ClientResponse.class);
+
+        assertStatus(BAD_REQUEST, response);
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("The 'ids' and 'topLevel' arguments cannot be combined for 'documentaryUnits'",
+                data.path("errors").path(0).path("message").textValue());
+    }
+
+    @Test
+    public void testGraphQLMutation() throws Exception {
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .entity("mutation { documentaryUnits { items { id } } }")
+                .post(ClientResponse.class);
+
+        assertStatus(BAD_REQUEST, response);
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("Only query operations are supported",
                 data.path("errors").path(0).path("message").textValue());
     }
 

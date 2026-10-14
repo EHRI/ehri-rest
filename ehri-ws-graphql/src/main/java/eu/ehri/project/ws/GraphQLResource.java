@@ -25,6 +25,7 @@ import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
+import eu.ehri.project.graphql.QueryChecks;
 import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.util.List;
 
 /**
  * GraphQL implementation.
@@ -115,14 +117,13 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
+        ExecutionInput input = executionInput(q);
+        validate(schema, input);
         ExecutionResult executionResult = GraphQL
                 .newGraphQL(schema)
                 .instrumentation(getInstrumentation())
                 .build()
-                .execute(ExecutionInput.newExecutionInput()
-                        .query(q.getQuery())
-                        .operationName(q.getOperationName())
-                        .variables(q.getVariables()).build());
+                .execute(input);
         if (!executionResult.getErrors().isEmpty()) {
             throw new ExecutionError(executionResult.getErrors());
         }
@@ -130,15 +131,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
-        final ExecutionInput input = ExecutionInput.newExecutionInput()
-                .query(q.getQuery())
-                .operationName(q.getOperationName())
-                .variables(q.getVariables())
-                .build();
-        ParseAndValidateResult validator = ParseAndValidate.parseAndValidate(schema, input);
-        if (validator.isFailure()) {
-            throw new ExecutionError(validator.getErrors());
-        }
+        final ExecutionInput input = executionInput(q);
+        validate(schema, input);
 
         return outputStream -> {
             try (final Tx tx = beginTx();
@@ -154,6 +148,26 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                 tx.success();
             }
         };
+    }
+
+    private ExecutionInput executionInput(GraphQLQuery q) {
+        return ExecutionInput.newExecutionInput()
+                .query(q.getQuery())
+                .operationName(q.getOperationName())
+                .variables(q.getVariables())
+                .build();
+    }
+
+    // Done before execution since errors cannot be reported once streaming starts
+    private void validate(GraphQLSchema schema, ExecutionInput input) {
+        ParseAndValidateResult validator = ParseAndValidate.parseAndValidate(schema, input);
+        if (validator.isFailure()) {
+            throw new ExecutionError(validator.getErrors());
+        }
+        List<GraphQLError> errors = QueryChecks.check(schema, validator.getDocument(), input);
+        if (!errors.isEmpty()) {
+            throw new ExecutionError(errors);
+        }
     }
 
     private Instrumentation getInstrumentation() {

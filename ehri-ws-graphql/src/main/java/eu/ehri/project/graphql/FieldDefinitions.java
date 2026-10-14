@@ -90,6 +90,12 @@ final class FieldDefinitions {
             .defaultValueProgrammatic(false)
             .build();
 
+    static final GraphQLArgument idsArgument = newArgument()
+            .name(IDS_PARAM)
+            .description(String.format(__("graphql.argument.ids.description"), QueryChecks.MAX_IDS))
+            .type(GraphQLList.list(GraphQLNonNull.nonNull(GraphQLID)))
+            .build();
+
     // Field builder helpers...
 
     static GraphQLFieldDefinition.Builder nullAttr(String name, String description, GraphQLOutputType type) {

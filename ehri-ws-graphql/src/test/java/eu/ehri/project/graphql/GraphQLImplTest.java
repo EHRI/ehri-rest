@@ -21,8 +21,10 @@ package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -31,6 +33,7 @@ import graphql.schema.GraphQLSchema;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -177,8 +180,40 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         assertEquals(1, desc.path("subjectOrPlaceAccessPoints").size());
     }
 
+    @Test
+    public void testQueryByIds() throws Exception {
+        JsonNode data = execute("testquery-ids.graphql", Collections.emptyMap()).path("data");
+        assertEquals(Lists.newArrayList("c2", "c1", null, null, "c1"), ids(data.path("docs").path("items")));
+        assertEquals(Lists.newArrayList("c2"), ids(data.path("firstDoc").path("items")));
+        assertTrue(data.path("firstDoc").path("pageInfo").path("hasNextPage").booleanValue());
+        assertEquals(Lists.newArrayList("r1", null), ids(data.path("repositories").path("items")));
+        // A cursor of -1 is treated as the start
+        JsonNode negativeFrom = data.path("negativeFrom");
+        assertEquals(Lists.newArrayList("c2"), ids(negativeFrom.path("items")));
+        assertEquals("MA==", negativeFrom.path("edges").path(0).path("cursor").textValue());
+        assertFalse(negativeFrom.path("pageInfo").path("hasPreviousPage").booleanValue());
+        assertEquals("MQ==", negativeFrom.path("pageInfo").path("nextPage").textValue());
+    }
+
+    @Test
+    public void testQueryByIdsWithPermissions() throws Exception {
+        Map<String, Object> vars = Collections.singletonMap("ids", Lists.newArrayList("c1", "c4"));
+        JsonNode data = execute("testquery-ids-variable.graphql", vars, basicUser).path("data");
+        assertEquals(Lists.newArrayList(null, "c4"), ids(data.path("documentaryUnits").path("items")));
+    }
+
+    static List<String> ids(JsonNode items) {
+        List<String> ids = Lists.newArrayList();
+        items.forEach(item -> ids.add(item.path("id").textValue()));
+        return ids;
+    }
+
     private JsonNode execute(String queryResource, Map<String, Object> vars) throws Exception {
-        GraphQLSchema schema = new GraphQLImpl(api(adminUser)).getSchema();
+        return execute(queryResource, vars, adminUser);
+    }
+
+    private JsonNode execute(String queryResource, Map<String, Object> vars, Accessor accessor) throws Exception {
+        GraphQLSchema schema = new GraphQLImpl(api(accessor)).getSchema();
         ExecutionResult result = GraphQL.newGraphQL(schema).build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(readResourceFileAsString(queryResource))

@@ -113,6 +113,19 @@ public class QueryApiTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testPageByIds() throws Exception {
+        List<String> ids = Lists.newArrayList("c4", "c1", "missing", null, "r1", "c4");
+        QueryApi.Page<DocumentaryUnit> page = getQuery(manager.getEntity("reto", Accessor.class))
+                .withOffset(1).withLimit(Integer.MAX_VALUE)
+                .page(ids, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class);
+        List<String> found = Lists.newArrayList();
+        page.forEach(item -> found.add(item == null ? null : item.getId()));
+        // c1 is inaccessible
+        assertEquals(Lists.newArrayList(null, null, null, null, "c4"), found);
+        assertEquals(6, page.getTotal());
+    }
+
+    @Test
     public void testCount() throws Exception {
         assertEquals(5, getQuery().count(EntityClass.DOCUMENTARY_UNIT));
     }

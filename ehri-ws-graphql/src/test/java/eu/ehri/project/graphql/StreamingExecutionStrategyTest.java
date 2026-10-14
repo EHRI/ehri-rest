@@ -22,6 +22,7 @@ package eu.ehri.project.graphql;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import eu.ehri.project.test.AbstractFixtureTest;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
@@ -31,12 +32,14 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
@@ -90,5 +93,18 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
         // System.out.println("JSON: " + json);
         String first = json.path("data").path("firstTwo").path("items").path(0).path("id").textValue();
         assertThat(first, anyOf(containsString("c1"), containsString("nl-r1-m19")));
+    }
+
+    @Test
+    public void textExecuteByIds() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-ids.graphql");
+        JsonNode data = executeStream(testQuery, Collections.emptyMap()).path("data");
+        assertEquals(Lists.newArrayList("c2", "c1", null, null, "c1"),
+                GraphQLImplTest.ids(data.path("docs").path("items")));
+        List<String> edgeIds = Lists.newArrayList();
+        data.path("docs").path("edges").forEach(e -> edgeIds.add(e.path("node").path("id").textValue()));
+        assertEquals(Lists.newArrayList("c2", "c1", null, null, "c1"), edgeIds);
+        assertEquals(Lists.newArrayList("c2"), GraphQLImplTest.ids(data.path("firstDoc").path("items")));
+        assertTrue(data.path("firstDoc").path("pageInfo").path("hasNextPage").booleanValue());
     }
 }

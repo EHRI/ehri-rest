@@ -113,7 +113,7 @@ final class DataFetchers {
     }
 
     DataFetcher<Map<String, Object>> docDataFetcher() {
-        return env -> env.getArgument(TOP_LEVEL_PARAM)
+        return env -> Boolean.TRUE.equals(env.getArgument(TOP_LEVEL_PARAM))
                 ? topLevelDocDataFetcher().get(env)
                 : entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT).get(env);
     }
@@ -135,8 +135,19 @@ final class DataFetchers {
         // once here, and once by the connection data fetcher, which also
         // applies pagination. This is a bit gross but the speed difference
         // appears to be negligible.
-        return connectionDataFetcher(() -> api().query()
-                .withStreaming(true).withLimit(-1).page(type, Entity.class));
+        return env -> {
+            List<String> ids = env.getArgument(IDS_PARAM);
+            if (ids == null) {
+                return connectionDataFetcher(() -> api().query()
+                        .withStreaming(true).withLimit(-1).page(type, Entity.class)).get(env);
+            }
+            // Paged over the ID list, with nulls in place of unavailable items
+            int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
+            int offset = Math.max(0, getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM)));
+            QueryApi.Page<Entity> page = api().query().withLimit(limit).withOffset(offset)
+                    .page(ids, type, Entity.class);
+            return pageConnectionData(Lists.newArrayList(page), page.getTotal(), limit, offset);
+        };
     }
 
     DataFetcher<Map<String, Object>> hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -189,8 +200,10 @@ final class DataFetchers {
         long total = Iterables.size(iter.get());
         QueryApi query = api().query().withStreaming(true).withLimit(limit).withOffset(offset);
         QueryApi.Page<Entity> page = query.page(iter.get(), Entity.class);
-        List<Entity> items = Lists.newArrayList(page);
+        return pageConnectionData(Lists.newArrayList(page), total, limit, offset);
+    }
 
+    private Map<String, Object> pageConnectionData(List<Entity> items, long total, int limit, int offset) {
         // Create a list of edges, with the cursor taking into
         // account each item's offset
         List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
@@ -201,10 +214,11 @@ final class DataFetchers {
             ));
         }
 
-        boolean hasNext = page.getOffset() + items.size() < total;
-        boolean hasPrev = page.getOffset() > 0;
+        boolean hasNext = offset + items.size() < total;
+        boolean hasPrev = offset > 0;
         String nextCursor = toBase64(String.valueOf(offset + limit));
-        String prevCursor = toBase64(String.valueOf(offset - limit));
+        // A negative limit means everything after the offset
+        String prevCursor = toBase64(String.valueOf(limit < 0 ? 0 : Math.max(0, offset - limit)));
         return connectionData(items, edges, hasNext ? nextCursor : null, hasPrev ? prevCursor : null);
     }
 

@@ -21,6 +21,7 @@ package eu.ehri.project.api.impl;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
@@ -34,6 +35,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -42,6 +44,7 @@ import eu.ehri.project.api.QueryApi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -240,6 +243,25 @@ public final class QueryApiImpl implements QueryApi {
     @Override
     public <E extends Entity> Page<E> page(EntityClass type, Class<E> cls) {
         return page(manager.getEntities(type, cls), cls);
+    }
+
+    @Override
+    public <E extends Entity> Page<E> page(List<String> ids, EntityClass type, Class<E> cls) {
+        PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager.getAclFilterFunction(accessor);
+        PipeFunction<Vertex, Boolean> filterFunction = getFilterFunction();
+        int low = Math.min(Math.max(0, offset), ids.size());
+        int high = limit < 0 ? ids.size() : (int) Math.min(ids.size(), (long) low + limit);
+        List<E> items = Lists.newArrayListWithExpectedSize(high - low);
+        for (String id : ids.subList(low, high)) {
+            items.add(Optional.ofNullable(id)
+                    .flatMap(i -> manager.getVertex(EntityType.ID_KEY, i))
+                    .filter(v -> type.getName().equals(manager.getType(v))
+                            && aclFilterFunction.compute(v)
+                            && filterFunction.compute(v))
+                    .map(v -> graph.frame(v, cls))
+                    .orElse(null));
+        }
+        return new Page<>(items, offset, limit, ids.size());
     }
 
     @Override
