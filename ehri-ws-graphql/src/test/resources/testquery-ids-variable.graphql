@@ -1,0 +1,7 @@
+query ids($ids: [ID!]) {
+    documentaryUnits(ids: $ids) {
+        items {
+            id
+        }
+    }
+}

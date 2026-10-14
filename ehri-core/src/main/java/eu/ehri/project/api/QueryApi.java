@@ -24,6 +24,7 @@ import eu.ehri.project.models.base.Entity;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 
 public interface QueryApi {
@@ -122,6 +123,21 @@ public interface QueryApi {
      * @return a page of items
      */
     <E extends Entity> Page<E> page(Iterable<? extends E> entities, Class<E> cls);
+
+    /**
+     * Return a page of the items with the given IDs, in the given order,
+     * with null in place of any which do not exist, are not of the given
+     * type, are inaccessible or do not match the filters. The offset and
+     * limit apply to the ID list, which also gives the total. Sort order
+     * is not applied.
+     *
+     * @param ids  a list of item IDs
+     * @param type the items' entity type
+     * @param cls  the items' class
+     * @param <E>  the generic type
+     * @return a page of items, possibly containing nulls
+     */
+    <E extends Entity> Page<E> page(List<String> ids, EntityClass type, Class<E> cls);
 
     /**
      * Return a Page instance containing a total of total items, and an iterable

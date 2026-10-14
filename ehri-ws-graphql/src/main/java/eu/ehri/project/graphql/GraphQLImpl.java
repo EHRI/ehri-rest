@@ -320,26 +320,26 @@ public class GraphQLImpl {
 
                 // Top level item connections
                 .field(connectionFieldDefinition("documentaryUnits", __("root.connection.documentaryUnit.description"),
-                        types.documentaryUnitsConnection, topLevelArgument))
+                        types.documentaryUnitsConnection, topLevelArgument, idsArgument))
                 .field(connectionFieldDefinition("topLevelDocumentaryUnits", __("root.connection.documentaryUnit.topLevel.description"),
                         types.documentaryUnitsConnection)
                         .deprecate(__("root.connection.documentaryUnit.topLevel.deprecationReason")))
                 .field(connectionFieldDefinition("repositories", __("root.connection.repository.description"),
-                        types.repositoriesConnection))
+                        types.repositoriesConnection, idsArgument))
                 .field(connectionFieldDefinition("historicalAgents", __("root.connection.historicalAgent.description"),
-                        types.historicalAgentsConnection))
+                        types.historicalAgentsConnection, idsArgument))
                 .field(connectionFieldDefinition("countries", __("root.connection.country.description"),
-                        types.countriesConnection))
+                        types.countriesConnection, idsArgument))
                 .field(connectionFieldDefinition("authoritativeSets", __("root.connection.authoritativeSet.description"),
-                        types.authoritativeSetsConnection))
+                        types.authoritativeSetsConnection, idsArgument))
                 .field(connectionFieldDefinition("concepts", __("root.connection.cvocConcept.description"),
-                        types.conceptsConnection))
+                        types.conceptsConnection, idsArgument))
                 .field(connectionFieldDefinition("vocabularies", __("root.connection.cvocVocabulary.description"),
-                        types.vocabulariesConnection))
+                        types.vocabulariesConnection, idsArgument))
                 .field(connectionFieldDefinition("annotations", __("root.connection.annotation.description"),
-                        types.annotationsConnection))
+                        types.annotationsConnection, idsArgument))
                 .field(connectionFieldDefinition("links", __("root.connection.link.description"),
-                        types.linksConnection))
+                        types.linksConnection, idsArgument))
                 .build();
     }
 }
