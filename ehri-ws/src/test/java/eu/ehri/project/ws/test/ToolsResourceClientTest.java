@@ -35,6 +35,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import java.util.Collections;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -190,5 +191,27 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         assertEquals(ImmutableList.of(
                 ImmutableList.of("c4", "nl-r1-c1-c4"),
                 ImmutableList.of("c3", "nl-r1-c1-c3")), out.rows());
+    }
+
+    @Test
+    public void testReparentAuthoritativeItem() throws Exception {
+        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "reparent"));
+        ClientResponse response = resource
+                .accept("text/csv")
+                .post(ClientResponse.class,
+                        Table.of(ImmutableList.of(ImmutableList.of("cvocc1", "cvoc2"))));
+        Table out = response.getEntity(Table.class);
+        assertStatus(OK, response);
+        assertEquals(ImmutableList.of(ImmutableList.of("cvocc1", "cvoc2-cvocc1")), out.rows());
+    }
+
+    @Test
+    public void testReparentWithInvalidParent() throws Exception {
+        WebResource resource = client.resource(ehriUri(ToolsResource.ENDPOINT, "reparent"));
+        ClientResponse response = resource
+                .accept("text/csv")
+                .post(ClientResponse.class,
+                        Table.of(ImmutableList.of(ImmutableList.of("a1", "cvoc1"))));
+        assertStatus(BAD_REQUEST, response);
     }
 }

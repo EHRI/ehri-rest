@@ -37,6 +37,8 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.cvoc.AuthoritativeItem;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
@@ -609,6 +611,10 @@ public class ToolsResource extends AbstractResource {
     /**
      * Takes a CSV file containing two columns: an item global id, and a new parent
      * ID. The item will be re-parented and a new global ID regenerated.
+     * <p>
+     * Documentary units can be moved to a repository or another documentary
+     * unit, and authoritative items to another set of the same type, e.g.
+     * concepts to another vocabulary.
      *
      * @param commit  actually commit changes
      * @param mapping a comma-separated CSV file, excluding headers.
@@ -632,26 +638,20 @@ public class ToolsResource extends AbstractResource {
                 }
                 String id = row.get(0);
                 String newParentId = row.get(1);
-                DocumentaryUnit item = manager
-                        .getEntity(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class);
+                Accessible item = manager.getEntity(id, Accessible.class);
                 PermissionScope parent = manager.getEntity(newParentId, PermissionScope.class);
-                item.setPermissionScope(parent);
-                if (Entities.DOCUMENTARY_UNIT.equals(parent.getType())) {
-                    parent.as(DocumentaryUnit.class).addChild(item);
-                    item.setRepository(null);
-                } else if (Entities.REPOSITORY.equals(parent.getType())) {
-                    item.setRepository(parent.as(Repository.class));
-                } else {
+                if (!setParent(item, parent)) {
                     throw new DeserializationError(String.format(
-                            "Unsupported parent type for ID '%s': %s",
-                            newParentId, parent.getType()));
+                            "Unsupported parent type for ID '%s' (%s): %s",
+                            newParentId, item.getType(), parent.getType()));
                 }
+                item.setPermissionScope(parent);
                 try {
                     idRegenerator.reGenerateId(item).ifPresent(done::add);
                 } catch (IdRegenerator.IdCollisionError e) {
                     throw new DeserializationError(String.format(
                             "%s. Ensure they do not share the same local identifier: '%s'",
-                            e.getMessage(), item.getIdentifier()));
+                            e.getMessage(), item.as(Identifiable.class).getIdentifier()));
                 }
             }
 
@@ -662,6 +662,28 @@ public class ToolsResource extends AbstractResource {
         } catch (ItemNotFound e) {
             throw new DeserializationError("Unable to locate item with ID: " + e.getId());
         }
+    }
+
+    private boolean setParent(Accessible item, PermissionScope parent) {
+        if (Entities.DOCUMENTARY_UNIT.equals(item.getType())) {
+            DocumentaryUnit unit = item.as(DocumentaryUnit.class);
+            if (Entities.DOCUMENTARY_UNIT.equals(parent.getType())) {
+                parent.as(DocumentaryUnit.class).addChild(unit);
+                unit.setRepository(null);
+                return true;
+            } else if (Entities.REPOSITORY.equals(parent.getType())) {
+                unit.setRepository(parent.as(Repository.class));
+                return true;
+            }
+        } else if (EntityClass.implementing(AuthoritativeItem.class).contains(manager.getEntityClass(item))) {
+            // Concepts must stay in vocabularies, and other items in plain sets
+            AuthoritativeItem authItem = item.as(AuthoritativeItem.class);
+            if (authItem.getAuthoritativeSet().getType().equals(parent.getType())) {
+                parent.as(AuthoritativeSet.class).addItem(authItem);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
